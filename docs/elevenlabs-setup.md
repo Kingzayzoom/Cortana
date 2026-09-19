@@ -1,38 +1,48 @@
-# Voice setup (ElevenLabs + Gemini)
+# ElevenLabs setup
 
-Without these keys the app still works in **reading mode**: "Read it instead" on the Today page runs the whole round on screen. Voice needs an ElevenLabs agent. Typed questions need a Gemini key.
+## Local application
 
-## 1. Gemini key (typed questions)
+1. Run `npm ci`.
+2. Copy `.env.example` to `.env.local` only if that file does not already exist. Preserve any teammate's configuration.
+3. Set `ELEVENLABS_API_KEY` to the actual secret beginning with `sk_`, not a key ID. Set `ELEVENLABS_AGENT_ID` to the existing agent ID. Enable **Write access for ElevenAgents / Conversational AI (`convai_write`)** on that key; an agent read can succeed while token creation still fails without this permission.
+4. Run `node scripts/prepare-local.mjs`. This adds a random demo access code and cookie signing secret without changing the provider fields. The code is saved in the ignored `.cortana/demo-access-code.txt` file for the demonstrator. Restart Next after changing configuration.
+5. Run `npm run dev -- --port 3100` and open http://localhost:3100.
+6. Run `node scripts/check-agent.mjs` for a read-only account/configuration check. The API key is never printed. Successful reads back up the existing agent configuration under ignored `.cortana/`.
 
-1. Create an API key in Google AI Studio.
-2. Add it to `.env.local` as `GEMINI_API_KEY`.
-3. Optionally, set `GEMINI_MODEL` to a Flash-class model your project has free quota for. The default is `gemini-flash-latest`. Check your AI Studio rate limits before the demo.
+## Configure the existing agent
 
-## 2. ElevenLabs agent (voice)
+First verify a base real voice session with `node scripts/verify-live-voice.mjs`. Then run `node scripts/configure-agent.mjs` to review the change and `node scripts/configure-agent.mjs --apply` to attach the prepared tools, learning prompt, dynamic variables and compact knowledge document. The script saves the prior configuration and exact patch under `.cortana/`, remembers created tool IDs for retries, and preserves the existing model and voice. Rehearse the full round after applying; configuration alone does not prove model tool use.
 
-1. In ElevenLabs, create a new blank agent.
-2. **Prompt**: paste the system prompt and first message from [agent-prompt.md](agent-prompt.md).
-3. **LLM**: choose a Gemini Flash model from the agent's model list. ElevenLabs supports Gemini natively. Keep the temperature low (about 0.3).
-4. **Voice**: pick a calm, clear voice. Leave interruptions enabled.
-5. **Tools**: add the eight client tools from [tool-contracts.md](tool-contracts.md), each with **Wait for response** on. Also enable the End conversation system tool.
-6. **Dynamic variables**: `round_id` and `learner_name` are detected from the prompt. Give them test defaults (`hf-round-001`, `Dr. Patel`) so the dashboard's test widget works.
-7. **Security**: turn on authentication for the agent. The app mints a short-lived WebRTC token on the server (`GET /api/elevenlabs/session`), so the API key never reaches the browser.
-8. Copy the agent ID into `.env.local` as `ELEVENLABS_AGENT_ID`, and an API key into `ELEVENLABS_API_KEY`.
+Use the existing agent model and voice; no additional language or speech provider is required. Confirm its model can invoke tools. Review the original agent configuration before changing it, and preserve unrelated teammate settings.
 
-Restart `npm run dev` after editing `.env.local`.
+- Apply `agent-prompt.md` to its clinical learning behavior.
+- Register and attach the seven Client tool definitions in `elevenlabs-tools.json`. Set all tools to wait for a result. Names are case-sensitive.
+- Enable user interruptions in conversation flow. Limit the demonstration session to approximately 5 minutes to allow questions while limiting usage.
+- Configure dynamic variables `round_id`, `section_id`, and `lesson_stage` with defaults `dapa-hf-01`, `population`, `briefing`. The browser passes the actual saved checkpoint at start.
+- Use `docs/round-knowledge.md` as the compact knowledge document. Its generated contents come from the same TypeScript content bundle used by the app. Always keep this small document available to the agent (Prompt usage mode), or index it and verify retrieval if using RAG. Source retrieval is not proof of clinical correctness.
+- Restrict answers to this bundle and retain the unsupported-question response. Do not enable browser-selected prompt, voice, or agent overrides.
+- For a private agent, enable the appropriate authentication policy. The app uses a backend-minted WebRTC conversation token, not a signed WebSocket URL.
+- Check provider retention settings. Cortana stores no raw microphone audio, but this does not imply that ElevenLabs stores none.
 
-## Checking it works
+## Variables
 
-- Click **Start today's round** and allow the microphone. The orb should turn cyan when you speak and blue/lavender when Cortana speaks.
-- The right panel should step through **The brief**, then **The challenge**, then **Your questions** as the agent calls `show_stage`, `show_section` and `show_case`.
-- Interrupt mid-brief with "Wait — who was included?". Cortana should stop, answer, and then resume at the same section.
-- If the stage panel doesn't move, the agent isn't calling tools. Check that the tool names match exactly and that "Wait for response" is on.
+All of these stay server-side:
 
-## Using your own Gemini quota for the voice agent
+| Variable                   | Purpose                                                                              |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `ELEVENLABS_API_KEY`       | Secret key that can access the selected agent and mint conversation tokens           |
+| `ELEVENLABS_AGENT_ID`      | Single permitted agent                                                               |
+| `CORTANA_DEMO_ACCESS_CODE` | Private code, at least 12 characters, required before a paid voice session           |
+| `CORTANA_SESSION_SECRET`   | At least 32 random characters; signs demo-profile cookies                            |
+| `CORTANA_DATA_DIR`         | Optional local persistent storage path; default `.cortana/`                          |
+| `CORTANA_APP_ORIGIN`       | Optional exact external origin for a reverse proxy, e.g. `https://your-demo.example` |
 
-In step 3, ElevenLabs runs Gemini on its own account, so voice turns don't use your `GEMINI_API_KEY`. If that quota is the reason you chose Gemini, point the agent at a **custom LLM** instead. ElevenLabs expects an OpenAI-compatible chat-completions endpoint, and Gemini provides one at `https://generativelanguage.googleapis.com/v1beta/openai/`.
+No `NEXT_PUBLIC_` secret variables are used. `POST /api/elevenlabs/token` accepts `{ accessCode, runId, consent: true }` and returns `{ token, conversationId }`. The backend performs the provider GET; the browser never sees the server API key. Success and error responses are non-cacheable. The API validates app-session cookies, request origin, access code, run ID and consent. It limits starts to six per profile per minute and forty globally per hour in this single Node process. Those controls are suitable for a private prototype, not a replacement for deployed user authentication and distributed rate limiting.
 
-- Try pointing the custom LLM straight at that endpoint, with your Gemini key as the secret.
-- If ElevenLabs sends fields Gemini rejects, add a thin streaming adapter route in this app (for example `app/api/cortana/llm/route.ts`) that strips them and forwards the request. It needs a public URL, so deploy to Vercel or use a tunnel, plus a shared-secret header check.
+## Verify a real conversation
 
-Neither option has been tested end to end yet. Get the built-in Gemini option working first.
+Click Start → enter the private demo code → Agree & start voice → allow microphone access. Speak, watch input-driven motion, hear the assistant, and watch output-driven motion. Interrupt with “Who was included in that study?”, then ask to continue. Confirm the checkpoint is preserved. Mute and check that the input is actually disabled while output can still animate. Live Pause is hidden. The text preview can still pause. After a disconnect, Retry requests a fresh token and resumes the saved section. End and confirm the browser microphone indicator clears. Reconnect and test repeated clicks.
+
+Do not call the integration verified until the account-side tools/grounding and an actual audio session pass this sequence. Missing or rejected credentials do not turn local preview into a live session.
+
+Official references: [React SDK](https://elevenlabs.io/docs/eleven-agents/libraries/react), [WebRTC token](https://elevenlabs.io/docs/eleven-agents/api-reference/conversations/get-webrtc-token), [Conversation flow](https://elevenlabs.io/docs/eleven-agents/customization/conversation-flow), [Knowledge-base RAG](https://elevenlabs.io/docs/eleven-agents/customization/knowledge-base/rag), [API authentication](https://elevenlabs.io/docs/api-reference/authentication).

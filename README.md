@@ -1,99 +1,54 @@
 # Cortana
 
-**Clinical learning that talks back.** Cortana is a daily two-minute clinical round for healthcare professionals, built around three steps:
+A voice-first cardiology learning workspace: listen, think, respond, grow. Built from the supplied white dashboard reference, with a procedural glowing orb inspired by the supplied ShaderGradient palette.
 
-1. **The brief:** a short spoken summary of curated evidence. You can interrupt it at any time.
-2. **The challenge:** apply that evidence to a synthetic case.
-3. **Your questions:** ask anything, and get answers grounded only in the round's sources.
+The active application is at the repository root, using `src/app/`. The previous CortexAi implementation, including its Gemini backend, is preserved under `legacy/` and excluded from this application's build and lint checks.
 
-Correct answers are decided by code, never by the model. Progress feeds a Learning Pulse, a streak and a rule-based "up next" recommendation.
+## Run
 
-The work is split across three pieces:
-
-| Piece | Role |
-| --- | --- |
-| **ElevenLabs** | The voice layer: microphone, turn-taking, interruptions and speech, over WebRTC |
-| **Gemini** | The reasoning layer: the voice agent's LLM, plus grounded answers to typed questions |
-| **Cortana (this app)** | Lesson state, the evidence bundle, grading, progress and the UI |
-
-> **Prototype.** The medical content in `lib/content/` is based on real sources (DAPA-HF, NEJM 2019; the 2022 AHA/ACC/HFSA guideline) but is marked *pending clinician review*. Verify every figure before any clinical or public use. Cases are synthetic, and this is not clinical advice.
-
-## Quick start
-
-```bash
-npm install
-cp .env.example .env.local   # optional: add keys (see below)
-npm run dev                  # http://localhost:3000
+```powershell
+npm ci
+npm run dev -- --port 3100
 ```
 
-With **no keys at all**, choose **Read it instead** to run the whole round on screen: brief, case, grading, evidence and completion.
+Open **http://localhost:3100**. Port 3000 was already occupied in the development workspace. No ElevenLabs credentials are needed for the full, explicitly labeled local text preview.
 
-| Feature | Needs |
-| --- | --- |
-| Voice rounds (the orb, interruptions) | `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`, plus the agent set up per [docs/elevenlabs-setup.md](docs/elevenlabs-setup.md) |
-| Typed questions with voice off | `GEMINI_API_KEY` |
+For live voice, preserve your existing `.env.local`, add the actual `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`, then run `node scripts/prepare-local.mjs`. This creates local session security without exposing secrets. Configure the existing agent using [ElevenLabs setup](docs/elevenlabs-setup.md), [agent instructions](docs/agent-prompt.md), and [tool contracts](docs/tool-contracts.md). The presence of frontend tools alone does not configure the ElevenLabs account.
 
-## Scripts
+## What works
 
-| Command | Does |
-| --- | --- |
-| `npm run dev` | Dev server |
-| `npm run build` / `npm start` | Production build and server |
-| `npm test` | Unit tests for grading, the lesson state machine, XP, streaks and review rules |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | Generates Next route types, then runs `tsc` |
+- Responsive reference-based dashboard and working Today, My Rounds, Evidence Library, Learning Profile, Topics, and Settings views.
+- Official ElevenLabs UI orb foundation with a luminous blue/cyan/violet/pink sphere material, true input/output level adapters, reduced motion, hidden-tab rendering controls and an explicit fallback.
+- One stable ElevenLabs React provider, `POST /api/elevenlabs/token`, microphone mute, final-event transcript, interruption callbacks and saved section recovery. Pause is available only in local text preview.
+- Three briefing sections, one synthetic case, deterministic server grading for text/buttons/agent tools, stored citation drawers, scoped questions and completion.
+- Persistent local-server progress, exactly-once completion XP, actual practice history and timezone-aware review/streak rules.
+- Explicit configuration/error states and local preview without fake connected or listening claims.
 
-## How it fits together
+## Validation
 
-```
-Browser (Next.js + React)
- ├─ Orb ← real mic/speaker levels (getInputVolume / getOutputVolume)
- ├─ Lesson state machine  (ready → briefing → challenge → feedback → questions → completed)
- ├─ Client tools ◄──────────── ElevenLabs agent (WebRTC) ── LLM: Gemini
- │    show_stage · show_section · show_case · show_evidence
- │    get_round_context · submit_answer · complete_round · get_next_review
- └─ Progress (localStorage for now)
-        │
-Server routes
- ├─ GET  /api/elevenlabs/session        mints a WebRTC conversation token
- ├─ POST /api/rounds/[roundId]/answer   deterministic grading (answer key is server-only)
- └─ POST /api/rounds/[roundId]/ask      Gemini, grounded in the round's evidence only
+```powershell
+npm run typecheck
+npm run lint
+npm test
+npm run test:e2e
+node scripts/accessibility-check.mjs
+npm run build
 ```
 
-Some deliberate design choices:
+Browser tests expect a dev server at port 3100. Override with `CORTANA_TEST_URL` if needed. The tests cover the complete local flow, origin/schema rejection, profile isolation, duplicate requests, honest missing configuration, navigation, desktop/mobile layout, animated WebGL frames and the synthetic audio harness at `/dev/orb`. That harness is unavailable in production.
 
-- **Three separate state machines.** Connection, voice and lesson state are tracked independently. "Someone is speaking" says nothing about where the round is.
-- **One grading path.** Voice, clicks and typed answers all go to the same API. The model only explains the result.
-- **Citations can't be invented.** Source ids from Gemini or the agent are checked against the round's evidence bundle before anything reaches the screen.
-- **Checkpointed brief.** `show_section` records where the brief is, so after an interruption it resumes at the same section instead of restarting.
-- **No fake mastery scores.** The UI shows real practice results ("2 / 3 correct") and a reason for each review recommendation.
+For real voice, the API key needs **Write access for ElevenAgents / Conversational AI (`convai_write`)** to mint a token; Read access alone is insufficient. `node scripts/verify-live-voice.mjs` exercises the actual SDK, WebRTC and host microphone without fake audio. After that base connection succeeds, review `node scripts/configure-agent.mjs` and apply the prepared learning setup with `node scripts/configure-agent.mjs --apply`. Account changes are backed up under `.cortana/`; the model and voice are preserved.
 
-## Project layout
+For a production build locally: `npm run build`, then `npm start -- --port 3100`. Host this prototype on a single Node process with persistent storage; replace the file adapter and in-process rate limiter before multi-node or ephemeral hosting.
 
-```
-app/                    pages (Today, My Rounds, Evidence, Profile) and API routes
-components/
-  today/                round-experience.tsx: the core loop and the ElevenLabs tools
-  voice/                orb wrapper, voice controls, transcript
-  learning/             brief, case, feedback, evidence drawer, questions, completion
-  dashboard/            Today's Round, Learning Pulse, streak, up next
-  ui/orb.tsx            official ElevenLabs UI Orb (vendored, not linted)
-lib/
-  content/              rounds, cases, sources; answer-keys.ts is server-only
-  learning/             lesson reducer, grading, progress/XP/streaks, review rules
-  gemini/ elevenlabs/   server-only API clients
-  voice/                voice state and audio-level hook
-  progress/             localStorage store and sample history
-docs/                   agent prompt, tool contracts, setup, demo script
-tests/                  vitest unit tests
-```
+## Handoff
 
-## Notes
+- [Demo sequence](docs/demo-script.md)
+- [Implementation choices and limitations](docs/implementation-notes.md)
+- [Verification results](docs/verification.md)
+- [Agent tool JSON](docs/elevenlabs-tools.json)
+- [Versioned knowledge document](docs/round-knowledge.md)
+- [Environment variable template](.env.example)
+- [Upstream orb license](vendor/elevenlabs-ui-LICENSE.md)
 
-- **Name.** "Cortana" is also Microsoft's assistant name and trademark. The name lives in one constant (`APP_NAME` in `lib/config.ts`), so renaming (for example to "Cortex") is a one-line change.
-- **Dev StrictMode is off** (`next.config.ts`). React StrictMode's dev double-mount blanks the orb's WebGL canvas. Production isn't affected.
-- **Persistence** is browser-local for the demo profile. `lib/learning/progress.ts` contains pure rules, so swapping `lib/progress/store.ts` for a Supabase-backed store later doesn't change the logic.
-
-## Next steps
-
-Confidence-aware review is already in: a confident miss is flagged as a possible misconception. Stretch goals, in order: teach-back grading with Gemini structured output, more rounds and topics, a hands-free mode, Supabase persistence and auth, a custom-LLM bridge so voice runs on your own Gemini quota, and multimodal chart explanations.
+Educational prototype · Synthetic cases only. No claims of clinical validation, accredited credit, HIPAA compliance, or patient-outcome improvement.

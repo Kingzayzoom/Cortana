@@ -1,21 +1,17 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
-
-const eslintConfig = defineConfig([
+export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Override default ignores of eslint-config-next.
+  { rules: { "react-hooks/set-state-in-effect": "off" } },
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
-    "out/**",
-    "build/**",
+    ".cortana/**",
+    "legacy/**",
     "next-env.d.ts",
-    // Vendored from the ElevenLabs UI registry; kept byte-for-byte so it can be
-    // re-synced. Its three.js mutations trip React Compiler lint rules.
-    "components/ui/orb.tsx",
+    "vendor/**",
+    "test-results/**",
+    "playwright-report/**",
   ]),
 ]);
-
-export default eslintConfig;

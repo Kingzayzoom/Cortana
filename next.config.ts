@@ -1,10 +1,5 @@
-import type { NextConfig } from "next"
-
-const nextConfig: NextConfig = {
-  // StrictMode's dev-only unmount/remount makes React Three Fiber force-lose the
-  // orb's WebGL context on the remounted canvas, leaving the orb blank in
-  // `next dev`. Production is unaffected either way.
-  reactStrictMode: false,
-}
-
-export default nextConfig
+import type { NextConfig } from "next";
+// R3F 9.7's development StrictMode remount leaves its render root inactive.
+// Explicit renderer teardown is covered by the orb browser harness.
+const nextConfig: NextConfig = { reactStrictMode: false, devIndicators: false };
+export default nextConfig;

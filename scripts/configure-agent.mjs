@@ -1,0 +1,180 @@
+// Apply only after the base real voice connection passes verification.
+// Reuses the selected agent and its model/voice. Existing unrelated settings survive.
+import nextEnv from "@next/env";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+nextEnv.loadEnvConfig(process.cwd());
+const apiKey = process.env.ELEVENLABS_API_KEY;
+const agentId = process.env.ELEVENLABS_AGENT_ID;
+if (!apiKey || !agentId)
+  throw new Error("Missing server ElevenLabs configuration.");
+const apply = process.argv.includes("--apply");
+const definitions = JSON.parse(
+  await readFile("docs/elevenlabs-tools.json", "utf8"),
+);
+const promptFile = await readFile("docs/agent-prompt.md", "utf8");
+const prompt = promptFile.match(/```text\r?\n([\s\S]*?)```/)?.[1]?.trim();
+if (!prompt) throw new Error("Agent prompt text block is missing.");
+async function api(path, method = "GET", body) {
+  const response = await fetch(`https://api.elevenlabs.io/v1/convai/${path}`, {
+    method,
+    headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(20000),
+  });
+  if (!response.ok) {
+    const failure = await response.json().catch(() => null);
+    // Validation locations/messages only; never headers, raw bodies or input values.
+    const validation =
+      response.status === 422 && Array.isArray(failure?.detail)
+        ? failure.detail.map(({ loc, msg, type }) => ({
+            loc,
+            msg: String(msg).replaceAll(apiKey, "[REDACTED]"),
+            type,
+          }))
+        : undefined;
+    if (validation) console.log(JSON.stringify({ validation }));
+    throw new Error(
+      `ElevenLabs ${method} request failed (${response.status}). No raw response body or credentials were logged.`,
+    );
+  }
+  return response.json();
+}
+const agent = await api(`agents/${encodeURIComponent(agentId)}`);
+await mkdir(".cortana", { recursive: true });
+const backupPath = `.cortana/agent-before-integration-${Date.now()}.json`;
+await writeFile(backupPath, JSON.stringify(agent, null, 2), {
+  flag: "wx",
+  mode: 0o600,
+});
+const existingPrompt = agent.conversation_config.agent.prompt;
+const plan = {
+  mode: apply ? "apply" : "review",
+  agentName: agent.name,
+  preservedModel: existingPrompt.llm,
+  preservedVoice: Boolean(agent.conversation_config.tts.voice_id),
+  tools: definitions.map((definition) => definition.tool_config.name),
+  knowledge: "Cortana DAPA-HF 2026-09-19.1",
+  backupPath,
+};
+console.log(JSON.stringify(plan, null, 2));
+if (apply) {
+  const statePath = ".cortana/agent-integration-state.json";
+  const saved = await readFile(statePath, "utf8")
+    .then(JSON.parse)
+    .catch(() => ({ agentId, tools: {}, knowledge: null }));
+  if (saved.agentId !== agentId)
+    throw new Error(
+      "Saved integration state belongs to a different agent. Review it before continuing.",
+    );
+  const save = () =>
+    writeFile(statePath, JSON.stringify(saved, null, 2), { mode: 0o600 });
+  const ids = new Set(existingPrompt.tool_ids ?? []);
+  for (const definition of definitions) {
+    const name = definition.tool_config.name;
+    // Preserve existing tools. Reuse a matching attached tool only after checking its contract.
+    let found = saved.tools[name];
+    // These IDs were created by this integration, so update their exported contracts.
+    if (found) await api(`tools/${found}`, "PATCH", definition);
+    if (!found) {
+      for (const id of existingPrompt.tool_ids ?? []) {
+        const attached = await api(`tools/${id}`);
+        if (attached.tool_config.name === name) {
+          if (
+            JSON.stringify(attached.tool_config.parameters) !==
+            JSON.stringify(definition.tool_config.parameters)
+          )
+            throw new Error(
+              `Existing ${name} tool has a different schema. Review it before changing this shared tool.`,
+            );
+          found = id;
+          break;
+        }
+      }
+    }
+    if (!found) found = (await api("tools", "POST", definition)).id;
+    if (!found) throw new Error(`No tool ID returned for ${name}.`);
+    saved.tools[name] = found;
+    ids.add(found);
+    await save();
+  }
+  if (!saved.knowledge) {
+    saved.knowledge = await api("knowledge-base/text", "POST", {
+      name: plan.knowledge,
+      text: await readFile("docs/round-knowledge.md", "utf8"),
+    });
+    await save();
+  }
+  const knowledge = existingPrompt.knowledge_base ?? [];
+  const patch = {
+    conversation_config: {
+      agent: {
+        first_message:
+          "Hello, I’m Cortana, your AI learning companion. Let’s take a moment with today’s evidence.",
+        disable_first_message_interruptions: false,
+        dynamic_variables: {
+          dynamic_variable_placeholders: {
+            ...agent.conversation_config.agent.dynamic_variables
+              ?.dynamic_variable_placeholders,
+            round_id: "dapa-hf-01",
+            section_id: "population",
+            lesson_stage: "briefing",
+          },
+        },
+        prompt: {
+          prompt,
+          tool_ids: [...ids],
+          knowledge_base: [
+            ...knowledge.filter((item) => item.id !== saved.knowledge.id),
+            {
+              type: "text",
+              id: saved.knowledge.id,
+              name: saved.knowledge.name,
+              usage_mode: "prompt",
+            },
+          ],
+        },
+      },
+      conversation: {
+        max_duration_seconds: 300,
+        client_events: [
+          ...new Set([
+            ...agent.conversation_config.conversation.client_events,
+            "audio",
+            "interruption",
+            "user_transcript",
+            "agent_response",
+            "agent_response_correction",
+            "vad_score",
+            "client_tool_call",
+            "agent_tool_request",
+            "agent_tool_response",
+          ]),
+        ],
+      },
+    },
+  };
+  await writeFile(
+    ".cortana/agent-integration-patch.json",
+    JSON.stringify(patch, null, 2),
+    { mode: 0o600 },
+  );
+  await api(`agents/${encodeURIComponent(agentId)}`, "PATCH", patch);
+  const verified = await api(`agents/${encodeURIComponent(agentId)}`);
+  if (
+    verified.conversation_config.agent.prompt.llm !== existingPrompt.llm ||
+    verified.conversation_config.tts.voice_id !==
+      agent.conversation_config.tts.voice_id
+  )
+    throw new Error(
+      "The provider changed the model or voice unexpectedly; inspect the backup.",
+    );
+  console.log(
+    JSON.stringify({
+      applied: true,
+      attachedTools: verified.conversation_config.agent.prompt.tool_ids.length,
+      knowledgeDocuments:
+        verified.conversation_config.agent.prompt.knowledge_base.length,
+      modelAndVoicePreserved: true,
+    }),
+  );
+}

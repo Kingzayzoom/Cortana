@@ -1,0 +1,195 @@
+[
+  {
+    "tool_config": {
+      "type": "client",
+      "name": "get_round_context",
+      "description": "Get the authoritative current round, sources and section checkpoint. Call first; use this bundle instead of model memory.",
+      "expects_response": true,
+      "response_timeout_secs": 20,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "roundId": {
+            "type": "string",
+            "enum": [
+              "dapa-hf-01"
+            ],
+            "description": "The fixed round ID dapa-hf-01."
+          }
+        },
+        "required": [
+          "roundId"
+        ],
+        "description": "Validated parameters for this client tool."
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "client",
+      "name": "show_stage",
+      "description": "Save the current lesson section before reading it. Sections must advance population, finding, limitation in order. Questions require graded feedback.",
+      "expects_response": true,
+      "response_timeout_secs": 20,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "stageId": {
+            "type": "string",
+            "enum": [
+              "briefing",
+              "challenge",
+              "questions"
+            ],
+            "description": "The next permitted lesson stage: briefing, challenge, or questions."
+          },
+          "sectionId": {
+            "type": "string",
+            "enum": [
+              "population",
+              "finding",
+              "limitation"
+            ],
+            "description": "The briefing section to show: population, finding, or limitation. Advance in that order."
+          }
+        },
+        "required": [
+          "stageId"
+        ],
+        "description": "Validated parameters for this client tool."
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "client",
+      "name": "show_case",
+      "description": "Show the known synthetic learning case after all briefing sections. Never invent case content.",
+      "expects_response": true,
+      "response_timeout_secs": 20,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "enum": [
+              "hf-case-01"
+            ],
+            "description": "The predefined synthetic case ID hf-case-01."
+          }
+        },
+        "required": [
+          "caseId"
+        ],
+        "description": "Validated parameters for this client tool."
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "client",
+      "name": "show_evidence",
+      "description": "Open one or two known source records, including their supporting passage and scope.",
+      "expects_response": true,
+      "response_timeout_secs": 20,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "dapa-hf",
+                "dapa-diabetes"
+              ],
+              "description": "Validated parameters for this client tool."
+            },
+            "description": "One or two source IDs from the current round: dapa-hf or dapa-diabetes."
+          }
+        },
+        "required": [
+          "sourceIds"
+        ],
+        "description": "Validated parameters for this client tool."
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "client",
+      "name": "submit_answer",
+      "description": "Submit the learner's actual final answer to server grading. Wait for the returned verdict. The application generates retry-safe request IDs; never supply a requestId yourself.",
+      "expects_response": true,
+      "response_timeout_secs": 20,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "roundId": {
+            "type": "string",
+            "enum": [
+              "dapa-hf-01"
+            ],
+            "description": "The fixed round ID dapa-hf-01."
+          },
+          "questionId": {
+            "type": "string",
+            "enum": [
+              "diabetes-eligibility"
+            ],
+            "description": "The fixed question ID diabetes-eligibility."
+          },
+          "answer": {
+            "type": "string",
+            "description": "The learner's actual final answer. Preserve ambiguity rather than guessing an option."
+          }
+        },
+        "required": [
+          "roundId",
+          "questionId",
+          "answer"
+        ],
+        "description": "Validated parameters for this client tool."
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "client",
+      "name": "complete_round",
+      "description": "Complete an answered round after the questions stage. Only the server awards XP. The application generates the request ID; supply only roundId.",
+      "expects_response": true,
+      "response_timeout_secs": 20,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "roundId": {
+            "type": "string",
+            "enum": [
+              "dapa-hf-01"
+            ],
+            "description": "The fixed round ID dapa-hf-01."
+          }
+        },
+        "required": [
+          "roundId"
+        ],
+        "description": "Validated parameters for this client tool."
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "client",
+      "name": "get_next_review",
+      "description": "Get the actual saved review date and rule-based reason. Never invent a mastery score.",
+      "expects_response": true,
+      "response_timeout_secs": 20,
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "description": "Validated parameters for this client tool."
+      }
+    }
+  }
+]

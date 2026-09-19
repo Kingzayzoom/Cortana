@@ -1,25 +1,17 @@
-# Five-minute demo
+# Two-minute local demonstration
 
-**Before you start**
-- Go to Profile and click **Reset to sample history**. This puts the demo profile at a 5-day streak, with Anticoagulation due because of a confident miss.
-- Use Chrome, allow the microphone once, and close other tabs that use audio.
-- Keep a fallback ready: if voice fails, click **Read it instead** and run the same flow on screen.
+1. Open http://localhost:3100. Point out the procedural orb and the three stages of today's round.
+2. Click **Explore in text mode**. This is explicitly labeled **Local preview · microphone off**.
+3. Read “Who was studied”, press Continue, read the finding, and open “Have a question before continuing?”. Ask “Who was studied?” and show its source. Continue from the same section.
+4. Finish the limitation and select **Try the challenge**.
+5. Type “maybe B or C” to show clarification without grading. Then select B. The fixed server answer key supplies the result and rationale.
+6. Click **See the evidence**. Inspect publication, date, passage, original link and scope. Close the drawer; the lesson remains in place.
+7. Go to **Your questions**. Ask “Can you prescribe for my patient?” to demonstrate the explicit unsupported-question response.
+8. Complete the round. Show the saved result, review date, learning pulse and XP. Reload. Repeat completion/review to demonstrate that XP is not duplicated.
+9. Explore My Rounds, search the two sources in Evidence Library, inspect Learning Profile, and adjust reduced motion in Settings.
 
-| Time | Beat | What to do and say |
-| --- | --- | --- |
-| 0:00 | Problem | "Doctors don't need another dashboard or another long article. Clinical learning has to fit into an already packed day." |
-| 0:25 | Introduce | Show the Today screen. "Cortana turns clinical learning into a two-minute conversation." |
-| 0:40 | Start | Click **Start today's round**. The orb comes alive and Cortana starts the brief. |
-| 1:10 | **Interrupt** | While Cortana is speaking: "Wait — who was included in that study?" The orb switches to cyan, Cortana answers from DAPA-HF, then you say "Continue" and it resumes at the same section. *This is the wow moment.* |
-| 2:00 | Case | Cortana: "Let's see how you'd apply that." The synthetic case animates in. Say "I think B." |
-| 2:20 | Feedback | The answer is graded by code, not by the model. Cortana explains why, and the feedback card shows the rationale and sources. |
-| 2:45 | Evidence | Click the **DAPA-HF** chip. The evidence drawer opens and the call stays connected. |
-| 3:10 | Unscripted | "What was the most important limitation?" Cortana answers from the evidence only. |
-| 3:40 | Complete | "Let's wrap up." The screen shows +100 XP, +20 for the correct answer, and the streak moving to 6 days. Learning Pulse updates to Heart Failure 2 / 3. |
-| 4:05 | Adaptive | Point to **Up next: Anticoagulation**, "recommended because you missed your last practice question on this topic." It's a plain rule, not a mystery score. |
-| 4:30 | Architecture | ElevenLabs for voice, Gemini for reasoning, Cortana for evidence, grading and the learning engine. |
+For an incorrect first answer use A; the result is supportive, earns 100 completion XP without the first-correct bonus, and schedules tomorrow's review. A correct first answer earns 120 XP and a seven-day review. Calendar calculations use the profile timezone.
 
-**Talking points if asked**
-- Correct answers are decided by code on the server. The model only explains the result.
-- Every citation comes from a curated source bundle. Unknown source ids are rejected before they reach the screen.
-- The history is sample data and is labeled as such throughout the UI.
+For live voice, follow `elevenlabs-setup.md`. Local preview contains a deliberately small question matcher, not an independent chatbot or synthetic speech service. It sends no microphone audio and makes no live connection claim.
+
+The development-only `/dev/orb` route is an explicitly labeled synthetic signal harness. It contains silence, soft input, strong input and output samples; input mute, reduced motion, WebGL fallback and renderer unmount controls. Never present its sample signals as live speech.

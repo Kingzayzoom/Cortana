@@ -1,41 +1,27 @@
-# Tool contracts
+# Agent tools and server authority
 
-Every tool is an ElevenLabs **client tool**, so it runs in the browser. Client tools work on `localhost` with no public webhook URL, and the ones that need the server (grading) call the Next.js API themselves. Correctness is still decided on the server, and the answer key never reaches the browser.
+Register all seven tools as **Client** tools. Set **Wait for response / expects_response = true** for every tool and a 20-second timeout. The names and parameter schemas must exactly match `src/lib/validation/contracts.ts`. The JSON file `docs/elevenlabs-tools.json` contains the corresponding provider tool configurations.
 
-Handlers live in `components/today/round-experience.tsx`, and parameters are validated with Zod in `lib/validation/tools.ts`. **Tool and parameter names must match exactly.**
-
-Configure each tool in the agent's tool settings as a client tool, with **Wait for response** turned on. Every tool returns a string: either JSON, or text starting with `error:` that explains what to do instead.
-
-| Tool | Parameters | What it does |
+| Name | Parameters | Result and authority |
 | --- | --- | --- |
-| `get_round_context` | `round_id` (string, optional) | Returns the round's briefing sections, case (question and options), sources, and a `checkpoint` (stage, current section, whether the answer is graded). Contains no answer key. |
-| `show_stage` | `stage` (string, required): `briefing`, `challenge` or `questions` | Moves the round forward. `questions` is refused until an answer is graded. Stages never move backward. |
-| `show_section` | `section_id` (string, required): `study`, `finding` or `limitation` | Highlights a brief section on screen and checkpoints it, so the round resumes there after an interruption. Returns that section's points. |
-| `show_case` | `case_id` (string, required): `hf-case-001` | Animates the synthetic case card in and returns its content. |
-| `show_evidence` | `source_ids` (string, required): comma-separated, e.g. `src-dapa-hf` | Opens the evidence drawer without interrupting the call. Unknown ids are rejected. |
-| `submit_answer` | `answer` (string, required): A–D; `confidence` (string, optional): `guessing`, `somewhat` or `very` | Sends the answer to `POST /api/rounds/[roundId]/answer` for grading against the stored key. Records the attempt. Returns correctness, the correct option, rationale and source ids. Idempotent: once graded, it returns the same result. |
-| `complete_round` | `round_id` (string, optional) | Awards XP, updates the streak and returns the summary plus the next review. Refused before an answer is graded. Idempotent per day. |
-| `get_next_review` | none | Returns the recommended next topic and a plain-language reason. |
+| `get_round_context` | `roundId: "dapa-hf-01"` | Curated content, citations and checkpoint |
+| `show_stage` | `stageId`: briefing, challenge or questions; optional `sectionId`: population, finding or limitation | Server validates ordered transitions and saves the checkpoint |
+| `show_case` | `caseId: "hf-case-01"` | Opens the stored synthetic case after the final briefing |
+| `show_evidence` | `sourceIds`: one or two of dapa-hf and dapa-diabetes | Opens stored evidence; accepts no arbitrary content |
+| `submit_answer` | Fixed roundId and questionId; actual answer (the app supplies the UUID) | Server grades and persists |
+| `complete_round` | Fixed roundId (the app supplies the UUID) | Server requires an answered case and questions stage; only server awards XP |
+| `get_next_review` | Empty object | Actual saved review date and reason |
 
-## Parameter descriptions to paste
+The provider export includes the names, fields, requiredness and accepted ID enums. ElevenLabs requires parameter descriptions and does not accept `additionalProperties`, string length/format or item-count constraints in the same form as Zod's full JSON schema. The runtime uses the original strict Zod schemas for all of those checks.
 
-These descriptions tell the LLM how to fill each parameter.
+The four operations concerning lesson/progress do not trust the model to supply grades, XP, user IDs, or answer keys. Client tools are the transport bridge into the authenticated application backend. These are not direct anonymous provider webhooks. The signed HttpOnly app cookie identifies the demo profile; neither profile IDs nor scores can be chosen in a tool payload.
 
-- **round_id**: "The round id from the system prompt, e.g. hf-round-001."
-- **stage**: "One of: briefing, challenge, questions."
-- **section_id**: "The section_id from get_round_context's briefing_sections, in order."
-- **case_id**: "The case_id from get_round_context's case."
-- **source_ids**: "Comma-separated source_id values from get_round_context's sources."
-- **answer**: "The learner's chosen option letter: A, B, C or D."
-- **confidence**: "Only if the learner stated it: guessing, somewhat or very."
+Transitions: `ready → briefing(population → finding → limitation) → challenge → feedback → questions → completed`. Repeating the current stage is allowed; skipping ahead or rewinding through late events is rejected. Interruptions leave the current section checkpoint unchanged. Live Pause is hidden; reconnect starts the saved section again. Text preview retains checkpoint pause.
 
-## Also enable
+Strict Zod schemas reject extra fields and unknown content IDs. The backend checks run IDs to reject stale events, stores request fingerprints to reject reuse with different payloads, returns the existing grade for a duplicate answer within a run, and grants completion XP once per content round. First completion earns 100 XP; a correct first graded attempt adds 20 XP. Later reviews add practice history without additional completion rewards.
 
-- The **End conversation** (`end_call`) system tool, so the agent can hang up after step 7 of the prompt.
-- **Interruptions**, which are on by default. They're the core of the demo.
+Configure the agent's client events for user transcripts, agent responses/corrections, audio, interruption, VAD, and tool events. The installed SDK delivers final message-level `onMessage` records separately from internal tentative output; only the former populate the transcript. The model must invoke submit_answer for spoken grading. Browser buttons and text input reach the same backend function.
 
-## How the app handles input that doesn't come through a tool
+References: [Client tools](https://elevenlabs.io/docs/eleven-agents/customization/tools/client-tools), [Create tool API](https://elevenlabs.io/docs/eleven-agents/api-reference/tools/create), [React SDK](https://elevenlabs.io/docs/eleven-agents/libraries/react).
 
-- **Clicked or typed answers.** The app grades these directly through the same API, then sends `My answer is X.` into the conversation. The agent's `submit_answer` call gets the cached grade and explains it aloud. Either way there's one grading path.
-- **Typed questions while voice is connected.** These go into the conversation as user messages.
-- **Typed questions with voice off.** These go to `POST /api/rounds/[roundId]/ask`, where Gemini answers from the round's evidence only.
+The model never generates idempotency UUIDs. The voice controller creates and reuses a UUID for each run, operation and validated semantic payload, then sends it to the strict server API. This fixes observed invalid model-generated UUIDs while preserving authoritative grading and duplicate-reward protection.
