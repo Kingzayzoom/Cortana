@@ -37,6 +37,17 @@ Each call carries a signed `phone_session` value that names one profile and one 
 
 8. **Try it:** open `/phone`, enter a number in international format (`+15715550123`), the demo access code, and both confirmations.
 
+## Carriers other than Twilio
+
+Twilio is a native ElevenLabs integration, so its numbers import with just an Account SID and auth token. Twilio's trial, however, includes free minutes but no phone number: buying one requires adding funds.
+
+Carriers such as Telnyx, Plivo and SignalWire connect as SIP trunks instead, and their trials do include a number plus a small credit. To use one:
+
+1. Create the account, claim a voice-capable local number, and verify the phones you plan to call.
+2. On the carrier, point a SIP connection's inbound destination at `sip.rtc.elevenlabs.io`, and note the outbound hostname and digest credentials.
+3. In ElevenLabs, import the number as a **SIP trunk** number with that hostname and those credentials, then assign it to the phone agent. ElevenLabs publishes per-carrier guides; the Telnyx one is the most detailed.
+4. Set `CORTANA_PHONE_PROVIDER=sip` on the server. The request is identical; only the ElevenLabs endpoint differs.
+
 ## Trial accounts
 
 A Twilio trial can only call numbers verified under **Verified Caller IDs**, and it plays a short trial notice before connecting, which the person has to acknowledge. Verify every phone you plan to call during a demo ahead of time, or upgrade the account to remove both limits.

@@ -132,7 +132,32 @@ describe("Placing a phone round", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("explains a Twilio trial rejection without leaking the provider response", async () => {
+  it("uses the SIP trunk endpoint for non-Twilio carriers", async () => {
+    vi.stubEnv("CORTANA_PHONE_PROVIDER", "sip");
+    vi.mocked(fetch).mockResolvedValue(
+      Response.json({
+        success: true,
+        message: "ok",
+        conversation_id: "conv_sip",
+        sip_call_id: "sip_1",
+      }),
+    );
+    const response = await call(callRequest());
+    expect(response.status).toBe(200);
+    expect((await response.json()).conversationId).toBe("conv_sip");
+    const [url, options] = vi.mocked(fetch).mock.calls[0] as [
+      string,
+      RequestInit,
+    ];
+    expect(url).toContain("/v1/convai/sip-trunk/outbound-call");
+    // The request body is identical, so the rest of the flow is unchanged.
+    expect(JSON.parse(options.body as string)).toMatchObject({
+      agent_id: "agent_phone_test",
+      to_number: "+15715550123",
+    });
+  });
+
+  it("explains a carrier trial rejection without leaking the provider response", async () => {
     vi.mocked(fetch).mockResolvedValue(
       Response.json(
         { detail: "The number is unverified on this trial account (secret)" },
@@ -142,7 +167,7 @@ describe("Placing a phone round", () => {
     const response = await call(callRequest());
     const body = await response.json();
     expect(response.status).toBe(400);
-    expect(body.error).toMatch(/trial account/);
+    expect(body.error).toMatch(/trial/);
     expect(JSON.stringify(body)).not.toContain("secret");
   });
 });

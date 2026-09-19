@@ -22,8 +22,12 @@ import type { Run } from "../learning/types";
 // server directly: a phone has no browser to host client tools. Each call carries
 // a short-lived signed session that names the profile and run it may touch.
 const SESSION_TTL_MS = 45 * 60 * 1000;
-const CALL_ENDPOINT =
-  "https://api.elevenlabs.io/v1/convai/twilio/outbound-call";
+// Twilio is a native ElevenLabs integration; every other carrier (Telnyx,
+// Plivo, SignalWire, …) arrives as a SIP trunk. Same request, different path.
+const callEndpoint = () =>
+  `https://api.elevenlabs.io/v1/convai/${
+    process.env.CORTANA_PHONE_PROVIDER === "sip" ? "sip-trunk" : "twilio"
+  }/outbound-call`;
 
 export function phoneConfigured() {
   return Boolean(
@@ -95,7 +99,7 @@ export async function startOutboundCall(
 ) {
   let response: Response;
   try {
-    response = await fetch(CALL_ENDPOINT, {
+    response = await fetch(callEndpoint(), {
       method: "POST",
       headers: {
         "xi-api-key": process.env.ELEVENLABS_API_KEY!,
@@ -129,7 +133,7 @@ export async function startOutboundCall(
     const detail = JSON.stringify(body ?? {}).toLowerCase();
     if (/unverified|verified caller|trial/.test(detail))
       throw new RequestError(
-        "Twilio is on a trial account and can only call verified numbers. Verify this number in Twilio, or upgrade the account.",
+        "The carrier account is on a trial and can only call verified numbers. Verify this number with the carrier, or add funds to the account.",
         400,
       );
     if (/invalid|not a valid phone|to_number/.test(detail))
@@ -165,7 +169,9 @@ export async function startOutboundCall(
       success: z.boolean().optional(),
       message: z.string().optional(),
       conversation_id: z.string().nullable().optional(),
+      // Twilio returns callSid; a SIP trunk returns sip_call_id.
       callSid: z.string().nullable().optional(),
+      sip_call_id: z.string().nullable().optional(),
     })
     .safeParse(body);
   if (!payload.success || payload.data.success === false)
