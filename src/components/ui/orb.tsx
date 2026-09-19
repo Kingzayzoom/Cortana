@@ -28,6 +28,7 @@ type OrbProps = {
   className?: string;
   reducedMotion?: boolean;
   active?: boolean;
+  motionSpeed?: number;
 };
 
 export function Orb({
@@ -46,6 +47,7 @@ export function Orb({
   className,
   reducedMotion = false,
   active = true,
+  motionSpeed = 1,
 }: OrbProps) {
   return (
     <div className={className ?? "relative h-full w-full"}>
@@ -72,6 +74,7 @@ export function Orb({
           outputVolumeRef={outputVolumeRef}
           getInputVolume={getInputVolume}
           getOutputVolume={getOutputVolume}
+          motionSpeed={motionSpeed}
         />
       </Canvas>
     </div>
@@ -91,6 +94,7 @@ function Scene({
   outputVolumeRef,
   getInputVolume,
   getOutputVolume,
+  motionSpeed,
 }: {
   reducedMotion: boolean;
   colors: [string, string];
@@ -104,6 +108,7 @@ function Scene({
   outputVolumeRef?: React.RefObject<number>;
   getInputVolume?: () => number;
   getOutputVolume?: () => number;
+  motionSpeed: number;
 }) {
   const { gl } = useThree();
   const circleRef =
@@ -180,7 +185,7 @@ function Scene({
     }
     const u = mat.uniforms;
     const dt = Math.min(delta, 0.05);
-    u.uTime.value += reducedMotion ? 0 : dt * 0.5;
+    u.uTime.value += reducedMotion ? 0 : dt * 0.5 * motionSpeed;
 
     if (u.uOpacity.value < 1) {
       u.uOpacity.value = reducedMotion
@@ -218,16 +223,30 @@ function Scene({
 
     curInRef.current +=
       (targetIn - curInRef.current) *
-      (1 - Math.exp(-dt / (targetIn > curInRef.current ? 0.065 : 0.24)));
+      (1 -
+        Math.exp(
+          -dt /
+            (targetIn > curInRef.current
+              ? 0.065 / motionSpeed
+              : 0.24 / motionSpeed),
+        ));
     curOutRef.current +=
       (targetOut - curOutRef.current) *
-      (1 - Math.exp(-dt / (targetOut > curOutRef.current ? 0.065 : 0.24)));
+      (1 -
+        Math.exp(
+          -dt /
+            (targetOut > curOutRef.current
+              ? 0.065 / motionSpeed
+              : 0.24 / motionSpeed),
+        ));
 
     const targetSpeed =
       0.18 + Math.max(curInRef.current, curOutRef.current) * 0.8;
     animSpeedRef.current += (targetSpeed - animSpeedRef.current) * 0.12;
 
-    u.uAnimation.value += reducedMotion ? 0 : dt * animSpeedRef.current;
+    u.uAnimation.value += reducedMotion
+      ? 0
+      : dt * animSpeedRef.current * motionSpeed;
     u.uInputVolume.value = curInRef.current;
     u.uOutputVolume.value = curOutRef.current;
     u.uColor1.value.lerp(targetColor1Ref.current, 1 - Math.exp(-dt * 5));

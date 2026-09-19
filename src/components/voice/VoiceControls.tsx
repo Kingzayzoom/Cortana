@@ -59,9 +59,11 @@ export function VoiceStatus() {
 export function VoiceControls({
   transcript,
   onTranscript,
+  showTranscriptToggle = true,
 }: {
   transcript: boolean;
   onTranscript: () => void;
+  showTranscriptToggle?: boolean;
 }) {
   const voice = useVoice(),
     { data, busy } = useLearning();
@@ -137,7 +139,7 @@ export function VoiceControls({
           </button>
         </>
       )}
-      {active && (
+      {active && showTranscriptToggle && (
         <>
           <button
             className="text-button transcript-toggle"

@@ -122,9 +122,11 @@ test("complete round with clarification, evidence, unsupported question, reload 
     .fill("Can you prescribe for my patient?");
   await page.getByRole("button", { name: "Send question" }).click();
   await expect(
-    page.getByText("The sources in this round do not establish that.", {
-      exact: false,
-    }),
+    page
+      .getByRole("region", { name: "Current learning section" })
+      .getByText("The sources in this round do not establish that.", {
+        exact: false,
+      }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Complete round" }).click();
   await expect(

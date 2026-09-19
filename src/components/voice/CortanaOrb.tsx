@@ -37,6 +37,7 @@ export function OrbVisual({
   muted,
   reducedMotion,
   listening,
+  motionSpeed = 1,
   fallback = false,
 }: {
   getInput: () => number;
@@ -45,6 +46,7 @@ export function OrbVisual({
   muted: boolean;
   reducedMotion: boolean;
   listening?: boolean;
+  motionSpeed?: number;
   fallback?: boolean;
 }) {
   const [supported, setSupported] = useState<boolean | null>(null),
@@ -109,6 +111,7 @@ export function OrbVisual({
       data-testid="orb"
       aria-label="Cortana voice visualization"
       role="img"
+      data-motion-speed={motionSpeed.toFixed(2)}
     >
       <div className="orb-halo" />
       <div className="orb-shadow" />
@@ -126,6 +129,7 @@ export function OrbVisual({
               outputVolumeRef={output}
               reducedMotion={reducedMotion}
               active={visible}
+              motionSpeed={motionSpeed}
             />
           ) : (
             <div className="orb-loading" />
@@ -156,6 +160,13 @@ export function CortanaOrb() {
         data?.preferences.reducedMotion || systemReduced || voice.paused,
       )}
       listening={voice.activity === "user-speaking"}
+      motionSpeed={
+        voice.preview || voice.connection === "connected"
+          ? voice.activity === "quiet"
+            ? 1.12
+            : 1.18
+          : 1
+      }
     />
   );
 }

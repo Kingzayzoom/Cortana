@@ -15,7 +15,7 @@ import type { Grade } from "@/lib/learning/types";
 import { Button } from "@/components/ui/button";
 import { LearningSignalSummary } from "./LearningSignalSummary";
 import { ImpiricusSignalBridge } from "./ImpiricusSignalBridge";
-export function LessonPanel() {
+export function LessonPanel({ embedded = false }: { embedded?: boolean }) {
   const { data, act, busy, openEvidence, addMessage } = useLearning();
   const voice = useVoice();
   const panel = useRef<HTMLElement>(null);
@@ -35,12 +35,16 @@ export function LessonPanel() {
       voice.preview ||
       ["challenge", "feedback", "questions"].includes(lessonStage)
     ) {
+      if (embedded && lessonStage === "briefing") return;
       const frame = requestAnimationFrame(() =>
-        panel.current?.scrollIntoView({ block: "start", behavior: "instant" }),
+        panel.current?.scrollIntoView({
+          block: embedded ? "nearest" : "start",
+          behavior: "instant",
+        }),
       );
       return () => cancelAnimationFrame(frame);
     }
-  }, [lessonStage, sectionIndex, voice.preview, voice.paused]);
+  }, [embedded, lessonStage, sectionIndex, voice.preview, voice.paused]);
   if (
     !run ||
     run.stage === "ready" ||
@@ -189,7 +193,7 @@ export function LessonPanel() {
   return (
     <section
       ref={panel}
-      className="lesson-panel"
+      className={`lesson-panel${embedded ? " lesson-panel-embedded" : ""}`}
       aria-label="Current learning section"
     >
       <div className="lesson-heading">
