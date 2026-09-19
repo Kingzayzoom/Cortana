@@ -39,7 +39,18 @@ Browser tests expect a dev server at port 3100. Override with `CORTANA_TEST_URL`
 
 For real voice, the API key needs **Write access for ElevenAgents / Conversational AI (`convai_write`)** to mint a token; Read access alone is insufficient. `node scripts/verify-live-voice.mjs --headed` exercises the actual SDK, WebRTC and host microphone without fake audio. After that base connection succeeds, review `node scripts/configure-agent.mjs` and apply the prepared learning setup with `node scripts/configure-agent.mjs --apply`. Account changes are backed up under `.cortana/`; the model and voice are preserved.
 
-For a production build locally: `npm run build`, then `npm start -- --port 3100`. Host this prototype on a single Node process with persistent storage; replace the file adapter and in-process rate limiter before multi-node or ephemeral hosting.
+For a production build locally: `npm run build`, then `npm start -- --port 3100`.
+
+## Deploy to Vercel
+
+Vercel runs the API as serverless functions with a read-only file system and no shared memory, so progress, locks and rate limits use Upstash Redis there. Locally, the app keeps using `.cortana/` files unless Redis variables are set.
+
+1. Import the GitHub repository in Vercel (framework preset: Next.js; defaults are fine).
+2. In the project, open **Storage → Marketplace → Upstash (Redis)**, create a free database and connect it to the project. This adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
+3. Under **Settings → Environment Variables**, add `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID`, `CORTANA_DEMO_ACCESS_CODE` and `CORTANA_SESSION_SECRET` (the same values as `.env.local`).
+4. Redeploy. The Profile page reads "Saved in the demo database" when Redis is active.
+
+Without Redis on Vercel, the API answers with an explicit "Connect Upstash Redis" error instead of failing on the file system; server errors appear in the Vercel function logs with a `[cortana]` prefix. To test the Redis path locally, run `node tests/upstash-emulator.mjs` and start the app with the printed `KV_REST_API_*` values.
 
 ## Handoff
 

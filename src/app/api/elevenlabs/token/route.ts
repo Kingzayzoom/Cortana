@@ -21,8 +21,8 @@ export async function POST(request: Request) {
         "Refresh the workspace before starting voice.",
         401,
       );
-    rateLimit("voice:global", 40, 3_600_000);
-    rateLimit(`voice:${id}`, 6);
+    await rateLimit("voice:global", 40, 3_600_000);
+    await rateLimit(`voice:${id}`, 6);
     if (!voiceConfigured())
       throw new RequestError(
         "Voice connection not configured. Explore the local preview below.",

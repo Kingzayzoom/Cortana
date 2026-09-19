@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         "Refresh the workspace to begin a demo session.",
         401,
       );
-    rateLimit(`learn:${id}`, 90);
+    await rateLimit(`learn:${id}`, 90);
     const parsed = learningRequest.safeParse(await readBody(request));
     if (!parsed.success)
       throw new RequestError(
