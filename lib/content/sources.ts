@@ -36,7 +36,7 @@ export const sources: Record<string, Source> = {
   },
   "src-aha-acc-hfsa-2022": {
     id: "src-aha-acc-hfsa-2022",
-    shortName: "AHA/ACC/HFSA 2022",
+    shortName: "AHA/ACC/HFSA guideline",
     title: "2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure",
     kind: "Clinical guideline",
     authors: "Heidenreich PA, Bozkurt B, Aguilar D, et al.",

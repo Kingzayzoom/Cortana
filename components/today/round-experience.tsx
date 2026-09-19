@@ -475,7 +475,12 @@ function RoundExperience({ round, clinicalCase }: { round: Round; clinicalCase: 
               )}
             />
 
-            <VoiceStatus connection={connection} voice={voice} muted={conversation.isMuted} />
+            <VoiceStatus
+              connection={connection}
+              voice={voice}
+              muted={conversation.isMuted}
+              idleText={stage === "completed" ? "Round complete" : runMode === "text" ? "Reading mode · voice off" : undefined}
+            />
 
             {stage === "ready" && runMode === null && (
               <div className="flex flex-col items-center gap-2">

@@ -14,7 +14,12 @@ type Props = {
   onEnd: () => void
 }
 
-export function VoiceStatus({ connection, voice, muted }: Pick<Props, "connection" | "voice" | "muted">) {
+export function VoiceStatus({
+  connection,
+  voice,
+  muted,
+  idleText = "Ready when you are",
+}: Pick<Props, "connection" | "voice" | "muted"> & { idleText?: string }) {
   const text =
     connection === "connecting"
       ? "Connecting…"
@@ -24,7 +29,7 @@ export function VoiceStatus({ connection, voice, muted }: Pick<Props, "connectio
           ? muted && voice !== "assistant-speaking"
             ? "Microphone muted"
             : VOICE_STATUS_TEXT[voice]
-          : "Ready when you are"
+          : idleText
 
   return (
     <p className="flex items-center justify-center gap-2 text-sm text-muted-foreground" aria-live="polite">

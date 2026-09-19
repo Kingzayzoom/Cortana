@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored from the ElevenLabs UI registry; kept byte-for-byte so it can be
+    // re-synced. Its three.js mutations trip React Compiler lint rules.
+    "components/ui/orb.tsx",
   ]),
 ]);
 

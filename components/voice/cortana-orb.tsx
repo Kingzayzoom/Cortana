@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, type RefObject } from "react"
+import { useEffect, useRef, type RefObject } from "react"
 import dynamic from "next/dynamic"
 
 import { cn } from "@/lib/utils"
@@ -54,9 +54,10 @@ export function CortanaOrb({ connection, voice, inputEnergy, outputEnergy, class
     }
   }, [live, inputEnergy, outputEnergy])
 
-  const getInput = useCallback(() => inputEnergy.current, [inputEnergy])
-  // A small baseline keeps the internal flow gently moving between turns.
-  const getOutput = useCallback(() => Math.max(0.12, outputEnergy.current), [outputEnergy])
+  // Read per frame by the orb. A small output baseline keeps its internal flow
+  // gently moving between turns.
+  const getInput = () => inputEnergy.current
+  const getOutput = () => Math.max(0.12, outputEnergy.current)
 
   const palette = live ? PALETTES[voice] : connection === "connecting" ? PALETTES["awaiting-response"] : PALETTES.idle
 
@@ -69,8 +70,10 @@ export function CortanaOrb({ connection, voice, inputEnergy, outputEnergy, class
       aria-hidden="true"
     >
       <div className="orb-halo" />
+      {/* Absolutely positioned so the canvas's pixel size never props open the
+          aspect-square box while it shrinks between stages. */}
       <Orb
-        className="relative size-full"
+        className="absolute inset-0"
         colors={palette}
         seed={7}
         volumeMode={live ? "manual" : "auto"}
