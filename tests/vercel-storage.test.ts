@@ -264,5 +264,11 @@ describe("Serverless configuration", () => {
     expect(() =>
       session.assertOrigin(request("https://demo.example")),
     ).not.toThrow();
+    // A trailing slash is easy to paste into a dashboard and would otherwise
+    // reject every request.
+    vi.stubEnv("CORTANA_APP_ORIGIN", "https://demo.example/");
+    expect(() =>
+      session.assertOrigin(request("https://demo.example")),
+    ).not.toThrow();
   });
 });

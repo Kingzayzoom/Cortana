@@ -86,7 +86,11 @@ export function assertOrigin(request: Request) {
     request.headers.get("x-forwarded-proto")?.split(",")[0].trim() ||
     new URL(request.url).protocol.replace(":", "");
   const expected = process.env.CORTANA_APP_ORIGIN
-    ? process.env.CORTANA_APP_ORIGIN.split(",").map((o) => o.trim())
+    ? // A browser's Origin header never has a trailing slash, but a pasted URL
+      // usually does; tolerate it rather than rejecting every request.
+      process.env.CORTANA_APP_ORIGIN.split(",").map((o) =>
+        o.trim().replace(/\/+$/, ""),
+      )
     : [`${protocol}://${request.headers.get("host")}`];
   if (!origin || !expected.includes(origin))
     throw new RequestError(
