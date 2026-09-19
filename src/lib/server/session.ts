@@ -47,6 +47,13 @@ async function sign(id: string) {
     .update(id)
     .digest("hex");
 }
+// Signs other server-issued values. Callers prefix their own purpose so tokens
+// from one feature can never be replayed in another.
+export async function hmac(value: string) {
+  return createHmac("sha256", await secret())
+    .update(value)
+    .digest("hex");
+}
 export async function profileSession(create = false): Promise<string | null> {
   const jar = await cookies();
   const value = jar.get("cortana_session")?.value;

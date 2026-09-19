@@ -20,6 +20,10 @@ if (!process.env.CORTANA_DEMO_ACCESS_CODE) {
     mode: 0o600,
   });
 }
+if (!process.env.CORTANA_PHONE_TOOL_SECRET) {
+  // Shared secret the ElevenLabs phone agent sends back to this server's tools.
+  additions += `CORTANA_PHONE_TOOL_SECRET=${randomBytes(24).toString("hex")}\n`;
+}
 if (additions) await appendFile(".env.local", additions, { mode: 0o600 });
 console.log(
   "Local session security is configured. Demo access code: .cortana/demo-access-code.txt. Existing ElevenLabs values were preserved.",

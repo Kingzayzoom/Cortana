@@ -1,0 +1,69 @@
+[
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_round_context",
+      "description": "Get the authoritative round, its sources, the synthetic case and this learner's saved checkpoint. Call this first and use the returned bundle instead of model memory.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_round_context",
+        "method": "POST",
+        "request_headers": { "Authorization": "Bearer __TOOL_SECRET__" },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": { "type": "string", "dynamic_variable": "phone_session" }
+          },
+          "required": ["session"]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "submit_answer",
+      "description": "Send the learner's spoken answer to the server for grading. The server owns the answer key: never grade the answer yourself. A duplicate submission returns the grade already recorded.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/submit_answer",
+        "method": "POST",
+        "request_headers": { "Authorization": "Bearer __TOOL_SECRET__" },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            },
+            "answer": {
+              "type": "string",
+              "description": "The learner's actual final answer, in their own words. Pass an option letter only when they clearly said one."
+            }
+          },
+          "required": ["session", "answer"]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "complete_round",
+      "description": "Complete the round after the answer has been graded and the learner's question is finished. Only the server awards XP and sets the next review. Calling it twice does not award anything again.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/complete_round",
+        "method": "POST",
+        "request_headers": { "Authorization": "Bearer __TOOL_SECRET__" },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": { "type": "string", "dynamic_variable": "phone_session" }
+          },
+          "required": ["session"]
+        }
+      }
+    }
+  }
+]

@@ -39,6 +39,8 @@ export type Run = {
   section: number;
   grade: Grade | null;
   completed: boolean;
+  /** Set when this run is being taught over the phone. No phone number is stored. */
+  phone?: { conversationId: string; at: string };
 };
 export type Progress = {
   learningSignals?: import("../learning-signals/types").LearningSignal[];

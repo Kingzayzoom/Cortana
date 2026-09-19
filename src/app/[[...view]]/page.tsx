@@ -9,6 +9,7 @@ import {
 } from "@/components/learning/SupportingViews";
 import { SettingsView } from "@/components/learning/SettingsView";
 import { ImpiricusSignalBridge } from "@/components/learning/ImpiricusSignalBridge";
+import { PhoneRoundView } from "@/components/phone/PhoneRoundView";
 export default async function Page({
   params,
 }: {
@@ -22,6 +23,7 @@ export default async function Page({
     evidence: <EvidenceView />,
     profile: <ProfileView />,
     topics: <TopicsView />,
+    phone: <PhoneRoundView />,
     settings: <SettingsView />,
     impiricus: <ImpiricusSignalBridge />,
   };

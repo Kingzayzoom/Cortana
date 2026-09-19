@@ -56,12 +56,17 @@ Vercel runs the API as serverless functions with a read-only file system and no 
 
 Without Redis on Vercel, the API answers with an explicit "Connect Upstash Redis" error instead of failing on the file system; server errors appear in the Vercel function logs with a `[cortana]` prefix. To test the Redis path locally, run `node tests/upstash-emulator.mjs` and start the app with the printed `KV_REST_API_*` values.
 
+## Phone rounds
+
+Cortana can also call a learner and run the same round by phone, graded by this server. See [phone rounds](docs/phone-round.md) for the Twilio and agent setup.
+
 ## Handoff
 
 - [Learning signals and integration boundaries](docs/learning-signals.md)
 - [Focused security review](docs/security-review-learning-signals.md)
 
 - [Demo sequence](docs/demo-script.md)
+- [Phone rounds](docs/phone-round.md)
 - [Implementation choices and limitations](docs/implementation-notes.md)
 - [Verification results](docs/verification.md)
 - [Agent tool JSON](docs/elevenlabs-tools.json)
