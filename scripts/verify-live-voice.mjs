@@ -118,9 +118,9 @@ try {
     );
     await page.waitForTimeout(200);
   }
-  report.transcript = await page
+  report.transcriptMessageCount = await page
     .locator(".transcript-message p")
-    .allTextContents();
+    .count();
   report.audio = await page.evaluate(() => ({
     tracks: window.__voiceAudit.tracks.map((track) => ({
       kind: track.kind,
@@ -313,9 +313,9 @@ try {
       ({ type, conceptIds, category }) => ({ type, conceptIds, category }),
     );
     report.learningActions = actions;
-    report.transcript = await page
+    report.transcriptMessageCount = await page
       .locator(".transcript-message p")
-      .allTextContents();
+      .count();
     if (await page.getByRole("dialog").count())
       await page
         .getByRole("dialog")
@@ -330,7 +330,7 @@ try {
     await page
       .getByRole("button", { name: "Turn microphone on", exact: true })
       .click();
-  await page.screenshot({ path: "artifacts/cortana-live.png", fullPage: true });
+  // Keep microphone QA artifacts metadata-only; do not persist transcript screenshots.
   if (
     await page.getByRole("button", { name: "End round", exact: true }).count()
   )

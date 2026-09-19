@@ -20,6 +20,7 @@ Question text is classified and discarded. No audio or transcript persistence wa
 - Built client assets are checked against the actual configured API key, session secret and private access code.
 - No Impiricus endpoint or network client exists; export is local.
 - Legacy implementation files are unchanged.
+- The local live-voice QA report now records transcript message counts only, and no longer captures transcript screenshots. The existing local QA artifact was scrubbed of transcript text.
 - The newer upstream Vercel/Redis commits were merged without replacing their storage, shared rate limits or deployment diagnostics. The fingerprint migration runs in both file and Redis adapters. An emulator integration test verifies signal persistence and duplicate suppression across independent server instances, including migration of an old raw fingerprint.
 
 No new exploitable issue was identified in this focused review. The prior raw-body fingerprint retention issue was corrected and tested.
