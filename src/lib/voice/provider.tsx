@@ -32,12 +32,19 @@ import {
   stageTool,
 } from "../validation/contracts";
 import { round, sources } from "../content/round";
+import {
+  DEFAULT_LANGUAGE,
+  type SpokenLanguage,
+} from "./languages";
 import { classifyQuestion, isQuestion } from "../learning-signals/adapter";
 type VoiceValue = {
   connection: ConnectionState;
   activity: VoiceActivity;
   muted: boolean;
   paused: boolean;
+  /** Spoken language for the next session. Never persisted: English each load. */
+  language: SpokenLanguage;
+  setLanguage: (language: SpokenLanguage) => void;
   preview: boolean;
   consentOpen: boolean;
   error: string | null;
@@ -68,6 +75,8 @@ function VoiceController({ children }: { children: React.ReactNode }) {
   const learning = useLearning();
   const [connection, setConnection] = useState<ConnectionState>("idle"),
     [activity, setActivity] = useState<VoiceActivity>("quiet");
+  const [language, setLanguage] = useState<SpokenLanguage>(DEFAULT_LANGUAGE);
+  const languageRef = useRef<SpokenLanguage>(DEFAULT_LANGUAGE);
   const [paused, setPaused] = useState(false),
     [preview, setPreview] = useState(false),
     [consentOpen, setConsentOpen] = useState(false),
@@ -391,6 +400,13 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           section_id: round.sections[data!.run!.section].id,
           lesson_stage: data!.run!.stage,
         },
+        // Language only. The prompt, voice and first message stay server-side,
+        // so the browser cannot redirect what the agent says, only which
+        // language it says it in. Requires the agent to allow the language
+        // override and to list this language; otherwise it keeps its default.
+        overrides: {
+          agent: { language: languageRef.current },
+        },
         onConnect: ({ conversationId: connectedId }) => {
           if (!isCurrent()) return;
           if (!accepting.current) {
@@ -522,6 +538,11 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         connection,
         activity,
         muted: conversation.isMuted,
+        language,
+        setLanguage: (next: SpokenLanguage) => {
+          languageRef.current = next;
+          setLanguage(next);
+        },
         paused,
         preview,
         consentOpen,
