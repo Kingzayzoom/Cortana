@@ -13,8 +13,11 @@ for (const route of [
   "/profile",
   "/topics",
   "/settings",
+  "/impiricus",
 ]) {
-  await page.goto(`http://localhost:3100${route}`);
+  await page.goto(
+    `${process.env.CORTANA_TEST_URL || "http://localhost:3100"}${route}`,
+  );
   await page.locator(".header-greeting").waitFor();
   const report = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])

@@ -5,6 +5,7 @@ export const sources = [
     id: "dapa-hf",
     shortTitle: "DAPA-HF · NEJM",
     publisher: "New England Journal of Medicine",
+    type: "Randomized controlled trial",
     title:
       "Dapagliflozin in Patients with Heart Failure and Reduced Ejection Fraction",
     authors: "McMurray JJV, Solomon SD, Inzucchi SE, et al.",
@@ -22,6 +23,7 @@ export const sources = [
     id: "dapa-diabetes",
     shortTitle: "Diabetes subgroup · JAMA",
     publisher: "JAMA",
+    type: "Exploratory subgroup analysis",
     title:
       "Effect of Dapagliflozin on Worsening Heart Failure and Cardiovascular Death in Patients With Heart Failure With and Without Diabetes",
     authors: "Petrie MC, Verma S, Docherty KF, et al.",

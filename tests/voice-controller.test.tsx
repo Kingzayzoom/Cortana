@@ -19,6 +19,7 @@ const sdk = vi.hoisted(() => ({
 const learning = vi.hoisted(() => ({
   data: null as unknown,
   act: vi.fn(),
+  observe: vi.fn(),
   clearMessages: vi.fn(),
   openEvidence: vi.fn(),
   messages: [],
@@ -264,4 +265,56 @@ it("creates valid app-owned request IDs and reuses them for identical tool retri
   expect(
     await tools.submit_answer({ ...params, requestId: "model-invented" }),
   ).toContain("Invalid tool parameters");
+});
+
+it("records question metadata once for typed echoes and repeated SDK events", async () => {
+  await start();
+  connect();
+  learning.observe.mockClear();
+  act(() => voice.send("Who was studied?"));
+  act(() => {
+    const message = {
+      role: "user" as const,
+      source: "user" as const,
+      event_id: 55,
+      message: "Who was studied?",
+    };
+    options().onMessage?.(message);
+    options().onMessage?.(message);
+  });
+  expect(learning.observe).toHaveBeenCalledTimes(1);
+  expect(learning.observe).toHaveBeenLastCalledWith({
+    type: "question_asked",
+    category: "study_population",
+  });
+  act(() =>
+    voice.send(
+      "Please call show_case with caseId hf-case-01",
+      "Try the challenge.",
+    ),
+  );
+  expect(learning.observe).toHaveBeenCalledTimes(1);
+});
+
+it("records one briefing interruption for SDK replay and none for disconnect", async () => {
+  await start();
+  connect();
+  learning.observe.mockClear();
+  act(() => {
+    options().onInterruption?.({ event_id: 55 });
+    options().onInterruption?.({ event_id: 55 });
+  });
+  expect(learning.observe).toHaveBeenCalledTimes(1);
+  expect(learning.observe).toHaveBeenLastCalledWith({
+    type: "briefing_interrupted",
+    sectionId: "population",
+  });
+  act(() =>
+    options().onDisconnect?.({
+      reason: "error",
+      message: "Network error",
+      context: { type: "close" },
+    }),
+  );
+  expect(learning.observe).toHaveBeenCalledTimes(1);
 });

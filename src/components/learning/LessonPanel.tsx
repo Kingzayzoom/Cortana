@@ -13,6 +13,8 @@ import { useVoice } from "@/lib/voice/provider";
 import { round, ROUND_ID } from "@/lib/content/round";
 import type { Grade } from "@/lib/learning/types";
 import { Button } from "@/components/ui/button";
+import { LearningSignalSummary } from "./LearningSignalSummary";
+import { ImpiricusSignalBridge } from "./ImpiricusSignalBridge";
 export function LessonPanel() {
   const { data, act, busy, openEvidence, addMessage } = useLearning();
   const voice = useVoice();
@@ -100,7 +102,7 @@ export function LessonPanel() {
   const ask = async (text: string) => {
     if (!text.trim()) return;
     if (!voice.preview) {
-      voice.send(text);
+      voice.send(text, undefined, "question");
       setQuestion("");
       return;
     }
@@ -367,6 +369,13 @@ export function LessonPanel() {
             {data?.review?.reason}
           </p>
           <div className="completion-facts">
+            <span>
+              <strong>Learning activity saved</strong>for this browser profile
+            </span>
+          </div>
+          <LearningSignalSummary />
+          <ImpiricusSignalBridge compact />
+          <div className="completion-facts secondary-reward">
             <span>
               <strong>
                 {data?.completions.find((c) => c.roundId === ROUND_ID)?.xp} XP

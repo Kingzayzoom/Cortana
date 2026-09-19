@@ -8,6 +8,7 @@ import {
   TopicsView,
 } from "@/components/learning/SupportingViews";
 import { SettingsView } from "@/components/learning/SettingsView";
+import { ImpiricusSignalBridge } from "@/components/learning/ImpiricusSignalBridge";
 export default async function Page({
   params,
 }: {
@@ -22,6 +23,7 @@ export default async function Page({
     profile: <ProfileView />,
     topics: <TopicsView />,
     settings: <SettingsView />,
+    impiricus: <ImpiricusSignalBridge />,
   };
   if (!(route in screens)) notFound();
   return <Shell>{screens[route]}</Shell>;

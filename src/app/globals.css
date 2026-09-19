@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./learning-signals.css";
 
 @theme inline {
   --color-background: var(--background);

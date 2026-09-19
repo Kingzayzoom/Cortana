@@ -32,6 +32,7 @@ import {
   stageTool,
 } from "../validation/contracts";
 import { round, sources } from "../content/round";
+import { classifyQuestion, isQuestion } from "../learning-signals/adapter";
 type VoiceValue = {
   connection: ConnectionState;
   activity: VoiceActivity;
@@ -50,7 +51,7 @@ type VoiceValue = {
   end: () => void;
   pause: () => void;
   mute: () => void;
-  send: (text: string, transcriptText?: string) => void;
+  send: (text: string, transcriptText?: string, intent?: "question") => void;
   setOutputVolume: (volume: number) => void;
   getInputVolume: () => number;
   getOutputVolume: () => number;
@@ -87,6 +88,18 @@ function VoiceController({ children }: { children: React.ReactNode }) {
   const current = useRef(learning);
   const mutedRef = useRef(false);
   const speakingRef = useRef(false);
+  const observedMessages = useRef(new Set<string>());
+  const recordQuestions = (rows: Message[]) => {
+    for (const row of rows) {
+      if (row.role !== "user" || observedMessages.current.has(row.id)) continue;
+      observedMessages.current.add(row.id);
+      if (isQuestion(row.text))
+        current.current.observe({
+          type: "question_asked",
+          category: classifyQuestion(row.text),
+        });
+    }
+  };
   useEffect(() => {
     current.current = learning;
   }, [learning]);
@@ -258,7 +271,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
       if (!paused || !learning.data?.run || learning.data.run.completed) {
         learning.clearMessages();
         await learning.act({ action: "begin" });
-      }
+      } else learning.observe({ type: "round_started", mode: "preview" });
       setPreview(true);
       setPaused(false);
     } catch {
@@ -295,7 +308,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
       let data = learning.data;
       if (!paused || !data?.run || data.run.completed) {
         learning.clearMessages();
-        data = await learning.act({ action: "begin" });
+        data = await learning.act({ action: "begin", mode: "voice" });
       }
       if (!isCurrent()) return;
       current.current = { ...current.current, data };
@@ -339,6 +352,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
       sdkDisconnected.current = false;
       setConversationId(credential.data.conversationId);
       transcript.current = new VoiceTranscript(credential.data.conversationId);
+      observedMessages.current.clear();
       setMessages([]);
       setConsentOpen(false);
       setPaused(false);
@@ -387,6 +401,11 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           setConversationId(connectedId);
           setWorking(false);
           setConnection("connected");
+          current.current.observe(
+            { type: "round_started", mode: "voice" },
+            undefined,
+            data!.run!.id,
+          );
           setActivity("quiet");
           // setMuted throws before a conversation exists in this SDK version.
           controlsRef.current.setMuted(false);
@@ -428,8 +447,21 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           if (isActive() && !mutedRef.current && !speakingRef.current)
             setActivity(vadScore > 0.45 ? "user-speaking" : "quiet");
         },
-        onInterruption: () => {
+        onInterruption: (event) => {
           if (!isActive()) return;
+          const run = current.current.data?.run;
+          if (run?.stage === "briefing") {
+            // Only SDK interruptions, never disconnects, produce this observation.
+            const key = `interruption:${credential.data.conversationId}:${event.event_id}`;
+            if (!observedMessages.current.has(key)) {
+              observedMessages.current.add(key);
+              current.current.observe({
+                type: "briefing_interrupted",
+                sectionId: round.sections[run.section].id as
+                  "population" | "finding" | "limitation",
+              });
+            }
+          }
           // ElevenLabs/LiveKit interrupt playback; this only reflects the event.
           speakingRef.current = false;
           setActivity(mutedRef.current ? "quiet" : "user-speaking");
@@ -448,8 +480,11 @@ function VoiceController({ children }: { children: React.ReactNode }) {
             );
         },
         onMessage: (message) => {
-          if (isActive() && transcript.current)
-            setMessages(transcript.current.received(message));
+          if (isActive() && transcript.current) {
+            const rows = transcript.current.received(message);
+            recordQuestions(rows);
+            setMessages(rows);
+          }
         },
         onAgentResponseCorrection: (correction) => {
           if (
@@ -510,14 +545,31 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           conversation.setMuted(muted);
           if (muted && !speakingRef.current) setActivity("quiet");
         },
-        send: (text, transcriptText) => {
+        send: (text, transcriptText, intent) => {
           if (
             accepting.current &&
             connection === "connected" &&
             transcript.current
           ) {
             conversation.sendUserMessage(text);
-            setMessages(transcript.current.sent(text, transcriptText));
+            const rows = transcript.current.sent(text, transcriptText);
+            if (
+              intent === "question" &&
+              !/^(i am finished|(?:please )?(?:complete|finish|end|stop|continue|start|resume)\b)/i.test(
+                text.trim(),
+              )
+            ) {
+              const question = rows.at(-1)!;
+              observedMessages.current.add(question.id);
+              current.current.observe({
+                type: "question_asked",
+                category: classifyQuestion(text),
+              });
+            }
+            // UI control instructions are not learner questions.
+            if (transcriptText === undefined) recordQuestions(rows);
+            else for (const row of rows) observedMessages.current.add(row.id);
+            setMessages(rows);
             setActivity("awaiting-response");
           }
         },

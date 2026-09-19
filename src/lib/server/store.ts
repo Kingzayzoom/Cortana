@@ -1,5 +1,6 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { dataDirectory, voiceConfigured } from "./session";
 import type { Progress, Snapshot } from "../learning/types";
 import { localDate, streak } from "../learning/rules";
@@ -20,6 +21,7 @@ export function emptyProgress(): StoredProgress {
     review: null,
     run: null,
     requests: {},
+    learningSignals: [],
   };
 }
 const queues = new Map<string, Promise<unknown>>();
@@ -40,6 +42,13 @@ export async function withProgress<T>(
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
         progress = emptyProgress();
+      }
+      // Migrate old replay fingerprints without retaining free-form answers.
+      for (const saved of Object.values(progress.requests)) {
+        if (!/^[a-f0-9]{64}$/.test(saved.fingerprint))
+          saved.fingerprint = createHash("sha256")
+            .update(saved.fingerprint)
+            .digest("hex");
       }
       const result = await operation(progress);
       const temporary = file + ".tmp";
@@ -62,6 +71,7 @@ export function snapshot(progress: Progress): Snapshot {
     practiceDays: progress.practiceDays,
     run: progress.run,
     review: progress.review,
+    learningSignals: progress.learningSignals ?? [],
     xp: progress.completions.reduce((sum, c) => sum + c.xp, 0),
     streak: streak(
       progress.practiceDays,

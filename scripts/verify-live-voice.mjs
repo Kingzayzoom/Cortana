@@ -1,4 +1,4 @@
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import nextEnv from "@next/env";
 import { mkdir, writeFile } from "node:fs/promises";
 nextEnv.loadEnvConfig(process.cwd());
@@ -159,7 +159,49 @@ try {
       document.querySelector('[data-testid="orb"]').dataset.inputEnergy,
     ),
   }));
+  const signalSnapshot = await page.evaluate(async () =>
+    (await fetch("/api/bootstrap")).json(),
+  );
+  report.learningSignals = signalSnapshot.learningSignals?.map(
+    ({ type, conceptIds, sessionId }) => ({ type, conceptIds, sessionId }),
+  );
   if (process.argv.includes("--round")) {
+    const questionDisclosure = page.getByText(
+      "Have a question before continuing?",
+      { exact: true },
+    );
+    if (await questionDisclosure.count()) {
+      await questionDisclosure.click();
+      await page
+        .getByRole("textbox", { name: "Question about this round" })
+        .fill(
+          "Who was studied in this trial? Please show me the supporting source.",
+        );
+      await page
+        .getByRole("button", { name: "Send question", exact: true })
+        .click();
+      await expect
+        .poll(
+          async () => {
+            const snapshot = await (
+              await page.request.get(new URL("/api/bootstrap", page.url()).href)
+            ).json();
+            return snapshot.learningSignals?.some(
+              (event) =>
+                event.type === "question_asked" &&
+                event.category === "study_population",
+            );
+          },
+          { timeout: 15000 },
+        )
+        .toBe(true);
+      await page.waitForTimeout(8000);
+      if (await page.getByRole("dialog").count())
+        await page
+          .getByRole("dialog")
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+    }
     const challenge = page.getByRole("button", {
       name: "B The trial included people with and without diabetes.",
     });
@@ -185,13 +227,29 @@ try {
     await page.waitForTimeout(7000);
     report.evidenceDrawerOpened = (await page.getByRole("dialog").count()) > 0;
     if (report.evidenceDrawerOpened)
-      await page.getByRole("dialog").getByRole("button", { name: "Close", exact: true }).click();
-    if (await page.getByRole("button", { name: "Your questions", exact: true }).count())
-      await page.getByRole("button", { name: "Your questions", exact: true }).click();
-    await page.waitForFunction(async () => {
-      const saved = await (await fetch("/api/bootstrap")).json();
-      return saved.run?.stage === "questions";
-    }, undefined, { timeout: 45000, polling: 1000 });
+      await page
+        .getByRole("dialog")
+        .getByRole("button", { name: "Close", exact: true })
+        .click();
+    if (
+      await page
+        .getByRole("button", { name: "Your questions", exact: true })
+        .count()
+    )
+      await page
+        .getByRole("button", { name: "Your questions", exact: true })
+        .click();
+    await expect
+      .poll(
+        async () =>
+          (
+            await (
+              await page.request.get(new URL("/api/bootstrap", page.url()).href)
+            ).json()
+          ).run?.stage,
+        { timeout: 45000 },
+      )
+      .toBe("questions");
     if (await page.getByRole("dialog").count())
       await page
         .getByRole("dialog")
@@ -205,10 +263,43 @@ try {
     await page
       .getByRole("button", { name: "Send question", exact: true })
       .click();
-    await page.waitForFunction(async () => {
-      const saved = await (await fetch("/api/bootstrap")).json();
-      return saved.run?.completed === true;
-    }, undefined, { timeout: 45000, polling: 1000 });
+    report.completionMethod = "agent tool";
+    try {
+      await expect
+        .poll(
+          async () =>
+            (
+              await (
+                await page.request.get(
+                  new URL("/api/bootstrap", page.url()).href,
+                )
+              ).json()
+            ).run?.completed,
+          { timeout: 15000 },
+        )
+        .toBe(true);
+    } catch {
+      report.completionMethod = "existing Complete round control";
+      if (await page.getByRole("dialog").count())
+        await page
+          .getByRole("dialog")
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+      await page
+        .getByRole("button", { name: "Complete round", exact: true })
+        .click();
+    }
+    await expect
+      .poll(
+        async () =>
+          (
+            await (
+              await page.request.get(new URL("/api/bootstrap", page.url()).href)
+            ).json()
+          ).run?.completed,
+        { timeout: 15000 },
+      )
+      .toBe(true);
     const saved = await page.evaluate(async () =>
       (await fetch("/api/bootstrap")).json(),
     );
@@ -218,6 +309,9 @@ try {
       xp: saved.xp,
       review: saved.review,
     };
+    report.completedLearningSignals = saved.learningSignals?.map(
+      ({ type, conceptIds, category }) => ({ type, conceptIds, category }),
+    );
     report.learningActions = actions;
     report.transcript = await page
       .locator(".transcript-message p")
@@ -228,11 +322,19 @@ try {
         .getByRole("button", { name: "Close", exact: true })
         .click();
   }
-  await page
-    .getByRole("button", { name: "Turn microphone on", exact: true })
-    .click();
+  if (
+    await page
+      .getByRole("button", { name: "Turn microphone on", exact: true })
+      .count()
+  )
+    await page
+      .getByRole("button", { name: "Turn microphone on", exact: true })
+      .click();
   await page.screenshot({ path: "artifacts/cortana-live.png", fullPage: true });
-  await page.getByRole("button", { name: "End round", exact: true }).click();
+  if (
+    await page.getByRole("button", { name: "End round", exact: true }).count()
+  )
+    await page.getByRole("button", { name: "End round", exact: true }).click();
   await page.locator(".status-idle").waitFor({ timeout: 15000 });
   report.afterEnd = await page.evaluate(() => ({
     liveTracks: window.__voiceAudit.tracks.filter(

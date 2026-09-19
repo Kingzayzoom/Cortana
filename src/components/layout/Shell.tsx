@@ -14,6 +14,7 @@ import {
   X,
   ChevronDown,
   AudioLines,
+  Workflow,
 } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
@@ -23,6 +24,7 @@ const navigation = [
   { href: "/evidence", title: "Evidence Library", icon: BookOpen },
   { href: "/profile", title: "Learning Profile", icon: ChartNoAxesCombined },
   { href: "/topics", title: "Topics", icon: Shapes },
+  { href: "/impiricus", title: "Signal Bridge", icon: Workflow },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(),

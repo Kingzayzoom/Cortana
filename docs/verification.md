@@ -1,43 +1,48 @@
 # Verification record
 
-Verified on 2026-09-19 in the supplied Windows workspace.
+Verified September 19, 2026 in the supplied Windows workspace. The active Git checkout is `.cortana/publish-checkout`; the updated development app runs at http://localhost:3102.
 
-| Check                                   | Result                                                                                      |
-| --------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `npm run typecheck`                     | Passed                                                                                      |
-| `npm run lint`                          | Passed, no errors or warnings                                                               |
-| `npm test`                              | 64 tests passed                                                                             |
-| `npm run test:e2e`                      | 13 Playwright tests passed                                                                  |
-| `npm run test:a11y`                     | No WCAG 2 A/AA or 2.1 AA violations detected across all six main views                      |
-| `npm run build`                         | Passed                                                                                      |
-| `node scripts/check-client-secrets.mjs` | 19 client assets scanned; no configured key, signing secret or access-code values found     |
-| `node scripts/production-smoke.mjs`     | Production render, signed-cookie learning mutation, no page errors; `/dev/orb` returned 404 |
+| Check                                     | Result                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------ |
+| Baseline unit suite before implementation | 64 passed                                                                            |
+| Final unit suite                          | 84 passed across 6 files                                                             |
+| Full Playwright suite                     | 15 passed, including all 13 existing scenarios and 2 new signal scenarios            |
+| Typecheck                                 | Passed                                                                               |
+| ESLint                                    | Passed without warnings                                                              |
+| Production build                          | Passed                                                                               |
+| Accessibility                             | No detected WCAG 2 A/AA or 2.1 AA violations across all 7 main views                 |
+| Responsive inspection                     | 1440, 1280, 768, 390 and 320 px; no settled horizontal overflow                      |
+| Production smoke                          | Page render, signed-cookie progress mutation, no page errors; /dev/orb returns 404   |
+| Client secret scan                        | 19 client assets; no configured API key, signing secret or private access code found |
+| Focused security review                   | Completed; see security-review-learning-signals.md                                   |
+| Legacy preservation                       | No changes under legacy/                                                             |
 
-Browser inspection and screenshots cover 1440×900, 1280×800, 390×844 and 320×740. The headline, orb and Start control fit the first viewport. There is no horizontal overflow at these sizes. Stable final captures are in `artifacts/cortana-desktop.png` and `artifacts/cortana-mobile.png`.
+## Learning signal verification
 
-The browser suite verifies: animated WebGL frames rather than a static image; all navigation routes; missing-configuration preview with a microphone trap proving no microphone request; an ambiguous answer followed by authoritative grading; real source metadata/link; an unsupported question; completion and refresh persistence; repeated completion without duplicate XP; checkpoint pause/resume and reload recovery; strict payload and origin rejection; separate demo profiles; duplicate and conflicting request IDs; evidence search; preferences and reset; responsive navigation; synthetic input/output signals; input mute with independent output; reduced motion; fallback; and zero remaining animation-frame callbacks after renderer unmount.
+Tests cover schema validation, unknown categories/concepts, structured event creation, deterministic grading signals, previous-miss reinforcement, transparent priorities, first-correct-not-reinforced, completion idempotence, evidence-open deduplication, elapsed duration, session isolation, replay across reload/reconnect, typed-message echoes, SDK interruption versus disconnect, empty history, supported-catalog selection and export shape.
 
-The signal harness is an explicitly labeled synthetic test. It does not demonstrate speech from ElevenLabs. Separate real-provider testing succeeded in full (headed) Chromium with no fake media flags:
+The browser suite completes a real text-preview round, reloads it, replays completion, exports JSON and inspects /impiricus. It submits fictional PHI-like text as an ambiguous answer and checks that the persisted profile contains neither that text nor the marker. Cross-origin and forged-grade observations are rejected. A second profile sees no signal history.
 
-| Live check | Observation |
-| --- | --- |
-| Token endpoint | Real provider token + conversation ID; server secret stayed server-side |
-| WebRTC | Connected to the configured Cortana agent |
-| Physical microphone | One live audio track; observed input energy peaked at 0.542 |
-| Assistant audio/orb | Real remote audio track; independent output energy peaked at 0.418 |
-| Transcript | Actual Cortana greeting and lesson messages received |
-| Mute | Zero enabled live microphone tracks; input energy settled to zero |
-| End | Zero live microphone tracks and zero active peer connections |
-| Reconnect | Different conversation ID; one live microphone and one active peer in this SDK setup |
-| Client tools | Account has seven tools and one knowledge document; real get_round_context/show_stage/show_case/submit_answer calls verified |
-| Deliberate spoken interruption | Not yet manually verified with a person saying the specified question during speech |
+A browser-discovered regression was corrected: the combined briefing concepts needed deduplication before strict validation. The corrected boundary has a unit regression test. Mobile viewport assertions wait for responsive navigation to settle; screenshots were re-captured after that transition.
 
-Headless Chromium rejected physical microphone capture with `NotSupportedError`; the successful runs used full Chromium. The first muted rehearsal ran slowly because the model waited between sections. The prompt and Continue control were clarified. Account metadata confirms the original model and voice were preserved. The account's retention/auth policy still needs the owner's deployment review; it was not silently changed.
+## Real ElevenLabs verification
 
-The publishing checkout was independently installed with `npm ci`, built, linted and unit-tested. A production browser smoke check passed rendering and signed-cookie learning writes; the development orb harness returned 404. All 77 files from the prior GitHub main branch were compared by Git blob and preserved exactly under `legacy/`. Staged-file checks found no environment files, local session data, or configured secret values.
+Full Chromium with actual host microphone permissions, the real SDK and no fake-media flags:
 
-The known upstream Three.Clock deprecation message is a library warning, not an application page error. Automated accessibility checks supplement the keyboard and visual tests; they do not establish a complete manual accessibility audit or clinical validation.
+- Base live connection received the configured agent's greeting and remote audio. Independent orb input/output peaks were 0.584 and 0.381.
+- Mute disabled live input tracks. End released all live microphone tracks and active peer connections. Reconnect created a distinct conversation with one live microphone and one active peer.
+- Final full-round rehearsal submitted the population question through the live SDK: “Who was studied in this trial? Please show me the supporting source.”
+- The agent answered, opened the source, progressed the briefing, showed the synthetic case and retrieved the deterministic correct grade for B.
+- The agent's complete_round tool saved completion, 120 first-completion XP and the seven-day review.
+- Saved activity contained one question_asked/study_population event, evidence views, an actual SDK briefing_interrupted event, section events, one challenge_attempted, one challenge_resolved and one round_completed. No concept_reinforced event was falsely generated for that first correct answer.
+- No page errors were recorded. Teardown and reconnect passed after the full round.
 
-Live tool validation exposed invalid UUIDs generated by the model. The controller now generates and reuses operation IDs; server grading contracts stay strict. A regression test verifies valid UUIDs, retry reuse, and rejection of model-supplied request IDs.
+This rehearsal used typed controls in a real voice session. The SDK interruption event occurred during typed interaction. It does not establish a deliberate human-spoken barge-in; that remains a short manual microphone rehearsal. The hosted model may wait between sections, so Continue remains available. The verifier now checks completion through Node-side polling and reports whether completion came from the agent tool or the existing UI control; the final run used the agent tool.
 
-The last extended live rehearsal was interrupted by the provider/transport before completing the full voice-guided round; the UI surfaced the interruption and the SDK released all microphone tracks and peer connections. A continuous start-to-finish live voice round (including spoken interruption and final completion) is therefore **not yet verified**. The complete local learning flow and its grading/reward rules pass the browser tests. Successful base voice, microphone, playback, transcript, mute, End and reconnect observations above came from separate real-provider runs.
+## Live versus conceptual
+
+ElevenLabs voice, audio-reactive orb, server grading, evidence drawer, event persistence, learning metrics, reinforcement rules and local supported-round recommendation are working.
+
+Impiricus is a proposed integration: factual public product roles, actual Cortana activity visualization and a locally downloaded schema 1.0 payload. There is no production Impiricus connection, private data, agreed external contract or partnership claim.
+
+Snapshots: artifacts/cortana-desktop.png, artifacts/cortana-mobile.png, artifacts/learning-signal-bridge-desktop.png and artifacts/learning-signal-bridge-mobile.png. The bridge screenshots contain actual automated preview interactions, not inserted sample metrics; their short duration reflects the speed of that test.

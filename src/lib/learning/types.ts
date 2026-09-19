@@ -33,6 +33,7 @@ export type Completion = {
   version: string;
 };
 export type Run = {
+  mode?: "voice" | "preview";
   id: string;
   stage: LessonStage;
   section: number;
@@ -40,6 +41,7 @@ export type Run = {
   completed: boolean;
 };
 export type Progress = {
+  learningSignals?: import("../learning-signals/types").LearningSignal[];
   preferences: Preferences;
   attempts: Attempt[];
   completions: Completion[];

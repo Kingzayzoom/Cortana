@@ -17,24 +17,40 @@ import { LessonPanel } from "@/components/learning/LessonPanel";
 import { ProgressCards } from "./ProgressCards";
 import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
+import { Dialog } from "@/components/ui/dialog";
+import { selectNextRound } from "@/lib/adaptive-learning/selectNextRound";
 export function Dashboard() {
   const { data, openEvidence } = useLearning(),
     voice = useVoice();
   const [transcriptOverride, setTranscriptOverride] = useState<boolean | null>(
     null,
   );
+  const [whyOpen, setWhyOpen] = useState(false);
+  const recommendation = selectNextRound(data?.learningSignals ?? []);
   const transcript =
     transcriptOverride ?? data?.preferences.transcript ?? false;
   const active =
     voice.preview || voice.connection === "connected" || data?.run?.completed;
   const stage = active ? data?.run?.stage : "ready";
+  const sessionSignals =
+    data?.learningSignals?.filter(
+      (event) => event.sessionId === data.run?.id,
+    ) ?? [];
+  const finishedStages = [
+    sessionSignals.some((event) => event.type === "briefing_completed"),
+    sessionSignals.some((event) => event.type === "question_asked"),
+    Boolean(data?.run?.grade),
+    Boolean(data?.run?.completed),
+  ];
   const current =
     stage === "briefing"
       ? 0
       : stage === "challenge" || stage === "feedback"
-        ? 1
+        ? 2
         : stage === "questions" || stage === "completed"
-          ? 2
+          ? stage === "completed"
+            ? 3
+            : 1
           : -1;
   return (
     <>
@@ -42,19 +58,22 @@ export function Dashboard() {
         <section className="hero-column" aria-labelledby="hero-heading">
           <div className="hero-intro">
             <p className="eyebrow">
-              LISTEN <span>·</span> THINK <span>·</span> RESPOND <span>·</span>{" "}
-              GROW
+              LISTEN <span>·</span> ASK <span>·</span> PRACTICE <span>·</span>{" "}
+              REINFORCE
             </p>
             <h1 id="hero-heading">
               Your daily clinical
               <br />
               <span>conversation.</span>
             </h1>
-            <p className="hero-subtitle">
-              Two minutes to listen, think, and learn.
-            </p>
+            <p className="hero-subtitle">Listen. Ask. Practice. Reinforce.</p>
           </div>
           <CortanaOrb />
+          <p className="orb-learning-caption">
+            2-minute round · Cardiology
+            <br />
+            <span>Evidence-grounded · Interactive · Synthetic case</span>
+          </p>
           <VoiceControls
             transcript={transcript}
             onTranscript={() => setTranscriptOverride(!transcript)}
@@ -74,28 +93,33 @@ export function Dashboard() {
             <ol className="round-stages">
               {[
                 {
-                  title: "The brief",
+                  title: "Briefing",
                   description: "An evidence-based perspective",
                   icon: FileText,
                 },
                 {
-                  title: "The challenge",
+                  title: "Ask anything",
+                  description: "Follow a question at any point",
+                  icon: Lightbulb,
+                },
+                {
+                  title: "Clinical challenge",
                   description: "One synthetic clinical case",
                   icon: UserRound,
                 },
                 {
-                  title: "Your questions",
-                  description: "Follow your curiosity",
+                  title: "Reinforcement",
+                  description: "Practice with a reason to revisit",
                   icon: Lightbulb,
                 },
               ].map((s, index) => (
                 <li
                   key={s.title}
-                  className={`${current === index ? "stage-active" : ""} ${current > index || stage === "completed" ? "stage-complete" : ""}`}
+                  className={`${current === index ? "stage-active" : ""} ${finishedStages[index] ? "stage-complete" : ""}`}
                   aria-current={current === index ? "step" : undefined}
                 >
                   <span className="stage-number">
-                    {current > index || stage === "completed" ? (
+                    {finishedStages[index] ? (
                       <Check size={15} />
                     ) : (
                       `0${index + 1}`
@@ -128,6 +152,9 @@ export function Dashboard() {
                 Explore who was studied in DAPA-HF, and why that distinction
                 matters.
               </p>
+              <button className="text-button" onClick={() => setWhyOpen(true)}>
+                Why this round?
+              </button>
               <button
                 className="text-button round-source-link"
                 onClick={() => openEvidence("dapa-hf")}
@@ -150,6 +177,18 @@ export function Dashboard() {
       </div>
       <LessonPanel />
       <ProgressCards />
+      <Dialog
+        open={whyOpen}
+        onOpenChange={setWhyOpen}
+        title="Why this round?"
+        description="A transparent recommendation from your learning activity."
+      >
+        <p>{recommendation?.reason}</p>
+        <p className="small muted">
+          The current demo supports one reviewed DAPA-HF round. It does not
+          infer clinical ability or select unsupported topics.
+        </p>
+      </Dialog>
     </>
   );
 }

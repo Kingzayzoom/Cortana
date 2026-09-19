@@ -12,6 +12,8 @@ Healthcare professionals taking a brief learning break at a laptop in a bright w
 
 A voice-first two-minute cardiology learning round: listen, question, practice with one synthetic case, inspect evidence, and save progress.
 
+Cortana adds a learning layer after engagement: structured question categories, concepts explored, evidence revisited, deterministic practice outcomes and transparent reinforcement. The proposed Impiricus bridge supplements ION, Pulse, Spark and Ascend; only the Cortana activity and local export currently run. No competency or partnership claim is made.
+
 ## Brand Personality
 
 Calm, precise, luminous. The supplied Cortana visualization is the primary layout reference. The supplied ShaderGradient palette informs the live orb's blue, violet, and pink material.

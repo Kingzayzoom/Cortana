@@ -8,10 +8,13 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";
+import { selectLearningSummary } from "@/lib/learning-signals/selectors";
+import { conceptLabels } from "@/lib/learning-signals/types";
+import { selectNextRound } from "@/lib/adaptive-learning/selectNextRound";
 export function ProgressCards() {
   const { data } = useLearning();
-  const attempts = data?.attempts || [],
-    correct = attempts.filter((a) => a.correct).length;
+  const summary = selectLearningSummary(data?.learningSignals ?? []);
+  const next = selectNextRound(data?.learningSignals ?? []);
   return (
     <div className="progress-grid">
       <section className="pulse-card panel">
@@ -21,7 +24,7 @@ export function ProgressCards() {
           </span>
           <div>
             <h2>Your Learning Pulse</h2>
-            <p>Your practice, taking shape.</p>
+            <p>Observable practice, over time.</p>
           </div>
           <Link
             href="/profile"
@@ -31,30 +34,74 @@ export function ProgressCards() {
             <ArrowUpRight size={19} />
           </Link>
         </div>
-        <div className="pulse-row">
-          <div>
-            <span>Heart failure</span>
-            <span>
-              {attempts.length
-                ? `${correct} of ${attempts.length} correct`
-                : "Your first round awaits"}
-            </span>
-          </div>
-          <div className="progress-track">
-            <span
-              style={{
-                width: attempts.length
-                  ? `${(correct / attempts.length) * 100}%`
-                  : "0%",
-              }}
-            />
-          </div>
-        </div>
-        <p className="small muted">
-          {attempts.length
-            ? "Actual practice results · saved for this demo profile"
-            : "Complete a challenge to see your learning grow."}
-        </p>
+        {!data ? (
+          <p role="status" className="muted">
+            Loading your learning activity…
+          </p>
+        ) : (
+          <>
+            <dl className="pulse-facts">
+              <div>
+                <dt>Concepts explored</dt>
+                <dd>{summary.conceptsExplored.length}</dd>
+              </div>
+              <div>
+                <dt>Practice</dt>
+                <dd>
+                  {summary.correct}/{summary.attempted}
+                  <small> correct</small>
+                </dd>
+              </div>
+              <div>
+                <dt>Evidence follow-ups</dt>
+                <dd>{summary.evidenceFollowUps}</dd>
+              </div>
+            </dl>
+            <ul className="concept-list">
+              {summary.concepts.map((concept) => (
+                <li key={concept.id}>
+                  <span>{conceptLabels[concept.id]}</span>
+                  <span
+                    className={`concept-status ${concept.status.toLowerCase().replaceAll(" ", "-")}`}
+                  >
+                    {concept.status}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="small muted">
+              Last practiced:{" "}
+              {summary.lastPracticed
+                ? new Date(summary.lastPracticed).toLocaleDateString()
+                : "Not yet"}
+            </p>
+            {summary.reviewNext.length > 0 && (
+              <details className="reinforcement-reasons">
+                <summary>Why revisit these concepts?</summary>
+                {summary.reviewNext.map((concept) => (
+                  <p key={concept.id}>
+                    <strong>
+                      {conceptLabels[concept.id]} ·{" "}
+                      {concept.priority >= 5
+                        ? "Review next"
+                        : "Consider reviewing"}
+                    </strong>
+                    <br />
+                    {concept.reasons.join(". ")}.
+                  </p>
+                ))}
+                <p>
+                  Transparent rules: incorrect response +3; explicit
+                  clarification +2; evidence after a miss +1; multiple questions
+                  about a concept +1. Priority 0–2: no suggestion, 3–4: consider
+                  reviewing, 5+: review next. A correct response after a miss
+                  clears those earlier signals. These priorities are not ability
+                  scores.
+                </p>
+              </details>
+            )}
+          </>
+        )}
       </section>
       <section className="streak-card panel">
         <div className="card-heading">
@@ -82,6 +129,9 @@ export function ProgressCards() {
             <p>Earned through practice</p>
           </div>
         </div>
+        <p className="small muted">
+          Practice history, not a measure of clinical ability.
+        </p>
       </section>
       <section className="recent-card panel">
         <div className="card-heading">
@@ -89,25 +139,22 @@ export function ProgressCards() {
             <Bookmark size={20} />
           </span>
           <div>
-            <h2>{data?.review ? "Your next review" : "Recent Topics"}</h2>
+            <h2>Your next round</h2>
             <p>
-              {data?.review
-                ? "A little reinforcement."
-                : "Start with what matters."}
+              {next?.kind === "new"
+                ? "A supported starting point."
+                : "Guided by your activity."}
             </p>
           </div>
         </div>
         <Link href="/rounds" className="recent-topic">
           <span>
             <strong>Heart failure</strong>
-            <small>
-              {data?.review
-                ? `Suggested ${data.review.date}`
-                : "DAPA-HF · Ready to explore"}
-            </small>
+            <small>DAPA-HF · Cardiology</small>
           </span>
           <ArrowRight size={19} />
         </Link>
+        <p className="small muted">{next?.reason}</p>
       </section>
     </div>
   );

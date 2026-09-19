@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Grade, Message, Snapshot } from "./types";
 import { sourceById } from "../content/round";
+import type { Observation } from "../learning-signals/types";
 type Result = Snapshot & {
   grade?: Grade;
   answer?: string;
@@ -22,6 +23,7 @@ type LearningContextValue = {
   evidence: string | null;
   messages: Message[];
   act: (body: Record<string, unknown>) => Promise<Result>;
+  observe: (observation: Observation, eventId?: string, runId?: string) => void;
   refresh: () => Promise<void>;
   openEvidence: (id: string | null) => boolean;
   addMessage: (message: Message) => void;
@@ -36,6 +38,12 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
     [evidence, setEvidence] = useState<string | null>(null),
     [messages, setMessages] = useState<Message[]>([]);
   const requestSeq = useRef(0);
+  const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
+  const dataRef = useRef(data);
+  const evidenceRef = useRef<string | null>(null);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
   const refresh = useCallback(async () => {
     try {
       const response = await fetch("/api/bootstrap", { cache: "no-store" });
@@ -56,12 +64,18 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
       setBusyCount((n) => n + 1);
       setError(null);
       try {
-        const response = await fetch("/api/learning", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-          signal: AbortSignal.timeout(15_000),
-        });
+        const pending = saveQueue.current
+          .catch(() => {})
+          .then(() =>
+            fetch("/api/learning", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+              signal: AbortSignal.timeout(15_000),
+            }),
+          );
+        saveQueue.current = pending;
+        const response = await pending;
         const result = await response.json();
         if (!response.ok)
           throw new Error(
@@ -82,14 +96,37 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
     },
     [],
   );
-  const openEvidence = useCallback((id: string | null) => {
-    if (id && !sourceById(id)) {
-      setError("That source is not in this round’s evidence library.");
-      return false;
-    }
-    setEvidence(id);
-    return true;
-  }, []);
+  const observe = useCallback(
+    (
+      observation: Observation,
+      eventId = crypto.randomUUID(),
+      runId = dataRef.current?.run?.id,
+    ) => {
+      if (!runId) return;
+      void act({ action: "observe", runId, eventId, observation }).catch(
+        () => {},
+      );
+    },
+    [act],
+  );
+  const openEvidence = useCallback(
+    (id: string | null) => {
+      if (id && !sourceById(id)) {
+        setError("That source is not in this round’s evidence library.");
+        return false;
+      }
+      if (evidenceRef.current !== id && id) {
+        observe({
+          type: "evidence_viewed",
+          sourceId: id as "dapa-hf" | "dapa-diabetes",
+        });
+      }
+      evidenceRef.current = id;
+      setEvidence(id);
+      return true;
+    },
+    [observe],
+  );
   const addMessage = useCallback(
     (message: Message) =>
       setMessages((current) => {
@@ -109,6 +146,7 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
         evidence,
         messages,
         act,
+        observe,
         refresh,
         openEvidence,
         addMessage,

@@ -36,6 +36,7 @@ export function EvidenceDrawer() {
           </span>
           <h3 className="source-title">{source.title}</h3>
           <p className="small muted">{source.authors}</p>
+          <p className="small muted">{source.type}</p>
           <p className="source-date">
             <CalendarDays size={15} />
             Published {source.date}

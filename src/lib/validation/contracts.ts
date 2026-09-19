@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ROUND_ID } from "../content/round";
+import { observationSchema } from "../learning-signals/types";
 export const sourceId = z.enum(["dapa-hf", "dapa-diabetes"]);
 export const stageTool = z
   .object({
@@ -46,7 +47,20 @@ export const preferencesSchema = z
   .strict();
 const run = { runId: z.string().uuid() };
 export const learningRequest = z.discriminatedUnion("action", [
-  z.object({ action: z.literal("begin") }).strict(),
+  z
+    .object({
+      action: z.literal("begin"),
+      mode: z.enum(["voice", "preview"]).optional(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal("observe"),
+      ...run,
+      eventId: z.string().uuid(),
+      observation: observationSchema,
+    })
+    .strict(),
   z.object({ action: z.literal("stage"), ...run, ...stageTool.shape }).strict(),
   z
     .object({ action: z.literal("answer"), ...run, ...answerTool.shape })

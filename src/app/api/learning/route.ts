@@ -1,4 +1,6 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
+import { signalWriter } from "@/lib/learning-signals/server";
+import { classifyQuestion } from "@/lib/learning-signals/adapter";
 import { learningRequest } from "@/lib/validation/contracts";
 import {
   assertOrigin,
@@ -38,21 +40,26 @@ export async function POST(request: Request) {
       let extra: Record<string, unknown> = {};
       if (body.action === "preferences") data.preferences = body.preferences;
       else if (body.action === "reset") Object.assign(data, emptyProgress());
-      else if (body.action === "begin")
+      else if (body.action === "begin") {
         data.run = {
+          mode: body.mode ?? "preview",
           id: randomUUID(),
           stage: "briefing",
           section: 0,
           grade: null,
           completed: false,
         };
-      else {
+        if (data.run.mode === "preview") signalWriter(data).start();
+      } else {
         if (!data.run || data.run.id !== body.runId)
           throw new RequestError(
             "This event belongs to an earlier round. Reopen the current round.",
             409,
           );
-        if (body.action === "stage") {
+        const signals = signalWriter(data);
+        if (body.action === "observe") {
+          signals.observe(body.observation, body.eventId);
+        } else if (body.action === "stage") {
           const current = data.run.stage;
           const allowed: Record<string, string[]> = {
             briefing: ["briefing", "challenge"],
@@ -82,11 +89,19 @@ export async function POST(request: Request) {
             );
           data.run.stage = body.stageId;
           data.run.section = index;
+          signals.start();
+          if (body.stageId === "briefing") signals.section();
+          if (body.stageId === "challenge") signals.briefingCompleted();
         } else if (body.action === "answer" || body.action === "complete") {
-          const fingerprint = JSON.stringify(body);
+          const fingerprint = createHash("sha256")
+            .update(JSON.stringify(body))
+            .digest("hex");
           const prior = data.requests[body.requestId];
           if (prior) {
-            if (prior.fingerprint !== fingerprint)
+            const priorFingerprint = /^[a-f0-9]{64}$/.test(prior.fingerprint)
+              ? prior.fingerprint
+              : createHash("sha256").update(prior.fingerprint).digest("hex");
+            if (priorFingerprint !== fingerprint)
               throw new RequestError(
                 "Request ID already used for another operation.",
                 409,
@@ -104,6 +119,11 @@ export async function POST(request: Request) {
               const grade = gradeAnswer(body.answer);
               extra = { grade };
               if (grade.verdict !== "clarify") {
+                signals.start();
+                signals.grade(
+                  grade.answerId! as "A" | "B" | "C",
+                  grade.verdict === "correct",
+                );
                 data.run.grade = grade;
                 data.run.stage = "feedback";
                 data.attempts.push({
@@ -123,11 +143,19 @@ export async function POST(request: Request) {
                 409,
               );
             completeProgress(data, new Date());
+            signals.complete();
           }
           data.requests[body.requestId] = { fingerprint, result: extra };
           const keys = Object.keys(data.requests);
           if (keys.length > 500) delete data.requests[keys[0]];
         } else if (body.action === "question") {
+          signals.observe(
+            {
+              type: "question_asked",
+              category: classifyQuestion(body.question),
+            },
+            randomUUID(),
+          );
           const q = body.question
             .toLowerCase()
             .trim()

@@ -1,6 +1,6 @@
 # Cortana
 
-A voice-first cardiology learning workspace: listen, think, respond, grow. Built from the supplied white dashboard reference, with a procedural glowing orb inspired by the supplied ShaderGradient palette.
+A voice-first cardiology learning workspace: listen, ask, practice, reinforce. Cortana adds observable learning signals after engagement: questions explored, evidence revisited, deterministic practice outcomes and transparent reinforcement. The existing white dashboard and audio-reactive orb are preserved.
 
 The active application is at the repository root, using `src/app/`. The previous CortexAi implementation, including its Gemini backend, is preserved under `legacy/` and excluded from this application's build and lint checks.
 
@@ -16,6 +16,10 @@ Open **http://localhost:3100**. Port 3000 was already occupied in the developmen
 For live voice, preserve your existing `.env.local`, add the actual `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`, then run `node scripts/prepare-local.mjs`. This creates local session security without exposing secrets. Configure the existing agent using [ElevenLabs setup](docs/elevenlabs-setup.md), [agent instructions](docs/agent-prompt.md), and [tool contracts](docs/tool-contracts.md). The presence of frontend tools alone does not configure the ElevenLabs account.
 
 ## What works
+
+- Structured learning signals persisted atomically with progress, real Learning Pulse metrics and deterministic next-round recommendations limited to supported content.
+- A readable completion summary and validated JSON export, without raw transcripts, audio or patient identifiers in analytics.
+- A native `/impiricus` signal bridge explaining how this proposed learning layer could supplement ION, Pulse, Spark and Ascend. Actual Cortana events, no Impiricus API or partnership claim.
 
 - Responsive reference-based dashboard and working Today, My Rounds, Evidence Library, Learning Profile, Topics, and Settings views.
 - Official ElevenLabs UI orb foundation with a luminous blue/cyan/violet/pink sphere material, true input/output level adapters, reduced motion, hidden-tab rendering controls and an explicit fallback.
@@ -42,6 +46,9 @@ For real voice, the API key needs **Write access for ElevenAgents / Conversation
 For a production build locally: `npm run build`, then `npm start -- --port 3100`. Host this prototype on a single Node process with persistent storage; replace the file adapter and in-process rate limiter before multi-node or ephemeral hosting.
 
 ## Handoff
+
+- [Learning signals and integration boundaries](docs/learning-signals.md)
+- [Focused security review](docs/security-review-learning-signals.md)
 
 - [Demo sequence](docs/demo-script.md)
 - [Implementation choices and limitations](docs/implementation-notes.md)

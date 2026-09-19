@@ -18,6 +18,8 @@ import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
 import { round, sources } from "@/lib/content/round";
 import { Button } from "@/components/ui/button";
+import { selectNextRound } from "@/lib/adaptive-learning/selectNextRound";
+import { LearningSignalSummary } from "./LearningSignalSummary";
 export function PageHeading({
   eyebrow,
   title,
@@ -80,6 +82,9 @@ export function RoundsView() {
           </div>
           <h2>{round.title}</h2>
           <p>{round.description}</p>
+          <p className="small muted">
+            {selectNextRound(data?.learningSignals ?? [])?.reason}
+          </p>
           <div className="round-meta">
             <span>2 sources</span>
             <span>1 synthetic case</span>
@@ -245,6 +250,7 @@ export function ProfileView() {
         </dl>
       </div>
       <section className="topic-results">
+        <LearningSignalSummary />
         <h2>Your Learning Pulse</h2>
         <div className="topic-result-row">
           <HeartPulse size={25} />
