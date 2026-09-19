@@ -266,3 +266,64 @@ describe("Serverless configuration", () => {
     ).not.toThrow();
   });
 });
+
+describe("account linking on Redis", () => {
+  const account = {
+    provider: "google" as const,
+    subject: "1098765432100",
+    email: "clinician@example.com",
+    name: "Dr. Maya Patel",
+    picture: null,
+  };
+  const anonymous = "11111111-1111-4111-8111-111111111111";
+
+  it("carries anonymous progress into the account across instances", async () => {
+    const a = await instance();
+    await a.store.withProgress(anonymous, (data) => {
+      data.practiceDays.push("2026-09-18");
+      data.completions.push({
+        roundId: "dapa-hf-01",
+        at: "2026-09-18T10:00:00.000Z",
+        date: "2026-09-18",
+        xp: 120,
+        version: "2026-09-19.1",
+      });
+    });
+
+    // A different serverless instance completes the sign-in.
+    const b = await instance();
+    const linked = await b.store.linkAccount(anonymous, "g-1098765432100", account);
+    expect(linked.xp).toBe(120);
+    expect(linked.signedIn).toBe(true);
+    expect(linked.storage).toContain("your Google account");
+
+    // A third instance sees the same account record from shared storage.
+    const c = await instance();
+    const seen = await c.store.withProgress("g-1098765432100", (data) =>
+      c.store.snapshot(data),
+    );
+    expect(seen.xp).toBe(120);
+    expect(seen.account?.email).toBe("clinician@example.com");
+    // The anonymous profile keeps nothing once the account has claimed it.
+    const left = await c.store.withProgress(anonymous, (data) => data);
+    expect(left.completions).toEqual([]);
+    expect(left.practiceDays).toEqual([]);
+  });
+
+  it("keeps an existing account's history and leaves the browser profile alone", async () => {
+    const a = await instance();
+    await a.store.withProgress("g-1098765432100", (data) => {
+      data.practiceDays.push("2026-09-01");
+      data.account = account;
+    });
+    await a.store.withProgress(anonymous, (data) => {
+      data.practiceDays.push("2026-09-19");
+    });
+
+    const b = await instance();
+    const linked = await b.store.linkAccount(anonymous, "g-1098765432100", account);
+    expect(linked.practiceDays).toEqual(["2026-09-01"]);
+    const left = await b.store.withProgress(anonymous, (data) => data);
+    expect(left.practiceDays).toEqual(["2026-09-19"]);
+  });
+});

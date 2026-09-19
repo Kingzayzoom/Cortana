@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
+import { AccountBadge, AuthNotice } from "./AccountControls";
 const navigation = [
   { href: "/", title: "Today", icon: Home },
   { href: "/rounds", title: "My Rounds", icon: Layers },
@@ -189,7 +190,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </button>
           <div className="header-greeting">
             <h2>
-              {greeting}, {data?.preferences.name || "Dr. Patel"}.
+              {greeting}, {data?.account?.name || data?.preferences.name || "Dr. Patel"}.
             </h2>
             <p>Ready for today’s round?</p>
           </div>
@@ -201,15 +202,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
               </select>
               <ChevronDown size={14} />
             </div>
-            <Link href="/settings" className="demo-badge">
-              Demo profile
-            </Link>
+            <AccountBadge />
+            {!data?.account && (
+              <Link href="/settings" className="demo-badge">
+                Demo profile
+              </Link>
+            )}
             <Link
               href="/profile"
               className="avatar"
               aria-label="Open learning profile"
             >
-              {(data?.preferences.name || "Dr. Patel")
+              {(data?.account?.name || data?.preferences.name || "Dr. Patel")
                 .replace(/^Dr\.?\s*/i, "")
                 .slice(0, 2)
                 .toUpperCase()}
@@ -225,6 +229,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
         )}
         <main id="main" className="main-content">
+          <AuthNotice />
           {error && (
             <div className="global-error" role="alert">
               <span>{error}</span>

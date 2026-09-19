@@ -18,6 +18,7 @@ import {
 } from "../src/lib/validation/contracts";
 function progress(correct: boolean): Progress {
   return {
+    account: null,
     preferences: {
       name: "Dr. Patel",
       timezone: "America/New_York",
