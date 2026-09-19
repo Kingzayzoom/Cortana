@@ -37,7 +37,7 @@ npm run build
 
 Browser tests expect a dev server at port 3100. Override with `CORTANA_TEST_URL` if needed. The tests cover the complete local flow, origin/schema rejection, profile isolation, duplicate requests, honest missing configuration, navigation, desktop/mobile layout, animated WebGL frames and the synthetic audio harness at `/dev/orb`. That harness is unavailable in production.
 
-For real voice, the API key needs **Write access for ElevenAgents / Conversational AI (`convai_write`)** to mint a token; Read access alone is insufficient. `node scripts/verify-live-voice.mjs` exercises the actual SDK, WebRTC and host microphone without fake audio. After that base connection succeeds, review `node scripts/configure-agent.mjs` and apply the prepared learning setup with `node scripts/configure-agent.mjs --apply`. Account changes are backed up under `.cortana/`; the model and voice are preserved.
+For real voice, the API key needs **Write access for ElevenAgents / Conversational AI (`convai_write`)** to mint a token; Read access alone is insufficient. `node scripts/verify-live-voice.mjs --headed` exercises the actual SDK, WebRTC and host microphone without fake audio. After that base connection succeeds, review `node scripts/configure-agent.mjs` and apply the prepared learning setup with `node scripts/configure-agent.mjs --apply`. Account changes are backed up under `.cortana/`; the model and voice are preserved.
 
 For a production build locally: `npm run build`, then `npm start -- --port 3100`. Host this prototype on a single Node process with persistent storage; replace the file adapter and in-process rate limiter before multi-node or ephemeral hosting.
 

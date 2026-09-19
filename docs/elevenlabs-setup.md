@@ -11,7 +11,7 @@
 
 ## Configure the existing agent
 
-First verify a base real voice session with `node scripts/verify-live-voice.mjs`. Then run `node scripts/configure-agent.mjs` to review the change and `node scripts/configure-agent.mjs --apply` to attach the prepared tools, learning prompt, dynamic variables and compact knowledge document. The script saves the prior configuration and exact patch under `.cortana/`, remembers created tool IDs for retries, and preserves the existing model and voice. Rehearse the full round after applying; configuration alone does not prove model tool use.
+First verify a base real voice session with `node scripts/verify-live-voice.mjs --headed`. Then run `node scripts/configure-agent.mjs` to review the change and `node scripts/configure-agent.mjs --apply` to attach the prepared tools, learning prompt, dynamic variables and compact knowledge document. The script saves the prior configuration and exact patch under `.cortana/`, remembers created tool IDs for retries, and preserves the existing model and voice. Rehearse the full round after applying; configuration alone does not prove model tool use.
 
 Use the existing agent model and voice; no additional language or speech provider is required. Confirm its model can invoke tools. Review the original agent configuration before changing it, and preserve unrelated teammate settings.
 
