@@ -129,6 +129,18 @@ describe("Redis progress storage", () => {
     expect(Date.now() - started).toBeGreaterThanOrEqual(250);
   });
 
+  it("finds Redis credentials connected with a custom Vercel prefix", async () => {
+    vi.stubEnv("KV_REST_API_URL", "");
+    vi.stubEnv("KV_REST_API_TOKEN", "");
+    vi.stubEnv("STORAGE_KV_REST_API_URL", emulator.url);
+    vi.stubEnv("STORAGE_KV_REST_API_TOKEN", emulator.token);
+    const { store } = await instance();
+    await store.withProgress(profile, (data) => {
+      data.preferences.name = "Dr. Ahmed";
+    });
+    expect(emulator.data.has(`cortana:profile:${profile}`)).toBe(true);
+  });
+
   it("returns a retryable error when Redis is unreachable", async () => {
     vi.stubEnv("KV_REST_API_TOKEN", "wrong-token");
     const { store } = await instance();

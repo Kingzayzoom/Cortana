@@ -7,11 +7,27 @@ import { RequestError } from "./errors";
 // integration injects KV_REST_API_*; a direct Upstash database uses UPSTASH_*.
 let cached: { config: string; client: Redis } | undefined;
 
+function credentials() {
+  const env = process.env;
+  for (const [url, token] of [
+    ["KV_REST_API_URL", "KV_REST_API_TOKEN"],
+    ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+  ])
+    if (env[url] && env[token]) return { url: env[url], token: env[token] };
+  // Vercel can connect a store with a custom prefix, e.g. STORAGE_KV_REST_API_URL.
+  for (const url of Object.keys(env)) {
+    const match = /^(.+_)(REST_API_URL|REDIS_REST_URL)$/.exec(url);
+    const token = match && match[1] + match[2].replace(/URL$/, "TOKEN");
+    if (token && env[url] && env[token])
+      return { url: env[url], token: env[token] };
+  }
+  return null;
+}
+
 export function redis(): Redis | null {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token =
-    process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
+  const found = credentials();
+  if (!found) return null;
+  const { url, token } = found;
   const config = `${url}\n${token}`;
   if (cached?.config !== config)
     cached = {
