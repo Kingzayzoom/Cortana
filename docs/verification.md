@@ -5,7 +5,7 @@ Verified September 19, 2026 in the supplied Windows workspace. The active Git ch
 | Check                                     | Result                                                                               |
 | ----------------------------------------- | ------------------------------------------------------------------------------------ |
 | Baseline unit suite before implementation | 64 passed                                                                            |
-| Final unit suite                          | 84 passed across 6 files                                                             |
+| Final unit suite                          | 94 passed across 7 files                                                             |
 | Full Playwright suite                     | 15 passed, including all 13 existing scenarios and 2 new signal scenarios            |
 | Typecheck                                 | Passed                                                                               |
 | ESLint                                    | Passed without warnings                                                              |
@@ -18,6 +18,8 @@ Verified September 19, 2026 in the supplied Windows workspace. The active Git ch
 | Legacy preservation                       | No changes under legacy/                                                             |
 
 ## Learning signal verification
+
+The upstream Vercel/Redis commits through bc7c707 were incorporated before publication. The merged suite includes the nine upstream storage/deployment tests and a new test proving that learning signals and fingerprint privacy migration survive across independent server instances. Redis is tested with the repository emulator; no production database claim is made. Both the local-file and shared Redis paths preserve the existing backend.
 
 Tests cover schema validation, unknown categories/concepts, structured event creation, deterministic grading signals, previous-miss reinforcement, transparent priorities, first-correct-not-reinforced, completion idempotence, evidence-open deduplication, elapsed duration, session isolation, replay across reload/reconnect, typed-message echoes, SDK interruption versus disconnect, empty history, supported-catalog selection and export shape.
 

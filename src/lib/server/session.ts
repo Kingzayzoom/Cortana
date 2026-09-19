@@ -7,12 +7,21 @@ import {
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cookies } from "next/headers";
+import { RequestError } from "./errors";
+import { database, onVercel, redis, redisKey } from "./redis";
+export { RequestError };
 export const dataDirectory = () =>
   process.env.CORTANA_DATA_DIR || path.join(process.cwd(), ".cortana");
 let secretPromise: Promise<string> | undefined;
 async function secret() {
   if (process.env.CORTANA_SESSION_SECRET)
     return process.env.CORTANA_SESSION_SECRET;
+  // Serverless instances can't share a generated key file.
+  if (onVercel())
+    throw new RequestError(
+      "CORTANA_SESSION_SECRET is not set on this deployment.",
+      503,
+    );
   secretPromise ??= (async () => {
     await mkdir(dataDirectory(), { recursive: true });
     const file = path.join(dataDirectory(), ".session-key");
@@ -61,29 +70,42 @@ export async function profileSession(create = false): Promise<string | null> {
   });
   return id;
 }
-export class RequestError extends Error {
-  constructor(
-    message: string,
-    public status = 400,
-  ) {
-    super(message);
-  }
-}
 export function assertOrigin(request: Request) {
   const origin = request.headers.get("origin");
   // Next can construct request.url with the 0.0.0.0 bind address. The browser's
-  // Host header retains the actual origin; use it, or an explicit proxy origin.
-  const expected =
-    process.env.CORTANA_APP_ORIGIN ||
-    `${new URL(request.url).protocol}//${request.headers.get("host")}`;
-  if (!origin || origin !== expected)
+  // Host header retains the actual origin; use it, or explicit proxy origins
+  // (comma-separated). Hosts such as Vercel terminate HTTPS and forward the scheme.
+  const protocol =
+    request.headers.get("x-forwarded-proto")?.split(",")[0].trim() ||
+    new URL(request.url).protocol.replace(":", "");
+  const expected = process.env.CORTANA_APP_ORIGIN
+    ? process.env.CORTANA_APP_ORIGIN.split(",").map((o) => o.trim())
+    : [`${protocol}://${request.headers.get("host")}`];
+  if (!origin || !expected.includes(origin))
     throw new RequestError(
       "This request must come from the Cortana workspace.",
       403,
     );
 }
 const windows = new Map<string, { count: number; until: number }>();
-export function rateLimit(key: string, max: number, duration = 60_000) {
+// Fixed-window limit. With Redis the count is shared by every serverless
+// instance; without it, it applies to this process only.
+export async function rateLimit(key: string, max: number, duration = 60_000) {
+  const db = redis();
+  if (db) {
+    const bucket = redisKey("rate", key);
+    // Creating the key with its expiry first means a counter can never outlive its window.
+    const count = await database(async () => {
+      await db.set(bucket, 0, { nx: true, px: duration });
+      return db.incr(bucket);
+    });
+    if (count > max)
+      throw new RequestError(
+        "Too many requests. Please wait a minute and try again.",
+        429,
+      );
+    return;
+  }
   const now = Date.now();
   for (const [id, bucket] of windows)
     if (bucket.until <= now) windows.delete(id);
@@ -106,8 +128,12 @@ export async function readBody(request: Request) {
   }
 }
 export function safeError(error: unknown) {
-  if (error instanceof RequestError)
+  if (error instanceof RequestError) {
+    if (error.status >= 500) console.error("[cortana]", error.message);
     return Response.json({ error: error.message }, { status: error.status });
+  }
+  // The response stays generic; the server log keeps the detail for debugging.
+  console.error("[cortana] unexpected server error", error);
   return Response.json(
     { error: "The request could not be completed. Please try again." },
     { status: 500 },

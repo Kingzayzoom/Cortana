@@ -47,8 +47,16 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
   const refresh = useCallback(async () => {
     try {
       const response = await fetch("/api/bootstrap", { cache: "no-store" });
-      if (!response.ok)
-        throw new Error("Your workspace couldn’t load. Please retry.");
+      if (!response.ok) {
+        // Server messages are written to be safe to show, and name the cause.
+        const reason = await response
+          .json()
+          .then((body) => body?.error as string | undefined)
+          .catch(() => undefined);
+        throw new Error(
+          `Your workspace couldn’t load. ${reason ?? "Please retry."}`,
+        );
+      }
       setData(await response.json());
       setError(null);
     } catch (error) {
