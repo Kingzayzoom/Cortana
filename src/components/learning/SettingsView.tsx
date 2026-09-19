@@ -54,12 +54,20 @@ function AccountSection() {
 function SettingsForm({ preferences }: { preferences: Preferences }) {
   const { act, busy, clearMessages } = useLearning(),
     voice = useVoice();
-  const [draft, setDraft] = useState(preferences),
+  // Send only the fields the strict schema knows. A stored profile that picked
+  // up an extra key must still be able to save its settings.
+  const known = (p: Preferences): Preferences => ({
+    name: p.name,
+    timezone: p.timezone,
+    reducedMotion: p.reducedMotion,
+    transcript: p.transcript,
+  });
+  const [draft, setDraft] = useState(() => known(preferences)),
     [saved, setSaved] = useState(false),
     [reset, setReset] = useState(false),
     [volume, setVolume] = useState(100);
   useEffect(() => {
-    setDraft(preferences);
+    setDraft(known(preferences));
   }, [preferences]);
   const update = (value: Partial<Preferences>) => {
     setDraft((d) => ({ ...d, ...value }));
@@ -234,6 +242,8 @@ function SettingsForm({ preferences }: { preferences: Preferences }) {
             disabled={busy}
             onClick={() => {
               voice.end();
+              // A reset returns the spoken language to English too.
+              voice.setLanguage("en");
               void act({ action: "reset", confirmation: "RESET" })
                 .then(() => {
                   clearMessages();
