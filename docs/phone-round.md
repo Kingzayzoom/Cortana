@@ -16,7 +16,7 @@ Each call carries a signed `phone_session` value that names one profile and one 
 1. **Twilio:** buy a voice-capable phone number (a trial account includes one).
 2. **ElevenLabs:** open **Phone Numbers → Import from Twilio** and enter the number with your Twilio Account SID and Auth Token. ElevenLabs holds those credentials; this app never sees them.
 3. **Secrets:** run `node scripts/prepare-local.mjs` to add `CORTANA_PHONE_TOOL_SECRET` to `.env.local` if it isn't there.
-4. **Public site:** the tools' URLs must be reachable by ElevenLabs without a login, so use the project's production domain. Vercel's deployment protection blocks preview links, and the agent would receive a login page instead of the lesson.
+4. **Public site:** the tools' URLs must be reachable by ElevenLabs without a login, so use the project's production domain. If Vercel Authentication is on, the agent receives a login page instead of the lesson: either allow production traffic under **Settings → Deployment Protection**, or create an **Automation Bypass** secret there and set `CORTANA_VERCEL_BYPASS` before configuring the agent, which adds the bypass header to every tool request.
 5. **Create the phone agent:**
 
    ```bash
@@ -27,7 +27,15 @@ Each call carries a signed `phone_session` value that names one profile and one 
    The first command only reviews and lists imported numbers. The second creates the "Cortana Phone" agent and its three webhook tools, copying the existing browser agent's model and voice. It never edits the browser agent, and it stores the created IDs in `.cortana/phone-agent.json` so repeat runs update instead of duplicating.
 
 6. **Server settings:** set `ELEVENLABS_PHONE_AGENT_ID` and `ELEVENLABS_PHONE_NUMBER_ID` (both printed by the script) and `CORTANA_PHONE_TOOL_SECRET` in Vercel, then redeploy. Until all three are set, the `/phone` page says phone rounds are not configured and no call is attempted.
-7. **Try it:** open `/phone`, enter a number in international format (`+15715550123`), the demo access code, and both confirmations.
+7. **Check the setup** at any point, without changing anything:
+
+   ```bash
+   node scripts/check-phone-setup.mjs --url=https://your-app.vercel.app
+   ```
+
+   It reports the imported numbers and their IDs, whether the phone agent exists, whether ElevenLabs can reach the site, and whether the deployed tool secret matches this machine's.
+
+8. **Try it:** open `/phone`, enter a number in international format (`+15715550123`), the demo access code, and both confirmations.
 
 ## Trial accounts
 

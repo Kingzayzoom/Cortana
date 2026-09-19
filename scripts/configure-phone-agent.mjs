@@ -57,6 +57,14 @@ const definitions = JSON.parse(
     .replaceAll("__PUBLIC_URL__", publicUrl)
     .replaceAll("__TOOL_SECRET__", toolSecret),
 );
+// Optional: lets the tools through Vercel's deployment protection when the
+// project keeps it switched on (Settings -> Deployment Protection -> Automation Bypass).
+const bypass = process.env.CORTANA_VERCEL_BYPASS;
+if (bypass)
+  for (const definition of definitions)
+    definition.tool_config.api_schema.request_headers[
+      "x-vercel-protection-bypass"
+    ] = bypass;
 
 // Copy the existing agent's model and voice so both channels sound the same.
 let llm = "gemini-2.0-flash",
