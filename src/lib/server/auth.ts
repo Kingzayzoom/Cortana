@@ -1,4 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { OAuth2Client } from "google-auth-library";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { appOrigin, hmac, safeEqual } from "./session";
@@ -8,6 +9,7 @@ const AUTHORIZE = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN = "https://oauth2.googleapis.com/token";
 const ISSUERS = ["https://accounts.google.com", "accounts.google.com"];
 const OAUTH_COOKIE = "cortana_oauth";
+const googleVerifier = new OAuth2Client();
 
 export function googleConfigured() {
   return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
@@ -87,20 +89,20 @@ const idTokenClaims = z.object({
   picture: z.string().url().optional(),
 });
 
-/**
- * Validates the ID token's claims. The token arrives directly from Google's
- * token endpoint over TLS in the code flow, which is the condition under which
- * Google documents signature verification as unnecessary; issuer, audience and
- * expiry are still checked here because those are ours to enforce.
- */
-function readIdToken(idToken: string) {
-  const parts = idToken.split(".");
-  if (parts.length !== 3) throw new RequestError("Google returned an unreadable sign-in token.", 502);
+/** Verifies Google's signature and validates the identity claims we consume. */
+async function readIdToken(idToken: string) {
   let decoded: unknown;
   try {
-    decoded = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
+    const ticket = await googleVerifier.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID!,
+    });
+    decoded = ticket.getPayload();
   } catch {
-    throw new RequestError("Google returned an unreadable sign-in token.", 502);
+    throw new RequestError(
+      "Google could not verify that sign-in token. Please try again.",
+      401,
+    );
   }
   const claims = idTokenClaims.safeParse(decoded);
   if (!claims.success)
@@ -163,7 +165,7 @@ export async function completeGoogleAuth(
   const token = z.object({ id_token: z.string().min(1) }).safeParse(body);
   if (!token.success)
     throw new RequestError("Google did not return a sign-in token. Please try again.", 502);
-  const claims = readIdToken(token.data.id_token);
+  const claims = await readIdToken(token.data.id_token);
   return {
     provider: "google" as const,
     subject: claims.sub,

@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const jar = vi.hoisted(() => ({ store: new Map<string, string>() }));
+const googleAuth = vi.hoisted(() => ({ verifyIdToken: vi.fn() }));
 vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({
     get: (name: string) =>
@@ -11,6 +12,11 @@ vi.mock("next/headers", () => ({
     set: (name: string, value: string) => jar.store.set(name, value),
     delete: ({ name }: { name: string }) => jar.store.delete(name),
   })),
+}));
+vi.mock("google-auth-library", () => ({
+  OAuth2Client: class {
+    verifyIdToken = googleAuth.verifyIdToken;
+  },
 }));
 
 import {
@@ -30,7 +36,6 @@ const request = () =>
     headers: { host: "localhost:3100" },
   });
 
-/** Claims only: the code flow receives this token directly from Google over TLS. */
 const idToken = (claims: Record<string, unknown>) =>
   [
     Buffer.from(JSON.stringify({ alg: "RS256" })).toString("base64url"),
@@ -62,6 +67,15 @@ beforeEach(async () => {
   vi.stubEnv("GOOGLE_CLIENT_ID", CLIENT_ID);
   vi.stubEnv("GOOGLE_CLIENT_SECRET", "google-client-secret-never-returned");
   vi.stubEnv("CORTANA_DATA_DIR", await mkdtemp(path.join(tmpdir(), "cortana-auth-")));
+  googleAuth.verifyIdToken.mockReset();
+  googleAuth.verifyIdToken.mockImplementation(
+    async ({ idToken: token }: { idToken: string; audience: string }) => {
+      const payload = JSON.parse(
+        Buffer.from(token.split(".")[1], "base64url").toString("utf8"),
+      );
+      return { getPayload: () => payload };
+    },
+  );
 });
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -113,6 +127,16 @@ describe("id token claims", () => {
       picture: "https://lh3.googleusercontent.com/a/photo",
     });
     expect(JSON.stringify(account)).not.toContain("secret-access-token");
+    expect(googleAuth.verifyIdToken).toHaveBeenCalledWith({
+      idToken: expect.any(String),
+      audience: CLIENT_ID,
+    });
+  });
+
+  it("rejects a token when Google's signature verification fails", async () => {
+    tokenResponds({ id_token: idToken(validClaims()) });
+    googleAuth.verifyIdToken.mockRejectedValueOnce(new Error("invalid signature"));
+    await expect(exchange()).rejects.toThrow(/could not verify/i);
   });
 
   it("rejects another application's audience", async () => {
