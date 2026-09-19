@@ -2,11 +2,55 @@
 import { useEffect, useState } from "react";
 import { Check, RotateCcw, Volume2 } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";
+import {
+  GoogleSignInButton,
+  SignOutButton,
+} from "@/components/layout/AccountControls";
 import { useVoice } from "@/lib/voice/provider";
 import { PageHeading } from "./SupportingViews";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import type { Preferences } from "@/lib/learning/types";
+function AccountSection() {
+  const { data } = useLearning();
+  const account = data?.account;
+  return (
+    <section className="settings-section">
+      <div>
+        <h2>Your account</h2>
+        <p>
+          {account
+            ? "Your practice history is linked to this Google account."
+            : "Sign in to keep your progress when you change browser or device."}
+        </p>
+      </div>
+      <div className="settings-fields">
+        {account ? (
+          <div className="account-row">
+            <div>
+              <p className="account-name">{account.name || "Signed in with Google"}</p>
+              {account.email && <p className="account-email">{account.email}</p>}
+            </div>
+            <SignOutButton />
+          </div>
+        ) : data?.googleConfigured ? (
+          <div className="account-row">
+            <p className="account-email">
+              Right now this profile lives only in this browser. Clearing cookies loses it.
+            </p>
+            <GoogleSignInButton />
+          </div>
+        ) : (
+          <p className="account-email">
+            Google sign-in is not configured on this server. This profile stays in
+            this browser.
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function SettingsForm({ preferences }: { preferences: Preferences }) {
   const { act, busy, clearMessages } = useLearning(),
     voice = useVoice();
@@ -32,6 +76,7 @@ function SettingsForm({ preferences }: { preferences: Preferences }) {
             .catch(() => {});
         }}
       >
+        <AccountSection />
         <section className="settings-section">
           <div>
             <h2>Your demo profile</h2>

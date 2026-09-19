@@ -3281,3 +3281,116 @@ svg {
     padding: 25px 21px;
   }
 }
+
+/* ---- Accounts and Google sign-in ---- */
+.google-signin {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--background);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+.google-signin:hover {
+  background: var(--surface);
+  border-color: oklch(0.88 0.03 259);
+}
+.google-signin:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+.account-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 190px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font-size: 12px;
+  color: var(--ink);
+}
+.account-badge > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-badge img {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.account-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.account-email {
+  font-size: 12px;
+  color: var(--muted);
+}
+.signout-button {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--background);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.signout-button:hover:not(:disabled) {
+  background: var(--surface);
+}
+.signout-button:disabled {
+  opacity: 0.6;
+}
+.auth-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  border: 1px solid var(--line);
+  background: var(--surface-blue);
+  color: var(--ink);
+}
+.auth-notice.error {
+  border-color: color-mix(in oklch, var(--danger) 35%, var(--line));
+  background: color-mix(in oklch, var(--danger) 8%, var(--background));
+}
+.auth-notice button {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--blue);
+  white-space: nowrap;
+}
+@media (max-width: 700px) {
+  .google-signin span,
+  .account-badge > span {
+    display: none;
+  }
+  .google-signin,
+  .account-badge {
+    padding: 0 12px;
+  }
+}

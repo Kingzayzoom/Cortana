@@ -42,7 +42,15 @@ export type Run = {
   /** Set when this run is being taught over the phone. No phone number is stored. */
   phone?: { conversationId: string; at: string };
 };
+export type Account = {
+  provider: "google";
+  subject: string;
+  email: string | null;
+  name: string | null;
+  picture: string | null;
+};
 export type Progress = {
+  account: Account | null;
   learningSignals?: import("../learning-signals/types").LearningSignal[];
   preferences: Preferences;
   attempts: Attempt[];
@@ -52,6 +60,8 @@ export type Progress = {
   review: { date: string; reason: string } | null;
 };
 export type Snapshot = Progress & {
+  signedIn: boolean;
+  googleConfigured: boolean;
   xp: number;
   streak: number;
   voiceConfigured: boolean;

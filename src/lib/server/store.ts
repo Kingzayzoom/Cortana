@@ -1,16 +1,18 @@
 import { randomUUID, createHash } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { dataDirectory, voiceConfigured } from "./session";
+import { dataDirectory, isAccount, voiceConfigured } from "./session";
 import { RequestError } from "./errors";
 import { database, onVercel, redis, redisKey } from "./redis";
-import type { Progress, Snapshot } from "../learning/types";
+import type { Account, Progress, Snapshot } from "../learning/types";
+import { googleConfigured } from "./auth";
 import { localDate, streak } from "../learning/rules";
 export type StoredProgress = Progress & {
   requests: Record<string, { fingerprint: string; result: unknown }>;
 };
 export function emptyProgress(): StoredProgress {
   return {
+    account: null,
     preferences: {
       name: "Dr. Patel",
       timezone: "America/New_York",
@@ -132,6 +134,9 @@ async function withRedisProgress<T>(id: string, operation: Operation<T>) {
 }
 export function snapshot(progress: Progress): Snapshot {
   return {
+    account: progress.account ?? null,
+    signedIn: Boolean(progress.account),
+    googleConfigured: googleConfigured(),
     preferences: progress.preferences,
     attempts: progress.attempts,
     completions: progress.completions,
@@ -145,8 +150,73 @@ export function snapshot(progress: Progress): Snapshot {
       localDate(new Date(), progress.preferences.timezone),
     ),
     voiceConfigured: voiceConfigured(),
-    storage: redis()
-      ? "Saved in the demo database · linked to this browser"
-      : "Saved on this demo server · linked to this browser",
+    storage: `${
+      redis() ? "Saved in the demo database" : "Saved on this demo server"
+    } · linked to ${progress.account ? "your Google account" : "this browser"}`,
   };
+}
+
+/** Anything worth carrying from one profile to another. */
+function hasHistory(progress: StoredProgress) {
+  return Boolean(
+    progress.attempts.length ||
+      progress.completions.length ||
+      progress.practiceDays.length ||
+      progress.run,
+  );
+}
+
+/**
+ * Attaches a verified Google account to a profile, carrying anonymous progress
+ * over on first sign-in. An account that already has history keeps it: its own
+ * record outranks whatever this browser happened to accumulate.
+ *
+ * Goes through withProgress rather than touching files, so it behaves the same
+ * on Redis and on the local file adapter.
+ */
+export async function linkAccount(
+  anonymousId: string | null,
+  accountProfileId: string,
+  account: Account,
+) {
+  if (!isAccount(accountProfileId))
+    throw new RequestError("Not an account profile.", 400);
+
+  const carryFrom =
+    anonymousId && !isAccount(anonymousId) && anonymousId !== accountProfileId
+      ? anonymousId
+      : null;
+  // Read without mutating: if the write below fails, nothing has been lost.
+  const carried = carryFrom
+    ? await withProgress(carryFrom, (data) =>
+        hasHistory(data) ? structuredClone(data) : null,
+      )
+    : null;
+
+  let adopted = false;
+  const result = await withProgress(accountProfileId, (data) => {
+    if (carried && !data.account && !hasHistory(data)) {
+      adopted = true;
+      data.attempts = carried.attempts;
+      data.completions = carried.completions;
+      data.practiceDays = carried.practiceDays;
+      data.review = carried.review;
+      data.run = carried.run;
+      data.requests = carried.requests;
+      data.learningSignals = carried.learningSignals ?? [];
+      data.preferences = carried.preferences;
+    }
+    data.account = account;
+    if (account.name && data.preferences.name === "Dr. Patel")
+      data.preferences.name = account.name;
+    return snapshot(data);
+  });
+
+  // Emptied last, and only when its history was actually claimed: an account
+  // that kept its own record must not destroy the browser's separate profile.
+  if (adopted && carryFrom)
+    await withProgress(carryFrom, (data) => {
+      Object.assign(data, emptyProgress());
+    });
+  return result;
 }

@@ -54,13 +54,41 @@ export async function hmac(value: string) {
     .update(value)
     .digest("hex");
 }
+/** An anonymous demo profile, or a signed-in Google account as `g-<subject>`. */
+const PROFILE_ID = /^(?:[0-9a-f-]{36}|g-\d{1,64})$/;
+export const isAccount = (id: string) => id.startsWith("g-");
+
+const sessionCookie = {
+  httpOnly: true,
+  // Lax rather than strict: Google's callback arrives as a cross-site GET and
+  // must already carry the session that the callback then upgrades.
+  sameSite: "lax",
+  secure: process.env.NODE_ENV === "production",
+  maxAge: 60 * 60 * 24 * 90,
+  path: "/",
+} as const;
+
+export async function setProfileSession(id: string) {
+  if (!PROFILE_ID.test(id)) throw new RequestError("Invalid profile.", 400);
+  (await cookies()).set(
+    "cortana_session",
+    `${id}.${await sign(id)}`,
+    sessionCookie,
+  );
+  return id;
+}
+
+export async function clearProfileSession() {
+  (await cookies()).delete({ name: "cortana_session", path: "/" });
+}
+
 export async function profileSession(create = false): Promise<string | null> {
   const jar = await cookies();
   const value = jar.get("cortana_session")?.value;
   if (value) {
     const [id, signature] = value.split(".");
     if (
-      /^[0-9a-f-]{36}$/.test(id) &&
+      PROFILE_ID.test(id) &&
       signature &&
       safeEqual(await sign(id), signature)
     )
@@ -68,30 +96,36 @@ export async function profileSession(create = false): Promise<string | null> {
   }
   if (!create) return null;
   const id = randomUUID();
-  jar.set("cortana_session", `${id}.${await sign(id)}`, {
-    httpOnly: true,
-    sameSite: "strict",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 90,
-    path: "/",
-  });
+  jar.set("cortana_session", `${id}.${await sign(id)}`, sessionCookie);
   return id;
 }
-export function assertOrigin(request: Request) {
-  const origin = request.headers.get("origin");
-  // Next can construct request.url with the 0.0.0.0 bind address. The browser's
-  // Host header retains the actual origin; use it, or explicit proxy origins
-  // (comma-separated). Hosts such as Vercel terminate HTTPS and forward the scheme.
+// Next can construct request.url with the 0.0.0.0 bind address. The browser's
+// Host header retains the actual origin; use it, or explicit proxy origins
+// (comma-separated). Hosts such as Vercel terminate HTTPS and forward the scheme.
+function expectedOrigins(request: Request) {
   const protocol =
     request.headers.get("x-forwarded-proto")?.split(",")[0].trim() ||
     new URL(request.url).protocol.replace(":", "");
-  const expected = process.env.CORTANA_APP_ORIGIN
+  return process.env.CORTANA_APP_ORIGIN
     ? // A browser's Origin header never has a trailing slash, but a pasted URL
       // usually does; tolerate it rather than rejecting every request.
       process.env.CORTANA_APP_ORIGIN.split(",").map((o) =>
         o.trim().replace(/\/+$/, ""),
       )
     : [`${protocol}://${request.headers.get("host")}`];
+}
+
+/**
+ * The canonical origin for links back into this app. The first configured
+ * origin wins, so an OAuth redirect URI stays stable across preview hosts.
+ */
+export function appOrigin(request: Request) {
+  return expectedOrigins(request)[0];
+}
+
+export function assertOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  const expected = expectedOrigins(request);
   if (!origin || !expected.includes(origin))
     throw new RequestError(
       "This request must come from the Cortana workspace.",
