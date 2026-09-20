@@ -5,6 +5,12 @@ import { useLearning } from "@/lib/learning/provider";
 import { selectLearningSummary } from "@/lib/learning-signals/selectors";
 import { LearningSignalSummary } from "./LearningSignalSummary";
 const eventLabels = {
+  prime_started: "Prime started",
+  prime_question_attempted: "Prime question practiced",
+  prime_question_correct: "Prime correct response",
+  prime_question_missed: "Prime reinforcement requested",
+  prime_evidence_viewed: "Prime evidence opened",
+  prime_completed: "Prime completed",
   round_started: "Round started",
   briefing_section_viewed: "Briefing section explored",
   briefing_completed: "Briefing completed",

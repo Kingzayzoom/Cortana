@@ -1,6 +1,18 @@
 // @vitest-environment jsdom
 // SDK boundary test doubles only. Live provider verification uses the real SDK.
 // Context tools share the active browser profile and respect SDK session lifetime.
+it("starts Prime without replacing the existing lesson and uses Prime-scoped credentials",async()=>{
+ const id="11111111-1111-4111-8111-111111111111";
+ vi.mocked(fetch).mockResolvedValueOnce(Response.json({session:{id}}));
+ act(()=>voice.requestStart("prime"));await start();connect();
+ expect(learning.act).not.toHaveBeenCalled();expect(learning.observe).not.toHaveBeenCalled();
+ expect(options()).toMatchObject({dynamicVariables:{context_mode:"prime"}});
+ expect(JSON.parse(vi.mocked(fetch).mock.calls[1][1]!.body as string)).toMatchObject({runId:id,mode:"prime"});
+ vi.mocked(fetch).mockResolvedValueOnce(Response.json({session:{id}}));
+ // The SDK's tool is authenticated and the server owns the answers.
+ const result=await options().clientTools!.get_prime_session({});
+ expect(JSON.parse(result as string)).toMatchObject({session:{id}});
+});
 it("starts a context briefing with selected language and bounded server tools", async () => {
   act(() => {
     voice.setLanguage("es");
@@ -54,6 +66,7 @@ const learning = vi.hoisted(() => ({
   observe: vi.fn(),
   clearMessages: vi.fn(),
   openEvidence: vi.fn(),
+  refresh: vi.fn(),
   messages: [],
 }));
 vi.mock("@elevenlabs/react", () => ({

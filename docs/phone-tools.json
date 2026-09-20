@@ -19,7 +19,9 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -33,7 +35,9 @@
       "api_schema": {
         "url": "__PUBLIC_URL__/api/phone/tools/email_front_desk",
         "method": "POST",
-        "request_headers": { "Authorization": "Bearer __TOOL_SECRET__" },
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
         "request_body_schema": {
           "type": "object",
           "properties": {
@@ -43,7 +47,11 @@
             },
             "reason": {
               "type": "string",
-              "enum": ["running_late", "emergency", "other"],
+              "enum": [
+                "running_late",
+                "emergency",
+                "other"
+              ],
               "description": "Why the message is being sent."
             },
             "message": {
@@ -59,7 +67,12 @@
               "description": "True only after you read the message back and the clinician agreed to send it."
             }
           },
-          "required": ["session", "reason", "message", "confirmed"]
+          "required": [
+            "session",
+            "reason",
+            "message",
+            "confirmed"
+          ]
         }
       }
     }
@@ -84,7 +97,9 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -109,7 +124,9 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -138,7 +155,10 @@
               "description": "The learner's actual final answer, in their own words. Pass an option letter only when they clearly said one."
             }
           },
-          "required": ["session", "answer"]
+          "required": [
+            "session",
+            "answer"
+          ]
         }
       }
     }
@@ -163,7 +183,9 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -189,7 +211,9 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -215,7 +239,9 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -241,7 +267,9 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -271,7 +299,9 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -313,7 +343,11 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": ["caseId", "section", "session"],
+          "required": [
+            "caseId",
+            "section",
+            "session"
+          ],
           "description": "Validated parameters for this client tool."
         }
       }
@@ -344,7 +378,9 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -370,7 +406,9 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -396,7 +434,184 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_prime_session",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_prime_session",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "description": "Validated parameters for this client tool.",
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "submit_prime_answer",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/submit_prime_answer",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "The exact session.id UUID returned by get_prime_session."
+            },
+            "questionId": {
+              "type": "string",
+              "description": "The exact current Prime question ID returned by get_prime_session; never the legacy lesson question ID."
+            },
+            "answer": {
+              "type": "string",
+              "description": "The learner's actual final answer. Preserve ambiguity rather than guessing an option."
+            },
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "required": [
+            "sessionId",
+            "questionId",
+            "answer",
+            "session"
+          ],
+          "description": "Validated parameters for this client tool."
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_prime_feedback",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_prime_feedback",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "The exact session.id UUID returned by get_prime_session."
+            },
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "required": [
+            "sessionId",
+            "session"
+          ],
+          "description": "Validated parameters for this client tool."
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "complete_prime",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/complete_prime",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "The exact session.id UUID returned by get_prime_session."
+            },
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "required": [
+            "sessionId",
+            "session"
+          ],
+          "description": "Validated parameters for this client tool."
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "advance_prime",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/advance_prime",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "string",
+              "description": "The exact session.id UUID returned by get_prime_session."
+            },
+            "questionId": {
+              "type": "string",
+              "description": "The exact current Prime question ID returned by get_prime_session; never the legacy lesson question ID."
+            },
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "required": [
+            "sessionId",
+            "questionId",
+            "session"
+          ],
+          "description": "Validated parameters for this client tool."
         }
       }
     }

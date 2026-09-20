@@ -8,6 +8,7 @@ import type { Account, Progress, Snapshot } from "../learning/types";
 import { googleConfigured } from "./auth";
 import { localDate, streak } from "../learning/rules";
 export type StoredProgress = Progress & {
+  prime?: import("../prime/types").PrimeState;
   contextScenario?: import("../context/types").ContextScenario | null;
   requests: Record<string, { fingerprint: string; result: unknown }>;
 };
@@ -27,6 +28,7 @@ export function emptyProgress(): StoredProgress {
     run: null,
     requests: {},
     learningSignals: [],
+    prime: {sessions:[],reviews:{}},
   };
 }
 type Operation<T> = (data: StoredProgress) => T | Promise<T>;
@@ -145,7 +147,7 @@ export function snapshot(progress: Progress): Snapshot {
     run: progress.run,
     review: progress.review,
     learningSignals: progress.learningSignals ?? [],
-    xp: progress.completions.reduce((sum, c) => sum + c.xp, 0),
+    xp: progress.completions.reduce((sum, c) => sum + c.xp, 0) + ((progress as StoredProgress).prime?.sessions.reduce((sum,s)=>sum+s.xp,0) ?? 0),
     streak: streak(
       progress.practiceDays,
       localDate(new Date(), progress.preferences.timezone),
@@ -163,7 +165,7 @@ function hasHistory(progress: StoredProgress) {
     progress.attempts.length ||
       progress.completions.length ||
       progress.practiceDays.length ||
-      progress.run,
+      progress.run || progress.prime?.sessions.some(s=>s.startedAt),
   );
 }
 
@@ -205,6 +207,7 @@ export async function linkAccount(
       data.run = carried.run;
       data.requests = carried.requests;
       data.learningSignals = carried.learningSignals ?? [];
+      data.prime = carried.prime;
       data.preferences = carried.preferences;
       if (data.contextScenario === undefined) data.contextScenario = carried.contextScenario;
     }
@@ -220,6 +223,7 @@ export async function linkAccount(
     await withProgress(carryFrom, (data) => {
       Object.assign(data, emptyProgress());
       delete data.contextScenario;
+      delete data.prime;
     });
   return result;
 }

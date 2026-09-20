@@ -20,6 +20,7 @@ import { round, sources } from "@/lib/content/round";
 import { Button } from "@/components/ui/button";
 import { selectNextRound } from "@/lib/adaptive-learning/selectNextRound";
 import { LearningSignalSummary } from "./LearningSignalSummary";
+import { PrimeStats } from "@/components/prime/PrimeViews";
 export function PageHeading({
   eyebrow,
   title,
@@ -250,7 +251,8 @@ export function ProfileView() {
         </dl>
       </div>
       <section className="topic-results">
-        <LearningSignalSummary />
+      <LearningSignalSummary />
+      <PrimeStats />
         <h2>Your Learning Pulse</h2>
         <div className="topic-result-row">
           <HeartPulse size={25} />

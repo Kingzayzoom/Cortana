@@ -21,6 +21,7 @@ import { ROUND_ID } from "@/lib/content/round";
 import { readActiveScenario } from "@/lib/context/store";
 import { buildPhoneBriefingContext } from "@/lib/context/selectors";
 import { clinician } from "@/lib/content/briefing";
+import { actPrime } from "@/lib/prime/server";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
     if (!safeEqual(accessCode, process.env.CORTANA_DEMO_ACCESS_CODE!))
       throw new RequestError("That demo access code is incorrect.", 403);
     const briefing = mode === "context" ? buildPhoneBriefingContext(await readActiveScenario(id)) : null;
+    if(mode==="prime")await actPrime(id,{action:"start"});
     if (mode === "context" && !briefing)
       throw new RequestError("Activate a synthetic scenario before requesting a briefing.", 409);
     // A phone round is a fresh run against the caller's own saved progress.

@@ -40,8 +40,8 @@ export function selectLearningSummary(
     evidenceFollowUps: signals.filter(
       (event) => event.type === "evidence_viewed",
     ).length,
-    attempted: resolved.length,
-    correct: resolved.filter((event) => event.correct).length,
+    attempted: resolved.length + signals.filter(e=>e.type==="prime_question_attempted").length,
+    correct: resolved.filter((event) => event.correct).length + signals.filter(e=>e.type==="prime_question_correct").length,
     reinforced: [
       ...new Set(
         signals

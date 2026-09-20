@@ -95,7 +95,7 @@ export const phoneCallRequest = z
       ),
     consent: z.literal(true),
     permission: z.literal(true),
-    mode: z.enum(["round", "context"]).default("round"),
+    mode: z.enum(["round", "context", "prime"]).default("round"),
   })
   .strict();
 

@@ -24,6 +24,7 @@ import type {
 import { voiceErrorMessage } from "./errors";
 import { VoiceTranscript } from "./transcript";
 import { contextToolNames, contextToolSchemas } from "../context/tools";
+import { primeToolNames, primeToolSchemas } from "../prime/tools";
 import {
   clientAnswerTool,
   caseTool,
@@ -53,7 +54,8 @@ type VoiceValue = {
   conversationId: string | null;
   messages: Message[];
   briefing: boolean;
-  requestStart: (mode?: "round" | "context") => void;
+  prime: boolean;
+  requestStart: (mode?: "round" | "context" | "prime") => void;
   closeConsent: () => void;
   start: (code: string) => Promise<void>;
   startPreview: () => Promise<void>;
@@ -77,6 +79,9 @@ function VoiceController({ children }: { children: React.ReactNode }) {
   const learning = useLearning();
   const [briefing, setBriefing] = useState(false);
   const briefingRef = useRef(false);
+  const primeRef=useRef(false);
+  const primeSessionRef=useRef<string|null>(null);
+  const [prime,setPrime]=useState(false);
   const [connection, setConnection] = useState<ConnectionState>("idle"),
     [activity, setActivity] = useState<VoiceActivity>("quiet");
   const [language, setLanguage] = useState<SpokenLanguage>(DEFAULT_LANGUAGE);
@@ -103,6 +108,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
   const speakingRef = useRef(false);
   const observedMessages = useRef(new Set<string>());
   const recordQuestions = (rows: Message[]) => {
+    if(primeRef.current)return;
     for (const row of rows) {
       if (row.role !== "user" || observedMessages.current.has(row.id)) continue;
       observedMessages.current.add(row.id);
@@ -150,7 +156,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           return JSON.stringify({
             error: "Invalid tool parameters or unknown content ID.",
           });
-        const runId = current.current.data?.run?.id;
+        const runId = primeRef.current ? primeSessionRef.current : current.current.data?.run?.id;
         if (!accepting.current || !runId)
           return JSON.stringify({
             error: "The voice session is no longer active.",
@@ -162,6 +168,12 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         }
       };
     return {
+      ...Object.fromEntries(primeToolNames.map(name=>[name,tool<unknown>(primeToolSchemas[name],async params=>{
+        const response=await fetch(`/api/prime/tools/${name}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(params)});
+        const result=await response.json();if(!response.ok)throw Error(result.error);
+        window.dispatchEvent(new Event("prime-updated"));void current.current.refresh();
+        return result;
+      })])),
       ...Object.fromEntries(contextToolNames.map((name) => [
         name,
         tool<unknown>(contextToolSchemas[name], async (params) => {
@@ -287,6 +299,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
   };
   const startPreview = async () => {
     if (lock.current) return;
+    primeRef.current=false;setPrime(false);
     lock.current = true;
     setWorking(true);
     try {
@@ -332,7 +345,12 @@ function VoiceController({ children }: { children: React.ReactNode }) {
     abort.current = requestAbort;
     try {
       let data = learning.data;
-      if (!paused || !data?.run || data.run.completed) {
+      if(primeRef.current){
+        const response=await fetch("/api/prime",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start"}),signal:requestAbort.signal});
+        const result=await response.json();if(!response.ok)throw Error(result.error);
+        primeSessionRef.current=result.session.id;
+        data={...learning.data!,run:{id:result.session.id,section:0,stage:"briefing",grade:null,completed:false}};
+      } else if (!paused || !data?.run || data.run.completed) {
         learning.clearMessages();
         data = await learning.act({ action: "begin", mode: "voice" });
       }
@@ -345,6 +363,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           accessCode: code,
           consent: true,
           runId: data!.run!.id,
+          ...(primeRef.current?{mode:"prime"}:{}),
         }),
         cache: "no-store",
         signal: AbortSignal.any([
@@ -413,7 +432,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         connectionType: "webrtc",
         clientTools: sessionTools,
         dynamicVariables: {
-          context_mode: briefingRef.current ? "context" : "round",
+          context_mode: primeRef.current ? "prime" : briefingRef.current ? "context" : "round",
           round_id: round.id,
           section_id: round.sections[data!.run!.section].id,
           lesson_stage: data!.run!.stage,
@@ -435,7 +454,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           setConversationId(connectedId);
           setWorking(false);
           setConnection("connected");
-          current.current.observe(
+          if(!primeRef.current) current.current.observe(
             { type: "round_started", mode: "voice" },
             undefined,
             data!.run!.id,
@@ -484,7 +503,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         onInterruption: (event) => {
           if (!isActive()) return;
           const run = current.current.data?.run;
-          if (run?.stage === "briefing") {
+          if (!primeRef.current && run?.stage === "briefing") {
             // Only SDK interruptions, never disconnects, produce this observation.
             const key = `interruption:${credential.data.conversationId}:${event.event_id}`;
             if (!observedMessages.current.has(key)) {
@@ -564,12 +583,15 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         paused,
         preview,
         briefing,
+        prime,
         consentOpen,
         error,
         working,
         conversationId,
         messages: preview ? learning.messages : messages,
         requestStart: (mode = "round") => {
+          primeRef.current = mode === "prime";
+          setPrime(mode === "prime");
           briefingRef.current = mode === "context";
           setBriefing(mode === "context");
           if (!lock.current || stopReason.current === "error")
@@ -596,7 +618,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
             conversation.sendUserMessage(text);
             const rows = transcript.current.sent(text, transcriptText);
             if (
-              intent === "question" &&
+              !primeRef.current && intent === "question" &&
               !/^(i am finished|(?:please )?(?:complete|finish|end|stop|continue|start|resume)\b)/i.test(
                 text.trim(),
               )

@@ -52,13 +52,14 @@ export function reduceLearningSignals(
         questionsSinceResolution++;
         if (event.category === "clarification") clarifications++;
       }
-      if (event.type === "evidence_viewed" && state.unresolvedMiss)
+      if ((event.type === "evidence_viewed" || event.type==="prime_evidence_viewed") && state.unresolvedMiss)
         evidenceAfterMiss = true;
-      if (event.type === "challenge_resolved") {
+      if (event.type === "challenge_resolved" || event.type==="prime_question_correct" || event.type==="prime_question_missed") {
+        const correct=event.type==="challenge_resolved"?event.correct:event.type==="prime_question_correct";
         state.attempts++;
-        state.correct += Number(event.correct);
+        state.correct += Number(correct);
         state.lastPracticed = event.timestamp;
-        if (!event.correct) {
+        if (!correct) {
           state.unresolvedMiss = true;
           state.reinforced = false;
           misses++;

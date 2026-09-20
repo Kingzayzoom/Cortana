@@ -11,6 +11,7 @@ import { SettingsView } from "@/components/learning/SettingsView";
 import { ImpiricusSignalBridge } from "@/components/learning/ImpiricusSignalBridge";
 import { PhoneRoundView } from "@/components/phone/PhoneRoundView";
 import { ContextFeedView } from "@/components/context/ContextFeedView";
+import { PrimeHome,PrimeSessionView } from "@/components/prime/PrimeViews";
 export default async function Page({
   params,
 }: {
@@ -18,8 +19,11 @@ export default async function Page({
 }) {
   const { view } = await params;
   const route = view?.join("/") || "";
+  if(route==="prime/session")return <PrimeSessionView/>;
   const screens: Record<string, React.ReactNode> = {
     "": <Dashboard />,
+    prime: <PrimeHome/>,
+    "prime/phone": <PhoneRoundView prime/>,
     rounds: <RoundsView />,
     evidence: <EvidenceView />,
     profile: <ProfileView />,

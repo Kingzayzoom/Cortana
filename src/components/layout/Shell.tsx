@@ -20,8 +20,10 @@ import {
 import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
 import { AccountBadge, AuthNotice } from "./AccountControls";
+import { usePrime } from "@/lib/prime/provider";
 const navigation = [
   { href: "/", title: "Today", icon: Home },
+  { href: "/prime", title: "Prime", icon: Shapes },
   { href: "/context", title: "Context Feed", icon: HeartPulse },
   { href: "/rounds", title: "My Rounds", icon: Layers },
   { href: "/evidence", title: "Evidence Library", icon: BookOpen },
@@ -31,6 +33,7 @@ const navigation = [
   { href: "/phone", title: "Phone Round", icon: Phone },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
+  const prime=usePrime();
   const pathname = usePathname(),
     { data, error, refresh, clearError } = useLearning(),
     voice = useVoice();
@@ -150,6 +153,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             >
               <Icon size={20} strokeWidth={1.65} />
               {title}
+              {href==="/prime" && prime.data && !prime.data.session?.completedAt && <span className="prime-nav-daily">Daily</span>}
               {pathname === href && <span className="nav-indicator" />}
             </Link>
           ))}

@@ -18,6 +18,7 @@ import { VoiceControls } from "@/components/voice/VoiceControls";
 import { LessonPanel } from "@/components/learning/LessonPanel";
 import { ProgressCards } from "./ProgressCards";
 import { ContextFeedCard } from "@/components/context/ContextFeedView";
+import { DailyPrimeCard } from "@/components/prime/PrimeViews";
 import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
 import { Dialog } from "@/components/ui/dialog";
@@ -302,6 +303,7 @@ export function Dashboard() {
           >
             <div className="dashboard-lower-inner">
               <ContextFeedCard />
+              <DailyPrimeCard />
               <ProgressCards />
             </div>
           </div>

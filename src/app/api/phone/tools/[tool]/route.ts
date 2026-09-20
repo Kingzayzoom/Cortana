@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { isContextTool, queryContext } from "@/lib/context/tools";
 import { readActiveScenario } from "@/lib/context/store";
+import { isPrimeTool } from "@/lib/prime/tools";
+import { runPrimeTool } from "@/lib/prime/server";
 import {
   rateLimit,
   readBody,
@@ -22,6 +24,8 @@ const toolRequest = z
     answer: z.string().trim().min(1).max(600).optional(),
     caseId: z.string().min(1).max(80).optional(),
     section: z.string().min(1).max(30).optional(),
+    sessionId:z.string().uuid().optional(),
+    questionId:z.string().min(1).max(80).optional(),
     // Front desk message. The recipient is never one of these fields.
     reason: z.string().max(40).optional(),
     message: z.string().max(400).optional(),
@@ -41,6 +45,12 @@ export async function POST(
       throw new RequestError("The tool request was not understood.");
     const { profileId, runId } = await readPhoneSession(parsed.data.session);
     await rateLimit(`phone-tool:${profileId}`, 60);
+    if(isPrimeTool(tool)){
+      await readActiveScenario(profileId,runId);
+      const {session: _session,...args}=parsed.data;void _session;
+      try{return Response.json(await runPrimeTool(profileId,tool,args),{headers:{"Cache-Control":"no-store, private"}});}
+      catch(e){if(e instanceof z.ZodError)throw new RequestError("Invalid Prime tool parameters.");throw e;}
+    }
     if (isContextTool(tool)) {
       const { session: _session, ...args } = parsed.data;
       void _session;

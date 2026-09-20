@@ -12,7 +12,7 @@ type CallState =
   | { step: "calling"; to: string; conversationId: string | null }
   | { step: "ended"; to: string };
 
-export function PhoneRoundView({ briefing = false }: { briefing?: boolean }) {
+export function PhoneRoundView({ briefing = false, prime = false }: { briefing?: boolean; prime?:boolean }) {
   const context = useContextScenario();
   const { data, refresh } = useLearning();
   const [number, setNumber] = useState(""),
@@ -61,7 +61,7 @@ export function PhoneRoundView({ briefing = false }: { briefing?: boolean }) {
           phoneNumber: number.trim(),
           consent: true,
           permission: true,
-          mode: briefing ? "context" : "round",
+          mode: prime ? "prime" : briefing ? "context" : "round",
         }),
       });
       const body = await response.json();
@@ -83,7 +83,7 @@ export function PhoneRoundView({ briefing = false }: { briefing?: boolean }) {
   return (
     <>
       <PageHeading
-        eyebrow={briefing ? "Phone briefing" : "Phone round"}
+        eyebrow={prime ? "Phone Prime" : briefing ? "Phone briefing" : "Phone round"}
         title="Cortana can call you."
         description={briefing ? "Changes, schedule, and review items from your active demo scenario." : "Two minutes of evidence, on any phone. The same round, the same grading, no screen needed."}
       />
@@ -152,6 +152,7 @@ export function PhoneRoundView({ briefing = false }: { briefing?: boolean }) {
               type="submit"
               disabled={
                 busy ||
+                (prime && !context.phoneConfigured) ||
                 (briefing && (!context.phoneConfigured || !context.activeScenario)) ||
                 !consent ||
                 !permission ||

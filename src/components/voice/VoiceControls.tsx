@@ -59,7 +59,7 @@ export function VoiceStatus() {
     </div>
   );
 }
-function LanguagePicker() {
+export function LanguagePicker() {
   const { data, busy } = useLearning();
   const voice = useVoice();
   return (
@@ -280,7 +280,7 @@ export function VoiceConsent() {
           {voice.error}
         </p>
       )}
-      {voice.briefing ? <Button asChild variant="secondary"><Link href="/context" onClick={voice.closeConsent}>Return to briefing preview</Link></Button> : <Button
+      {voice.prime ? <Button variant="secondary" onClick={voice.closeConsent}>Continue Prime on screen</Button> : voice.briefing ? <Button asChild variant="secondary"><Link href="/context" onClick={voice.closeConsent}>Return to briefing preview</Link></Button> : <Button
         className="full-width"
         variant={data?.voiceConfigured ? "secondary" : "primary"}
         onClick={voice.startPreview}
