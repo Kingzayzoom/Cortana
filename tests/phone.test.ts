@@ -501,9 +501,15 @@ describe("Phone agent tools", () => {
     const [, options] = mail.mock.calls[0] as unknown as [string, RequestInit];
     const sent = JSON.parse(options.body as string);
     expect(sent.to).toEqual(["kingzayzoom@gmail.com"]);
-    expect(sent.subject).toMatch(/^\[Demo\]/);
-    expect(sent.text).toMatch(/synthetic demonstration message/i);
-    expect(sent.text).toContain("about 20 minutes");
+    expect(sent.subject).toBe("Dr. Zaybish — running late (Cardiac Step-Down)");
+    // Reads as a note: greeting, the message, the ETA, one quiet footer.
+    expect(sent.text).toMatch(/^Hi — Cortana here, on behalf of Dr. Zaybish\./);
+    expect(sent.text).toContain(
+      "Held up in traffic, about twenty minutes out.",
+    );
+    expect(sent.text).toContain("Expected in about 20 minutes.");
+    expect(sent.text).toMatch(/demonstration message$/);
+    expect(sent.text).not.toMatch(/Reason:|From:/);
   });
 
   it("refuses to send when the mail service is not configured", async () => {
