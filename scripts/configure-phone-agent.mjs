@@ -189,6 +189,23 @@ const config = {
       // Seven seconds of quiet was enough to make it talk over a thinking
       // clinician, and far too short to honour a pause.
       turn_timeout: 15,
+      // A one-word interruption such as "pause" has to land while it is
+      // mid-sentence, so it yields the floor readily.
+      turn_eagerness: "eager",
+    },
+    asr: {
+      ...existingAgent?.conversation_config.asr,
+      // Short commands are the easiest words to mishear on a phone line.
+      keywords: [
+        "pause",
+        "resume",
+        "hold on",
+        "wait",
+        "stop",
+        "continue",
+        "front desk",
+        "running late",
+      ],
     },
     ...(voiceId ? { tts: { voice_id: voiceId } } : {}),
   },
