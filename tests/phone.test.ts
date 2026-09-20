@@ -273,6 +273,56 @@ describe("Phone agent tools", () => {
     expect(option(vague)).toBe(vague);
   });
 
+  it("serves the shift briefing in speech-ready form, with nothing to misread", async () => {
+    const session = await startedSession();
+    const { request, context } = toolRequest("get_shift_briefing", { session });
+    const response = await tool(request, context);
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.clinician.sayThisName).toBe("Dr. Zabish");
+    expect(body.briefing.status.urgentCount).toBe(1);
+    expect(body.briefing.urgent.requestedWithin).toBe("fifteen minutes");
+    expect(body.briefing.primaryCase.currentVitals.bloodPressure.spoken).toBe(
+      "eighty-eight over fifty-six",
+    );
+    const serialized = JSON.stringify(body);
+    // Nothing the voice could read as a URL, a record ID, or a raw timestamp.
+    expect(serialized).not.toMatch(/https?:\/\//);
+    expect(serialized).not.toMatch(/SYNTH-|scenario-|hospital-event|lab-/);
+    expect(serialized).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
+    expect(serialized).not.toContain("Â");
+    expect(body.synthetic).toBe(true);
+  });
+
+  it("offers only topics that have a round behind them", async () => {
+    const session = await startedSession();
+    const { request, context } = toolRequest("get_topics", { session });
+    const body = await (await tool(request, context)).json();
+    expect(body.availableNow).toHaveLength(1);
+    expect(body.availableNow[0]).toMatchObject({
+      id: "heart-failure",
+      minutes: 2,
+    });
+    expect(
+      body.topics.filter((t: { available: boolean }) => !t.available),
+    ).toHaveLength(3);
+  });
+
+  it("answers briefing questions even when no round is active", async () => {
+    // A stale run must not break the briefing: it is the point of the call.
+    const stale = await createPhoneSession(
+      state.profile,
+      "22222222-2222-4222-8222-222222222222",
+    );
+    const briefing = toolRequest("get_shift_briefing", { session: stale });
+    expect((await tool(briefing.request, briefing.context)).status).toBe(200);
+    const list = toolRequest("get_topics", { session: stale });
+    expect((await tool(list.request, list.context)).status).toBe(200);
+    // The lesson tools still require the current run.
+    const lesson = toolRequest("get_round_context", { session: stale });
+    expect((await tool(lesson.request, lesson.context)).status).toBe(409);
+  });
+
   it("rejects an unknown tool and a missing answer", async () => {
     const session = await startedSession();
     const unknown = toolRequest("delete_everything", { session });

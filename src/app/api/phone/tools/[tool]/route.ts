@@ -49,6 +49,10 @@ function run(
   answer: string | undefined,
 ) {
   switch (tool) {
+    case "get_shift_briefing":
+      return phoneTools.get_shift_briefing();
+    case "get_topics":
+      return phoneTools.get_topics();
     case "get_round_context":
       return phoneTools.get_round_context(profileId, runId);
     case "submit_answer":
