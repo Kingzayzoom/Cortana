@@ -373,10 +373,16 @@ describe("Phone agent tools", () => {
     const body = await response.json();
     expect(response.status).toBe(200);
     expect(body.clinician.sayThisName).toBe("Dr. Zabish");
-    expect(body.briefing.status.urgentCount).toBe(1);
-    expect(body.briefing.urgent.requestedWithin).toBe("fifteen minutes");
-    expect(body.briefing.primaryCase.currentVitals.bloodPressure.spoken).toBe(
-      "eighty-eight over fifty-six",
+    expect(body.simulated).toBe(true);
+    // A named patient in a room, not a record number.
+    expect(body.briefing.urgent.patient).toMatch(/^(Mr|Ms)\. [A-Z]/);
+    expect(body.briefing.urgent.room).toMatch(/[a-z]/);
+    expect(body.briefing.urgent.requestedBy).toBeTruthy();
+    expect(
+      body.briefing.primaryCase.currentVitals.bloodPressure.spoken,
+    ).toMatch(/ over /);
+    expect(body.briefing.primaryCase.currentVitals.heartRate.spoken).toMatch(
+      /beats per minute$/,
     );
     const serialized = JSON.stringify(body);
     // Nothing the voice could read as a URL, a record ID, or a raw timestamp.
@@ -384,7 +390,30 @@ describe("Phone agent tools", () => {
     expect(serialized).not.toMatch(/SYNTH-|scenario-|hospital-event|lab-/);
     expect(serialized).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
     expect(serialized).not.toContain("Â");
-    expect(body.synthetic).toBe(true);
+    // "Synthetic patient" language is gone from what gets spoken.
+    expect(serialized.toLowerCase()).not.toContain("synthetic patient");
+  });
+
+  it("keeps one briefing for a whole call and varies between calls", async () => {
+    const session = await startedSession();
+    const read = async (s: string) => {
+      const { request, context } = toolRequest("get_shift_briefing", {
+        session: s,
+      });
+      return (await (await tool(request, context)).json()).briefing.urgent
+        .fullName;
+    };
+    // Every tool call in one conversation describes the same patient.
+    expect(await read(session)).toBe(await read(session));
+    const patients = new Set<string>();
+    for (let i = 0; i < 12; i++) {
+      const other = await createPhoneSession(
+        state.profile,
+        `1111111${i}-1111-4111-8111-11111111111${i % 10}`,
+      );
+      patients.add(await read(other));
+    }
+    expect(patients.size).toBeGreaterThan(1);
   });
 
   it("offers only topics that have a round behind them", async () => {

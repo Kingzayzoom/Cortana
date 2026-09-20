@@ -153,7 +153,22 @@ const config = {
       first_message:
         "Hi {{learner_name}}, it's Cortana, your AI learning companion. Is now a good time for your synthetic demo briefing or learning round?",
       language: existingAgent?.conversation_config.agent.language ?? "en",
-      prompt: { prompt, llm, tool_ids: [...toolIds] },
+      prompt: {
+        prompt,
+        llm,
+        tool_ids: [...toolIds],
+        built_in_tools: {
+          ...existingAgent?.conversation_config.agent.prompt.built_in_tools,
+          // Lets the agent hold its tongue when asked to pause, instead of
+          // filling the silence or ending the call.
+          skip_turn: {
+            name: "skip_turn",
+            description:
+              "Stay silent for this turn. Use while the clinician has asked you to wait, until they say to resume.",
+            params: { system_tool_type: "skip_turn" },
+          },
+        },
+      },
       dynamic_variables: {
         dynamic_variable_placeholders: {
           ...existingAgent?.conversation_config.agent.dynamic_variables
@@ -169,6 +184,12 @@ const config = {
       },
     },
     conversation: { max_duration_seconds: 420 },
+    turn: {
+      ...existingAgent?.conversation_config.turn,
+      // Seven seconds of quiet was enough to make it talk over a thinking
+      // clinician, and far too short to honour a pause.
+      turn_timeout: 15,
+    },
     ...(voiceId ? { tts: { voice_id: voiceId } } : {}),
   },
 };

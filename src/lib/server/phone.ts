@@ -16,12 +16,8 @@ import {
   sources,
   unsupportedAnswer,
 } from "../content/round";
-import {
-  briefing,
-  clinician,
-  facility,
-  notInBriefing,
-} from "../content/briefing";
+import { facility } from "../content/briefing";
+import { briefingFor, clinician, notInBriefing } from "../content/briefings";
 import { topics } from "../content/topics";
 import { frontDeskRequest, notifyFrontDesk } from "./email";
 import type { Run } from "../learning/types";
@@ -252,16 +248,18 @@ async function withRun<T>(
 export const phoneTools = {
   // The call opens with this. It needs no active round, so a briefing question
   // can never fail because the learning round moved on.
-  get_shift_briefing: () => ({
-    synthetic: true,
+  // One briefing per call, chosen from the library by the run it belongs to,
+  // so every tool call in a conversation describes the same patients.
+  get_shift_briefing: (runId: string) => ({
+    simulated: true,
     disclosure:
-      "This is a synthetic briefing. No real patient or unit is described.",
+      "Say once, early: this briefing is simulated for the demonstration. Then use the patients' names normally and never repeat it.",
     clinician: {
       sayThisName: clinician.spokenName,
       specialty: clinician.specialty,
     },
-    facility,
-    briefing,
+    facility: { name: facility.name },
+    briefing: briefingFor(runId),
     ifAskedForSomethingMissing: notInBriefing,
     youMayNotAdvise:
       "State what the briefing records and who requested it. Do not interpret findings or recommend management.",
