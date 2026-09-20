@@ -22,6 +22,11 @@ const toolRequest = z
     answer: z.string().trim().min(1).max(600).optional(),
     caseId: z.string().min(1).max(80).optional(),
     section: z.string().min(1).max(30).optional(),
+    // Front desk message. The recipient is never one of these fields.
+    reason: z.string().max(40).optional(),
+    message: z.string().max(400).optional(),
+    etaMinutes: z.number().optional(),
+    confirmed: z.boolean().optional(),
   })
   .strict();
 export async function POST(
@@ -40,13 +45,20 @@ export async function POST(
       const { session: _session, ...args } = parsed.data;
       void _session;
       try {
-        return Response.json(queryContext(await readActiveScenario(profileId,runId),tool,args), {headers:{"Cache-Control":"no-store, private"}});
-      } catch(error) {
-        if (error instanceof z.ZodError) throw new RequestError("Invalid context tool parameters.");
+        return Response.json(
+          queryContext(await readActiveScenario(profileId, runId), tool, args),
+          { headers: { "Cache-Control": "no-store, private" } },
+        );
+      } catch (error) {
+        if (error instanceof z.ZodError)
+          throw new RequestError("Invalid context tool parameters.");
         throw error;
       }
     }
-    const result = await run(tool, profileId, runId, parsed.data.answer);
+    if (tool === "email_front_desk")
+      // Messages leave the building: far tighter than the other tools.
+      await rateLimit(`front-desk:${profileId}`, 3, 600_000);
+    const result = await run(tool, profileId, runId, parsed.data);
     return Response.json(result, {
       headers: { "Cache-Control": "no-store, private" },
     });
@@ -60,11 +72,17 @@ function run(
   tool: string,
   profileId: string,
   runId: string,
-  answer: string | undefined,
+  body: { answer?: string; [key: string]: unknown },
 ) {
+  const answer = body.answer;
   switch (tool) {
     case "get_shift_briefing":
       return phoneTools.get_shift_briefing();
+    case "email_front_desk": {
+      const { session: _session, ...request } = body;
+      void _session;
+      return phoneTools.email_front_desk(request);
+    }
     case "get_topics":
       return phoneTools.get_topics();
     case "get_round_context":

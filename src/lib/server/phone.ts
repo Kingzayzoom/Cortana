@@ -23,6 +23,7 @@ import {
   notInBriefing,
 } from "../content/briefing";
 import { topics } from "../content/topics";
+import { frontDeskRequest, notifyFrontDesk } from "./email";
 import type { Run } from "../learning/types";
 
 // A phone round runs the same lesson as the browser, but ElevenLabs reaches this
@@ -265,6 +266,17 @@ export const phoneTools = {
     youMayNotAdvise:
       "State what the briefing records and who requested it. Do not interpret findings or recommend management.",
   }),
+
+  // The clinician can have a message passed to the front desk. The address and
+  // the wording template live on this server; the agent supplies only the words.
+  email_front_desk: (request: unknown) => {
+    const parsed = frontDeskRequest.safeParse(request);
+    if (!parsed.success)
+      throw new RequestError(
+        "Say why you're sending it (running late, an emergency, or something else), include a short message, and confirm with the clinician first.",
+      );
+    return notifyFrontDesk(parsed.data);
+  },
 
   // Quizzes may only use topics that actually have a round behind them.
   get_topics: () => ({

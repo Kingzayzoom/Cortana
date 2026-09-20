@@ -416,6 +416,58 @@ describe("Phone agent tools", () => {
     expect((await tool(lesson.request, lesson.context)).status).toBe(409);
   });
 
+  it("emails the front desk only with a confirmed, server-written message", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    const session = await startedSession();
+    const send = async (body: Record<string, unknown>) => {
+      const { request, context } = toolRequest("email_front_desk", {
+        session,
+        ...body,
+      });
+      const response = await tool(request, context);
+      return { status: response.status, body: await response.json() };
+    };
+    // Unconfirmed, or missing words, never reaches the mail service.
+    expect(
+      (await send({ reason: "running_late", message: "20 minutes out" }))
+        .status,
+    ).toBe(400);
+    expect(
+      (await send({ reason: "running_late", confirmed: true })).status,
+    ).toBe(400);
+    const mail = vi.fn(async () => Response.json({ id: "email_1" }));
+    vi.mocked(fetch).mockImplementation(mail);
+    const ok = await send({
+      reason: "running_late",
+      message: "Held up in traffic, about twenty minutes out.",
+      etaMinutes: 20,
+      confirmed: true,
+    });
+    expect(ok.status).toBe(200);
+    expect(ok.body.sent).toBe(true);
+    // The address is masked in the reply, so it never reaches a transcript.
+    expect(ok.body.to).not.toContain("kingzayzoom@gmail.com");
+    const [, options] = mail.mock.calls[0] as unknown as [string, RequestInit];
+    const sent = JSON.parse(options.body as string);
+    expect(sent.to).toEqual(["kingzayzoom@gmail.com"]);
+    expect(sent.subject).toMatch(/^\[Demo\]/);
+    expect(sent.text).toMatch(/synthetic demonstration message/i);
+    expect(sent.text).toContain("about 20 minutes");
+  });
+
+  it("refuses to send when the mail service is not configured", async () => {
+    const session = await startedSession();
+    const { request, context } = toolRequest("email_front_desk", {
+      session,
+      reason: "emergency",
+      message: "Family emergency, cannot make rounds.",
+      confirmed: true,
+    });
+    const response = await tool(request, context);
+    expect(response.status).toBe(503);
+    expect((await response.json()).error).toMatch(/not configured/);
+  });
+
   it("rejects an unknown tool and a missing answer", async () => {
     const session = await startedSession();
     const unknown = toolRequest("delete_everything", { session });

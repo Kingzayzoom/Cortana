@@ -19,9 +19,47 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "email_front_desk",
+      "description": "Send the clinician's message to the hospital front desk, for example that they are running late or have an emergency. The server holds the address and writes the email: you supply only the reason and the words. Read the message back and get a clear yes before calling this.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/email_front_desk",
+        "method": "POST",
+        "request_headers": { "Authorization": "Bearer __TOOL_SECRET__" },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            },
+            "reason": {
+              "type": "string",
+              "enum": ["running_late", "emergency", "other"],
+              "description": "Why the message is being sent."
+            },
+            "message": {
+              "type": "string",
+              "description": "What to tell the front desk, in the clinician's own words. One or two sentences."
+            },
+            "etaMinutes": {
+              "type": "number",
+              "description": "Minutes until the clinician expects to arrive, when they gave a number."
+            },
+            "confirmed": {
+              "type": "boolean",
+              "description": "True only after you read the message back and the clinician agreed to send it."
+            }
+          },
+          "required": ["session", "reason", "message", "confirmed"]
         }
       }
     }
@@ -46,9 +84,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -73,9 +109,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -104,10 +138,7 @@
               "description": "The learner's actual final answer, in their own words. Pass an option letter only when they clearly said one."
             }
           },
-          "required": [
-            "session",
-            "answer"
-          ]
+          "required": ["session", "answer"]
         }
       }
     }
@@ -132,9 +163,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -160,9 +189,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -188,9 +215,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -216,9 +241,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -248,9 +271,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -292,11 +313,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "caseId",
-            "section",
-            "session"
-          ],
+          "required": ["caseId", "section", "session"],
           "description": "Validated parameters for this client tool."
         }
       }
@@ -327,9 +344,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -355,9 +370,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -383,9 +396,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
