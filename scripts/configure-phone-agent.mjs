@@ -189,9 +189,12 @@ const config = {
       // Seven seconds of quiet was enough to make it talk over a thinking
       // clinician, and far too short to honour a pause.
       turn_timeout: 15,
-      // A one-word interruption such as "pause" has to land while it is
-      // mid-sentence, so it yields the floor readily.
-      turn_eagerness: "eager",
+      // Demos happen in loud rooms. Eager yielding meant a cough or a nearby
+      // conversation stopped it mid-sentence, so it holds the floor normally
+      // and the clinician steers in the gaps between short turns instead.
+      turn_eagerness: "normal",
+      // Backchannels like "mm-hmm" and "okay" should not count as interruptions.
+      merge_with_default_ignore_terms: true,
     },
     asr: {
       ...existingAgent?.conversation_config.asr,
