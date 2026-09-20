@@ -39,6 +39,31 @@ async function api(path, method = "GET", body) {
   }
   return response.json();
 }
+// The provider echoes tool schemas back with its own defaults added and the
+// keys reordered, so compare what the contract actually says.
+function normalize(value) {
+  if (Array.isArray(value)) return value.map(normalize);
+  if (!value || typeof value !== "object") return value;
+  // null, "", false and empty collections are the provider's "unset" values.
+  const empty = (entry) =>
+    entry === null ||
+    entry === "" ||
+    entry === false ||
+    (Array.isArray(entry) && entry.length === 0) ||
+    (entry &&
+      typeof entry === "object" &&
+      !Array.isArray(entry) &&
+      Object.keys(entry).length === 0);
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, entry]) => [key, normalize(entry)])
+      .filter(([, entry]) => !empty(entry)),
+  );
+}
+const sameContract = (a, b) =>
+  JSON.stringify(normalize(a)) === JSON.stringify(normalize(b));
+
 const agent = await api(`agents/${encodeURIComponent(agentId)}`);
 await mkdir(".cortana", { recursive: true });
 const backupPath = `.cortana/agent-before-integration-${Date.now()}.json`;
@@ -80,8 +105,10 @@ if (apply) {
         const attached = await api(`tools/${id}`);
         if (attached.tool_config.name === name) {
           if (
-            JSON.stringify(attached.tool_config.parameters) !==
-            JSON.stringify(definition.tool_config.parameters)
+            !sameContract(
+              attached.tool_config.parameters,
+              definition.tool_config.parameters,
+            )
           )
             throw new Error(
               `Existing ${name} tool has a different schema. Review it before changing this shared tool.`,
