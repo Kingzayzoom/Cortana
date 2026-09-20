@@ -3583,6 +3583,8 @@ svg {
 
 @media (max-width: 760px) {
   .dashboard-grid:not(.live-mode) .orb-halo { inset: 9% -5% 0; }
+}
+
 /* Live phone transcript, readable across a room. */
 .call-transcript {
   margin-top: 18px;
