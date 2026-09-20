@@ -181,7 +181,9 @@ const config = {
           round_id: "dapa-hf-01",
           streak_days: "0",
           returning_learner: "no",
-          phone_session: "",
+          // Inbound callers have no signed session; this value tells the
+          // server they are a guest, and keeps the tools satisfied.
+          phone_session: "guest-inbound-caller",
         },
       },
     },
