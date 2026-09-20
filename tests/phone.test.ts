@@ -446,7 +446,8 @@ describe("Phone agent tools", () => {
     expect(patients.size).toBeGreaterThan(1);
   });
 
-  it("gives an inbound caller the briefing but nothing that writes", async () => {
+  it("lets an inbound caller send a confirmed front desk message but not write progress", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
     const guest = { session: "guest-inbound-caller" };
     const ask = async (name: string, body: Record<string, unknown> = {}) => {
       const { request, context } = toolRequest(name, { ...guest, ...body });
@@ -460,11 +461,33 @@ describe("Phone agent tools", () => {
     expect(briefing.body.guest).toBe(true);
     expect(briefing.body.briefing.urgent.patient).toMatch(/^(Mr|Ms)\./);
     expect((await ask("get_topics")).status).toBe(200);
-    // Everything that touches a learner's saved progress is declined.
+    // A message still requires the same explicit confirmation as outbound.
+    expect(
+      (
+        await ask("email_front_desk", {
+          reason: "running_late",
+          message: "Traffic is heavy; I am about twenty minutes away.",
+        })
+      ).status,
+    ).toBe(400);
+    const mail = vi.fn(async () => Response.json({ id: "email_guest_1" }));
+    vi.mocked(fetch).mockImplementation(mail);
+    const sent = await ask("email_front_desk", {
+      reason: "running_late",
+      message: "Traffic is heavy; I am about twenty minutes away.",
+      etaMinutes: 20,
+      confirmed: true,
+    });
+    expect(sent.status).toBe(200);
+    expect(sent.body.sent).toBe(true);
+    const [, options] = mail.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(options.body as string).to).toEqual([
+      "kingzayzoom@gmail.com",
+    ]);
+    // Operations that touch a learner's saved progress remain unavailable.
     for (const name of [
       "get_round_context",
       "complete_round",
-      "email_front_desk",
       "get_prime_session",
     ]) {
       const refused = await ask(name);
