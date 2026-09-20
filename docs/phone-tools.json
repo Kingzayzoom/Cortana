@@ -240,7 +240,7 @@
           "properties": {
             "caseId": {
               "type": "string",
-              "description": "Use the exact case ID returned by the corresponding context tool; the educational challenge uses hf-case-01."
+              "description": "The exact synthetic case ID returned by get_primary_case, never the educational challenge ID."
             },
             "session": {
               "type": "string",
@@ -272,7 +272,7 @@
           "properties": {
             "caseId": {
               "type": "string",
-              "description": "Use the exact case ID returned by the corresponding context tool; the educational challenge uses hf-case-01."
+              "description": "The exact synthetic case ID returned by get_primary_case, never the educational challenge ID."
             },
             "section": {
               "type": "string",
@@ -319,7 +319,7 @@
           "properties": {
             "caseId": {
               "type": "string",
-              "description": "Use the exact case ID returned by the corresponding context tool; the educational challenge uses hf-case-01."
+              "description": "The exact synthetic case ID returned by get_primary_case, never the educational challenge ID."
             },
             "session": {
               "type": "string",

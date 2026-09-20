@@ -1,5 +1,37 @@
 // @vitest-environment jsdom
 // SDK boundary test doubles only. Live provider verification uses the real SDK.
+// Context tools share the active browser profile and respect SDK session lifetime.
+it("starts a context briefing with selected language and bounded server tools", async () => {
+  act(() => {
+    voice.setLanguage("es");
+    voice.requestStart("context");
+  });
+  await start();
+  expect(options()).toMatchObject({
+    dynamicVariables: { context_mode: "context" },
+    overrides: { agent: { language: "es" } },
+  });
+  vi.mocked(fetch).mockResolvedValueOnce(
+    Response.json({ available: true, data: { clinicianName: "Dr. Zabish" } }),
+  );
+  const result = await options().clientTools!.get_context_summary({});
+  expect(JSON.parse(result as string)).toMatchObject({ available: true });
+  expect(fetch).toHaveBeenLastCalledWith(
+    "/api/context/tools/get_context_summary",
+    expect.objectContaining({ method: "POST", body: "{}" }),
+  );
+  const before = vi.mocked(fetch).mock.calls.length;
+  await options().clientTools!.get_case_section({
+    caseId: "patient-024",
+    section: "secrets",
+  });
+  expect(fetch).toHaveBeenCalledTimes(before);
+  act(() => voice.end());
+  expect(
+    JSON.parse((await options().clientTools!.get_primary_case({})) as string),
+  ).toHaveProperty("error");
+  expect(fetch).toHaveBeenCalledTimes(before);
+});
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { useLayoutEffect, type ReactNode } from "react";

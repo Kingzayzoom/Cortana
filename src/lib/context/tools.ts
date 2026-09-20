@@ -81,7 +81,10 @@ export function queryContext(
         result = item?.scheduledEvents;
         break;
       case "get_hospital_timeline":
-        result = { timeline: s.timeline, hospitalEvents: s.hospitalEvents };
+        result =
+          s.timeline.length || s.hospitalEvents.length
+            ? { timeline: s.timeline, hospitalEvents: s.hospitalEvents }
+            : null;
         break;
       case "get_education_triggers":
         result = s.educationTriggers;

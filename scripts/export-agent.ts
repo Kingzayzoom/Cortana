@@ -61,8 +61,7 @@ const parameterDescriptions: Record<string, string> = {
     "The next permitted lesson stage: briefing, challenge, or questions.",
   sectionId:
     "The briefing section to show: population, finding, or limitation. Advance in that order.",
-  caseId:
-    "Use the exact case ID returned by the corresponding context tool; the educational challenge uses hf-case-01.",
+  caseId: "The predefined synthetic case ID hf-case-01.",
   section:
     "The requested case section: history, status, vitals, labs, changes, schedule, or review_items.",
   sourceIds:
@@ -111,6 +110,20 @@ function providerSchema(value: unknown, parameterName?: string): unknown {
   }
   return value;
 }
+function exportedParameters(name: string, schema: z.ZodType) {
+  const result = providerSchema(z.toJSONSchema(schema)) as {
+    properties: Record<string, { description?: string }>;
+    required?: string[];
+  };
+  if (
+    name.startsWith("get_") &&
+    name !== "get_round_context" &&
+    result.properties?.caseId
+  )
+    result.properties.caseId.description =
+      "The exact synthetic case ID returned by get_primary_case, never the educational challenge ID.";
+  return result;
+}
 await writeFile(
   "docs/elevenlabs-tools.json",
   JSON.stringify(
@@ -121,7 +134,7 @@ await writeFile(
         description,
         expects_response: true,
         response_timeout_secs: 20,
-        parameters: providerSchema(z.toJSONSchema(schema)),
+        parameters: exportedParameters(name, schema),
       },
     })),
     null,
@@ -142,9 +155,7 @@ await writeFile(
           ),
       ),
       ...contextToolNames.map((name) => {
-        const schema = providerSchema(
-          z.toJSONSchema(contextToolSchemas[name]),
-        ) as { properties: Record<string, unknown>; required?: string[] };
+        const schema = exportedParameters(name, contextToolSchemas[name]);
         return {
           tool_config: {
             type: "webhook",

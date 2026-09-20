@@ -81,7 +81,22 @@ await mkdir(".cortana", { recursive: true });
 const statePath = ".cortana/phone-agent.json";
 const saved = await readFile(statePath, "utf8")
   .then(JSON.parse)
-  .catch(() => ({ agentId: null, tools: {} }));
+  .catch(() => ({
+    agentId: process.env.ELEVENLABS_PHONE_AGENT_ID || null,
+    tools: {},
+  }));
+const existingAgent = saved.agentId
+  ? await api(`agents/${encodeURIComponent(saved.agentId)}`)
+  : null;
+if (existingAgent) {
+  await writeFile(
+    `.cortana/phone-agent-before-integration-${Date.now()}.json`,
+    JSON.stringify(existingAgent, null, 2),
+    { mode: 0o600, flag: "wx" },
+  );
+  llm = existingAgent.conversation_config.agent.prompt.llm ?? llm;
+  voiceId = existingAgent.conversation_config.tts?.voice_id ?? voiceId;
+}
 
 console.log(
   JSON.stringify(
@@ -116,7 +131,9 @@ if (!apply) {
 
 const save = () =>
   writeFile(statePath, JSON.stringify(saved, null, 2), { mode: 0o600 });
-const toolIds = [];
+const toolIds = new Set(
+  existingAgent?.conversation_config.agent.prompt.tool_ids ?? [],
+);
 for (const definition of definitions) {
   const name = definition.tool_config.name;
   const existing = saved.tools[name];
@@ -125,7 +142,7 @@ for (const definition of definitions) {
     : (await api("tools", "POST", definition)).id;
   if (!id) throw new Error(`No tool ID returned for ${name}.`);
   saved.tools[name] = id;
-  toolIds.push(id);
+  toolIds.add(id);
   await save();
 }
 
@@ -135,10 +152,12 @@ const config = {
     agent: {
       first_message:
         "Hi {{learner_name}}, it's Cortana, your AI learning companion. Is now a good time for your synthetic demo briefing or learning round?",
-      language: "en",
-      prompt: { prompt, llm, tool_ids: toolIds },
+      language: existingAgent?.conversation_config.agent.language ?? "en",
+      prompt: { prompt, llm, tool_ids: [...toolIds] },
       dynamic_variables: {
         dynamic_variable_placeholders: {
+          ...existingAgent?.conversation_config.agent.dynamic_variables
+            ?.dynamic_variable_placeholders,
           context_mode: "round",
           context_briefing: "",
           learner_name: "Doctor",
