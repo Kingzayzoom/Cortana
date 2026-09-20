@@ -49,7 +49,8 @@ export async function POST(
       throw new RequestError("The tool request was not understood.");
     if (parsed.data.session === GUEST_SESSION) {
       await rateLimit("phone-guest", 120);
-      const seed = parsed.data.conversationId || "guest";
+      const seed =
+        parsed.data.conversationId || `guest-${new Date().getUTCHours()}`;
       if (tool === "get_shift_briefing")
         return Response.json(guestTools.get_shift_briefing(seed), {
           headers: { "Cache-Control": "no-store, private" },

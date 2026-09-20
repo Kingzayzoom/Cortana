@@ -57,6 +57,8 @@ export async function createPhoneSession(profileId: string, runId: string) {
 export const GUEST_SESSION = "guest-inbound-caller";
 
 export const guestTools = {
+  // Without a conversation to seed from, the briefing rotates through the
+  // library by the hour: steady inside one call, different later in the day.
   get_shift_briefing: (conversationId: string) => ({
     ...phoneTools.get_shift_briefing(conversationId),
     guest: true,
