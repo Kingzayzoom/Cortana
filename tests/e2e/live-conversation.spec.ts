@@ -1,5 +1,26 @@
 import { expect, test } from "@playwright/test";
 
+test("language selection stays with the voice controls throughout a round", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const language = page.getByRole("combobox", {
+    name: "Voice language",
+    exact: true,
+  });
+  await expect(language).toBeVisible();
+  await language.selectOption("es");
+  await page.getByRole("button", { name: "Explore in text mode" }).click();
+  await expect(language).toBeVisible();
+  await expect(language).toHaveValue("es");
+  await page.getByRole("button", { name: "Pause round" }).click();
+  await expect(language).toBeVisible();
+  await expect(language).toHaveValue("es");
+  await page.getByRole("button", { name: "End round", exact: true }).click();
+  await expect(language).toBeVisible();
+  await expect(language).toHaveValue("es");
+});
+
 test("start reveals only the conversation surface, cancel restores the dashboard", async ({
   page,
 }) => {
