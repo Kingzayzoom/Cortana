@@ -77,7 +77,7 @@ function run(
   const answer = body.answer;
   switch (tool) {
     case "get_shift_briefing":
-      return phoneTools.get_shift_briefing();
+      return phoneTools.get_shift_briefing(runId);
     case "email_front_desk": {
       const { session: _session, ...request } = body;
       void _session;
