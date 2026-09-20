@@ -158,6 +158,19 @@ async function finish(profile: string, date = now) {
   return actPrime(profile, { action: "complete", sessionId: s.id }, date);
 }
 describe("Prime persistence", () => {
+  it("reinforces a miss with a different question and awards its bonus once",async()=>{
+    const first=await actPrime("reinforce",{action:"start"},now),q=questions.find(q=>q.id===first.questions[0].id)!;
+    await actPrime("reinforce",{action:"answer",sessionId:first.session!.id,questionId:q.id,answer:q.options.find(o=>o.id!==q.correctOptionId)!.id},now);
+    await finish("reinforce",now);
+    const tomorrow=new Date("2026-09-20T16:00:00Z"),next=await actPrime("reinforce",{action:"start"},tomorrow);
+    expect(next.session!.selection[0].reason).toBe("reinforcement");
+    expect(next.questions[0].id).not.toBe(q.id);
+    expect(next.questions[0].conceptIds).toEqual(q.conceptIds);
+    const done=await finish("reinforce",tomorrow);
+    expect(done.session!.xp).toBe(90);expect(done.stats.reinforced).toBe(1);
+    await actPrime("reinforce",{action:"complete",sessionId:done.session!.id},tomorrow);
+    expect((await readPrime("reinforce",tomorrow)).session!.xp).toBe(90);
+  });
   it("never reveals grading keys or explanations for unanswered questions", async () => {
     const view = await readPrime("a", now);
     expect(JSON.stringify(view)).not.toContain("correctOptionId");

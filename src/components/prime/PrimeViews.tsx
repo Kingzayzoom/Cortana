@@ -242,7 +242,7 @@ export function PrimeSessionView() {
         return;
       const target = e.target as HTMLElement;
       if (
-        target.closest("input,textarea,select,button,a,[contenteditable=true]")
+        target.closest("input,textarea,select,button,a,[contenteditable=true],[role=dialog]")
       )
         return;
       const index =
@@ -284,7 +284,7 @@ export function PrimeSessionView() {
         questionId: q.id,
         sourceId,
       });
-      learning.openEvidence(sourceId);
+      learning.openEvidence(sourceId, false);
     } catch {}
   };
   const completed = Boolean(s?.completedAt);
@@ -380,6 +380,10 @@ export function PrimeSessionView() {
           </div>
           <div
             className="prime-progress"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={3}
+            aria-valuenow={s.cursor+1}
             aria-label={"Question " + (s.cursor + 1) + " of 3"}
           >
             {[0, 1, 2].map((i) => (

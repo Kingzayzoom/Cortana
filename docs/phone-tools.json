@@ -445,7 +445,7 @@
     "tool_config": {
       "type": "webhook",
       "name": "get_prime_session",
-      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "description": "Use the authoritative daily Prime session for this signed caller. Submit actual answers for server grading, advance only after feedback, and complete only after three answers. Never infer correctness.",
       "response_timeout_secs": 20,
       "api_schema": {
         "url": "__PUBLIC_URL__/api/phone/tools/get_prime_session",
@@ -473,7 +473,7 @@
     "tool_config": {
       "type": "webhook",
       "name": "submit_prime_answer",
-      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "description": "Use the authoritative daily Prime session for this signed caller. Submit actual answers for server grading, advance only after feedback, and complete only after three answers. Never infer correctness.",
       "response_timeout_secs": 20,
       "api_schema": {
         "url": "__PUBLIC_URL__/api/phone/tools/submit_prime_answer",
@@ -516,7 +516,7 @@
     "tool_config": {
       "type": "webhook",
       "name": "get_prime_feedback",
-      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "description": "Use the authoritative daily Prime session for this signed caller. Submit actual answers for server grading, advance only after feedback, and complete only after three answers. Never infer correctness.",
       "response_timeout_secs": 20,
       "api_schema": {
         "url": "__PUBLIC_URL__/api/phone/tools/get_prime_feedback",
@@ -549,7 +549,7 @@
     "tool_config": {
       "type": "webhook",
       "name": "complete_prime",
-      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "description": "Use the authoritative daily Prime session for this signed caller. Submit actual answers for server grading, advance only after feedback, and complete only after three answers. Never infer correctness.",
       "response_timeout_secs": 20,
       "api_schema": {
         "url": "__PUBLIC_URL__/api/phone/tools/complete_prime",
@@ -582,7 +582,7 @@
     "tool_config": {
       "type": "webhook",
       "name": "advance_prime",
-      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "description": "Use the authoritative daily Prime session for this signed caller. Submit actual answers for server grading, advance only after feedback, and complete only after three answers. Never infer correctness.",
       "response_timeout_secs": 20,
       "api_schema": {
         "url": "__PUBLIC_URL__/api/phone/tools/advance_prime",

@@ -25,7 +25,7 @@ type LearningContextValue = {
   act: (body: Record<string, unknown>) => Promise<Result>;
   observe: (observation: Observation, eventId?: string, runId?: string) => void;
   refresh: () => Promise<void>;
-  openEvidence: (id: string | null) => boolean;
+  openEvidence: (id: string | null, recordRoundSignal?:boolean) => boolean;
   addMessage: (message: Message) => void;
   clearMessages: () => void;
   clearError: () => void;
@@ -118,12 +118,12 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
     [act],
   );
   const openEvidence = useCallback(
-    (id: string | null) => {
+    (id: string | null, recordRoundSignal=true) => {
       if (id && !sourceById(id)) {
         setError("That source is not in this round’s evidence library.");
         return false;
       }
-      if (evidenceRef.current !== id && id) {
+      if (recordRoundSignal && evidenceRef.current !== id && id) {
         observe({
           type: "evidence_viewed",
           sourceId: id as "dapa-hf" | "dapa-diabetes",

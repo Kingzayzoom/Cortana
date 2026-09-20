@@ -1,8 +1,8 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { contextToolNames, contextToolSchemas } from "../src/lib/context/tools";
-import { primeToolNames,primeToolSchemas } from "../src/lib/prime/tools";
-const generatedToolSchemas={...contextToolSchemas,...primeToolSchemas};
-const generatedToolNames=[...contextToolNames,...primeToolNames];
+import { primeToolNames, primeToolSchemas } from "../src/lib/prime/tools";
+const generatedToolSchemas = { ...contextToolSchemas, ...primeToolSchemas };
+const generatedToolNames = [...contextToolNames, ...primeToolNames];
 import { z } from "zod";
 import {
   clientAnswerTool,
@@ -14,7 +14,14 @@ import {
 } from "../src/lib/validation/contracts";
 import { round, sources } from "../src/lib/content/round";
 const definitions = [
-  ...primeToolNames.map(name=>[name,primeToolSchemas[name],"Cortana Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness."] as const),
+  ...primeToolNames.map(
+    (name) =>
+      [
+        name,
+        primeToolSchemas[name],
+        "Cortana Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
+      ] as const,
+  ),
   ...contextToolNames.map(
     (name) =>
       [
@@ -119,9 +126,13 @@ function exportedParameters(name: string, schema: z.ZodType) {
     properties: Record<string, { description?: string }>;
     required?: string[];
   };
-  if(primeToolNames.includes(name as typeof primeToolNames[number])){
-    if(result.properties.questionId)result.properties.questionId.description="The exact current Prime question ID returned by get_prime_session; never the legacy lesson question ID.";
-    if(result.properties.sessionId)result.properties.sessionId.description="The exact session.id UUID returned by get_prime_session.";
+  if (primeToolNames.includes(name as (typeof primeToolNames)[number])) {
+    if (result.properties.questionId)
+      result.properties.questionId.description =
+        "The exact current Prime question ID returned by get_prime_session; never the legacy lesson question ID.";
+    if (result.properties.sessionId)
+      result.properties.sessionId.description =
+        "The exact session.id UUID returned by get_prime_session.";
   }
   if (
     name.startsWith("get_") &&
@@ -168,8 +179,11 @@ await writeFile(
           tool_config: {
             type: "webhook",
             name,
-            description:
-              "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+            description: primeToolNames.includes(
+              name as (typeof primeToolNames)[number],
+            )
+              ? "Use the authoritative daily Prime session for this signed caller. Submit actual answers for server grading, advance only after feedback, and complete only after three answers. Never infer correctness."
+              : "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
             response_timeout_secs: 20,
             api_schema: {
               url: "__PUBLIC_URL__/api/phone/tools/" + name,

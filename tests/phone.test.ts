@@ -99,6 +99,28 @@ async function startedSession() {
 }
 
 describe("Placing a phone round", () => {
+  it("runs Prime through signed phone tools against the same saved session", async () => {
+    expect((await call(callRequest({ mode: "prime" }))).status).toBe(200);
+    const sent = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string);
+    const variables =
+      sent.conversation_initiation_client_data.dynamic_variables;
+    expect(variables.context_mode).toBe("prime");
+    const get = toolRequest("get_prime_session", {
+      session: variables.phone_session,
+    });
+    const current = await (await tool(get.request, get.context)).json();
+    expect(current.questions).toHaveLength(3);
+    expect(JSON.stringify(current.questions)).not.toContain("correctOptionId");
+    const answer = toolRequest("submit_prime_answer", {
+      session: variables.phone_session,
+      sessionId: current.session.id,
+      questionId: current.questions[0].id,
+      answer: "Option A",
+    });
+    const response = await tool(answer.request, answer.context);
+    expect(response.status).toBe(200);
+    expect((await response.json()).stats.questions).toBe(1);
+  });
   it("validates streamed uploads server-side and preserves the last valid context", async () => {
     const upload = (body: string, origin = "http://localhost:3100") =>
       new Request("http://localhost:3100/api/context", {

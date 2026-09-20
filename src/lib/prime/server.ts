@@ -223,7 +223,7 @@ export async function actPrime(
         const grade = gradePrimeAnswer(q.id, option);
         const reinforced =
           grade.correct &&
-          q.conceptIds.some((c) => p.reviews[c]?.needsReinforcement);
+          (q.conceptIds.some((c) => p.reviews[c]?.needsReinforcement) || s.selection[s.cursor].reason==="reinforcement");
         s.answers[q.id] = { ...grade, reinforced };
         for (const c of q.conceptIds)
           p.reviews[c] = reviewAfter(p.reviews[c], c, grade.correct, now, date);

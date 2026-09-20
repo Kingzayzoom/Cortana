@@ -1,6 +1,7 @@
 import type { PrimeQuestion, PrimeState, Selection } from "./types";
 import type { EducationTrigger } from "../context/types";
 import type { LearningSignal } from "../learning-signals/types";
+import { reduceLearningSignals } from "../learning-signals/reducer";
 export function buildDailyPrime(
   state: PrimeState,
   bank: PrimeQuestion[],
@@ -29,16 +30,14 @@ export function buildDailyPrime(
     (q, i, a) => a.findIndex((x) => x.id === q.id) === i,
   );
   const result: Selection[] = [];
+  const activity = reduceLearningSignals(history);
   for (let i = 0; i < 3; i++) {
     const eligible = candidates.filter((q) => !used.has(q.id));
     const score = (q: PrimeQuestion) => {
       const review = state.reviews[q.conceptIds[0]];
-      const signalMiss = history.some(
-        (e) =>
-          e.type === "challenge_resolved" &&
-          !e.correct &&
-          e.conceptIds.includes(q.conceptIds[0]),
-      );
+      const signalMiss = activity.find(
+        (c) => c.id === q.conceptIds[0],
+      )?.unresolvedMiss;
       const priority =
         review?.needsReinforcement || (!review && signalMiss)
           ? 0
@@ -57,12 +56,9 @@ export function buildDailyPrime(
     const q = eligible[0];
     if (!q) break;
     const review = state.reviews[q.conceptIds[0]];
-    const missed = history.some(
-      (e) =>
-        e.type === "challenge_resolved" &&
-        !e.correct &&
-        e.conceptIds.includes(q.conceptIds[0]),
-    );
+    const missed = activity.find(
+      (c) => c.id === q.conceptIds[0],
+    )?.unresolvedMiss;
     result.push({
       questionId: q.id,
       reason:
