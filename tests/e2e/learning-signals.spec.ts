@@ -42,9 +42,7 @@ test("actual preview events, replay safety, privacy, persistence and export", as
     headers: { Origin: "https://untrusted.invalid" },
   });
   expect(crossOrigin.status()).toBe(403);
-  await page
-    .getByRole("button", { name: "View supporting source", exact: true })
-    .click();
+  await page.getByRole("button", { name: "View source", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.getByRole("button", { name: "The trial", exact: true }).click();
   await page.getByRole("button", { name: "Close", exact: true }).click();

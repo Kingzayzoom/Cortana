@@ -1,261 +1,352 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
-import {
-  Activity,
-  BookOpen,
-  Check,
-  Circle,
-  MessageSquareText,
-  Sparkles,
-} from "lucide-react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { ArrowDown, ArrowRight, Send } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
-import { round, sourceById } from "@/lib/content/round";
+import { round, ROUND_ID } from "@/lib/content/round";
+import { Button } from "@/components/ui/button";
 
-type Step = {
-  label: string;
-  detail: string;
-};
-
-const steps: Step[] = [
-  { label: "Trial population", detail: "Who was studied" },
-  { label: "Evidence discussion", detail: "Finding and limits" },
-  { label: "Clinical challenge", detail: "Apply the distinction" },
-  { label: "Evidence review", detail: "Ground the feedback" },
-  { label: "Questions & wrap", detail: "Make it your own" },
-];
-
-function getStep(stage: string | undefined, section: number | undefined) {
-  if (stage === "briefing") return section === 0 ? 0 : 1;
-  if (stage === "challenge") return 2;
-  if (stage === "feedback") return 3;
-  if (stage === "questions" || stage === "completed") return 4;
-  return 0;
-}
-
-function getSessionState(
-  connection: string,
-  activity: string,
-  preview: boolean,
-  paused: boolean,
-  consentOpen: boolean,
-) {
-  if (paused) return { id: "paused", label: "Round paused" };
-  if (consentOpen && connection === "idle")
-    return { id: "entering", label: "Ready to connect" };
-  if (connection === "connecting")
-    return { id: "connecting", label: "Opening the conversation" };
-  if (connection === "disconnecting")
-    return { id: "ending", label: "Closing the conversation" };
-  if (preview) return { id: "preview", label: "Text preview in progress" };
-  if (activity === "assistant-speaking")
-    return { id: "assistant-speaking", label: "Cortana is speaking" };
-  if (activity === "user-speaking")
-    return { id: "user-speaking", label: "Listening to you" };
-  if (activity === "awaiting-response")
-    return { id: "between-turns", label: "Cortana is thinking" };
-  return { id: "listening", label: "Your turn" };
-}
-
-export function LiveConversationPanel({
-  active,
-  children,
-}: {
-  active: boolean;
-  children?: ReactNode;
-}) {
-  const { data, openEvidence } = useLearning();
+/** One conversation surface. SDK messages remain the source of live dialogue. */
+export function LiveConversationPanel({ active }: { active: boolean }) {
+  const { data, act, busy, addMessage, openEvidence } = useLearning();
   const voice = useVoice();
   const transcript = useRef<HTMLDivElement>(null);
+  const following = useRef(true);
+  const [jump, setJump] = useState(false);
+  const [typed, setTyped] = useState("");
+  const [clarification, setClarification] = useState("");
   const run = data?.run;
-  const currentStep = getStep(run?.stage, run?.section);
-  const section = round.sections[run?.section ?? 0] ?? round.sections[0];
-  const state = getSessionState(
-    voice.connection,
-    voice.activity,
-    voice.preview,
-    voice.paused,
-    voice.consentOpen,
-  );
+  const [lastMessages, setLastMessages] = useState(voice.messages);
+  if (voice.messages.length > 0 && voice.messages !== lastMessages)
+    setLastMessages(voice.messages);
+  const messages =
+    run?.completed && voice.messages.length === 0
+      ? lastMessages
+      : voice.messages;
+  // Anchor the case once, before subsequent turns, and retain it after grading.
+  const [caseAnchor, setCaseAnchor] = useState<{
+    runId: string;
+    before: string | null;
+  } | null>(null);
+  const hasCase =
+    run &&
+    ["challenge", "feedback", "questions", "completed"].includes(run.stage);
+  if (active && hasCase && caseAnchor?.runId !== run.id) {
+    setCaseAnchor({ runId: run.id, before: messages.at(-1)?.id ?? null });
+  }
+  const caseVisible = active && caseAnchor?.runId === run?.id;
+  const anchorIndex = caseVisible
+    ? messages.findIndex((message) => message.id === caseAnchor?.before)
+    : -1;
 
-  const focus = useMemo(() => {
-    if (run?.stage === "challenge") {
-      return {
-        eyebrow: "Clinical challenge",
-        title: "Apply the trial distinction",
-        text: round.case.question,
-        sourceId: "dapa-hf",
-      };
-    }
-    if (run?.stage === "feedback") {
-      return {
-        eyebrow: "Evidence-grounded feedback",
-        title:
-          run.grade?.verdict === "correct"
-            ? "The population distinction"
-            : "Revisit the population",
-        text:
-          run.grade?.takeaway ??
-          "Keep the population and scope of the evidence in view.",
-        sourceId: run.grade?.sourceIds[0] ?? "dapa-hf",
-      };
-    }
-    if (run?.stage === "questions") {
-      return {
-        eyebrow: "Questions & wrap",
-        title: "Make the evidence your own",
-        text: "Ask one final question about this round, or complete your practice.",
-        sourceId: "dapa-diabetes",
-      };
-    }
-    return {
-      eyebrow: `The brief · Section ${(run?.section ?? 0) + 1} of 3`,
-      title: section.title,
-      text:
-        run?.section === 0
-          ? "Symptomatic HFrEF with LVEF ≤40%; diabetes was not required."
-          : run?.section === 1
-            ? "The primary outcome combined worsening heart failure and cardiovascular death."
-            : "Keep the selected trial population and exploratory subgroup limits in view.",
-      sourceId: section.sourceIds[0],
-    };
-  }, [run?.grade, run?.section, run?.stage, section]);
-  const source = sourceById(focus.sourceId);
-
+  // Local preview reads the reviewed source text; never synthesize live speech.
   useEffect(() => {
-    if (!active || !transcript.current) return;
-    transcript.current.scrollTop = transcript.current.scrollHeight;
-  }, [active, voice.messages]);
+    if (!active || !voice.preview || !run || run.stage !== "briefing") return;
+    addMessage({
+      id: `preview-${run.id}-section-${run.section}`,
+      role: "assistant",
+      text: round.sections[run.section].text,
+      preview: true,
+    });
+  }, [active, voice.preview, run, addMessage]);
 
+  const scrollToLatest = () => {
+    const node = transcript.current;
+    if (!node) return;
+    following.current = true;
+    setJump(false);
+    node.scrollTo({
+      top: node.scrollHeight,
+      behavior:
+        data?.preferences.reducedMotion ||
+        matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+    });
+  };
+  useEffect(() => {
+    if (!active) {
+      following.current = true;
+      setJump(false);
+      return;
+    }
+    const node = transcript.current;
+    if (!node) return;
+    if (following.current) {
+      node.scrollTo({
+        top: node.scrollHeight,
+        behavior:
+          data?.preferences.reducedMotion ||
+          matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "instant"
+            : "smooth",
+      });
+    } else setJump(true);
+  }, [
+    active,
+    messages,
+    run?.stage,
+    caseVisible,
+    data?.preferences.reducedMotion,
+  ]);
+
+  const submit = async (text: string) => {
+    if (!run || !text.trim()) return;
+    if (run.stage === "challenge") {
+      const result = await act({
+        action: "answer",
+        runId: run.id,
+        roundId: ROUND_ID,
+        questionId: round.case.questionId,
+        answer: text,
+        requestId: crypto.randomUUID(),
+      });
+      setClarification(
+        result.grade?.verdict === "clarify" ? result.grade.explanation : "",
+      );
+      if (voice.preview) {
+        addMessage({
+          id: crypto.randomUUID(),
+          role: "user",
+          text,
+          preview: true,
+        });
+        if (result.grade)
+          addMessage({
+            id: crypto.randomUUID(),
+            role: "assistant",
+            text: result.grade.explanation,
+            preview: true,
+          });
+      } else {
+        voice.send(
+          `I selected ${text}. Please call submit_answer to retrieve the authoritative grade before explaining it.`,
+          text,
+        );
+      }
+    } else if (voice.preview) {
+      addMessage({
+        id: crypto.randomUUID(),
+        role: "user",
+        text,
+        preview: true,
+      });
+      const result = await act({
+        action: "question",
+        runId: run.id,
+        question: text,
+      });
+      if (result.answer)
+        addMessage({
+          id: crypto.randomUUID(),
+          role: "assistant",
+          text: result.answer,
+          preview: true,
+        });
+    } else voice.send(text, undefined, "question");
+    setTyped("");
+  };
+  const advancePreview = async () => {
+    if (!run) return;
+    if (run.stage === "questions") {
+      await act({
+        action: "complete",
+        runId: run.id,
+        roundId: ROUND_ID,
+        requestId: crypto.randomUUID(),
+      });
+      voice.end();
+    } else {
+      await act({
+        action: "stage",
+        runId: run.id,
+        stageId:
+          run.stage === "feedback"
+            ? "questions"
+            : run.section < 2
+              ? "briefing"
+              : "challenge",
+        ...(run.stage === "briefing" && run.section < 2
+          ? { sectionId: round.sections[run.section + 1].id }
+          : {}),
+      });
+    }
+  };
+  const challenge = (
+    <section
+      className="transcript-challenge"
+      aria-label="Synthetic clinical challenge"
+    >
+      <span className="case-label">Synthetic clinical challenge</span>
+      <p>{round.case.description}</p>
+      <h3>{round.case.question}</h3>
+      <div className="answer-options">
+        {round.case.options.map((option) => (
+          <button
+            key={option.id}
+            disabled={busy || voice.paused || run?.stage !== "challenge"}
+            onClick={() => void submit(option.id).catch(() => {})}
+          >
+            <span>{option.id}</span>
+            {option.text}
+          </button>
+        ))}
+      </div>
+      {clarification && run?.stage === "challenge" && (
+        <p role="status">{clarification}</p>
+      )}
+    </section>
+  );
+  const connected = voice.connection === "connected";
+  const canSend = (connected || voice.preview) && !run?.completed;
   return (
     <aside
       className="live-intelligence-panel"
-      aria-label="Live round intelligence"
+      aria-label="Live conversation"
       aria-hidden={!active}
       inert={!active ? true : undefined}
-      data-session-state={state.id}
     >
-      <header className="live-panel-header">
-        <div>
-          <p className="live-panel-kicker">TODAY&apos;S ROUND</p>
-          <h2>{round.title}</h2>
-          <p>{round.duration} · Cardiology</p>
-        </div>
-        <span className="live-round-number">01</span>
+      <header className="conversation-header">
+        <h2>Live conversation</h2>
+        <span>
+          {run?.completed
+            ? "Complete"
+            : voice.preview
+              ? "Text preview"
+              : connected
+                ? "● Live"
+                : "Connecting"}
+        </span>
       </header>
-
-      <section className="live-progress" aria-label="Round progress">
-        <div className="live-section-label">
-          <span>Round progress</span>
-          <span>
-            Step {currentStep + 1} of {steps.length}
-          </span>
-        </div>
-        <ol>
-          {steps.map((step, index) => (
-            <li
-              key={step.label}
-              className={
-                index < currentStep
-                  ? "is-complete"
-                  : index === currentStep
-                    ? "is-current"
-                    : ""
-              }
-              aria-current={index === currentStep ? "step" : undefined}
-            >
-              <span className="live-step-marker">
-                {index < currentStep ? (
-                  <Check size={12} aria-hidden="true" />
-                ) : (
-                  <Circle size={9} aria-hidden="true" />
-                )}
-              </span>
-              <span>
-                <strong>{step.label}</strong>
-                <small>{step.detail}</small>
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="live-focus" aria-labelledby="live-focus-heading">
-        <div className="live-focus-icon" aria-hidden="true">
-          <Sparkles size={17} />
-        </div>
-        <div>
-          <p>{focus.eyebrow}</p>
-          <h3 id="live-focus-heading">Current focus</h3>
-          <strong className="live-focus-title">{focus.title}</strong>
-          <blockquote>{focus.text}</blockquote>
-          {source && (
-            <button
-              className="text-button live-source-link"
-              onClick={() => openEvidence(source.id)}
-            >
-              <BookOpen size={14} />
-              {source.shortTitle}
-            </button>
-          )}
-        </div>
-      </section>
-
-      <section
-        className="live-transcript-section"
-        aria-labelledby="live-transcript-heading"
+      <div
+        className="conversation-scroll"
+        ref={transcript}
+        tabIndex={0}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        aria-label="Conversation between you and Cortana"
+        onWheel={(event) => {
+          if (event.deltaY < 0) following.current = false;
+        }}
+        onTouchMove={() => {
+          following.current = false;
+        }}
+        onKeyDown={(event) => {
+          if (["ArrowUp", "PageUp", "Home"].includes(event.key))
+            following.current = false;
+        }}
+        onScroll={(event) => {
+          const node = event.currentTarget;
+          const nearBottom =
+            node.scrollHeight - node.scrollTop - node.clientHeight < 64;
+          following.current = nearBottom;
+          setJump(!nearBottom);
+        }}
       >
-        <div className="live-transcript-heading">
-          <div>
-            <MessageSquareText size={16} aria-hidden="true" />
-            <h3 id="live-transcript-heading">Live transcript</h3>
+        {messages.length === 0 && !caseVisible && (
+          <p className="conversation-empty">
+            Your conversation will appear here as you and Cortana speak.
+          </p>
+        )}
+        {caseVisible && anchorIndex === -1 && challenge}
+        {messages.map((message, index) => (
+          <Fragment key={message.id}>
+            <article
+              className={`conversation-turn${index === messages.length - 1 && message.role === "assistant" && voice.activity === "assistant-speaking" ? " is-speaking" : ""}`}
+            >
+              <span className="conversation-speaker">
+                {message.role === "user" ? "You" : "Cortana"}
+              </span>
+              <p>{message.text}</p>
+            </article>
+            {caseVisible && index === anchorIndex && challenge}
+          </Fragment>
+        ))}
+        {connected && voice.activity === "user-speaking" && (
+          <div className="conversation-listening" role="status">
+            <span />
+            You · Listening…
           </div>
-          <span>{voice.messages.length} turns</span>
-        </div>
-        <div
-          className="live-transcript"
-          ref={transcript}
-          role="log"
-          aria-live="polite"
-          aria-relevant="additions text"
-          aria-label="Conversation between you and Cortana"
-        >
-          {voice.messages.length === 0 ? (
-            <div className="live-transcript-empty">
-              <span className="transcript-pulse" aria-hidden="true" />
-              <p>
-                {state.id === "entering" || state.id === "connecting"
-                  ? "Your conversation will appear here as soon as the round begins."
-                  : "Cortana is ready. Your conversation will appear here turn by turn."}
-              </p>
-            </div>
-          ) : (
-            voice.messages.map((message) => (
-              <article
-                key={message.id}
-                className={`live-transcript-turn live-turn-${message.role}`}
+        )}
+        {run?.completed && (
+          <div className="conversation-complete" role="status">
+            Round complete. Your practice is saved.
+          </div>
+        )}
+      </div>
+      {jump && (
+        <button className="jump-to-live" onClick={scrollToLatest}>
+          <ArrowDown size={14} />
+          Jump to live
+        </button>
+      )}
+      {canSend && (
+        <footer className="conversation-composer">
+          {voice.preview && run?.stage !== "challenge" && (
+            <div className="preview-conversation-actions">
+              <button
+                className="text-button"
+                onClick={() =>
+                  openEvidence(
+                    run?.grade?.sourceIds[0] ??
+                      round.sections[run?.section ?? 0].sourceIds[0],
+                  )
+                }
               >
-                <span>
-                  {message.role === "user" ? "You" : "Cortana"}
-                  {message.preview && message.role === "assistant"
-                    ? " · local preview"
-                    : ""}
-                </span>
-                <p>{message.text}</p>
-              </article>
-            ))
+                View source
+              </button>
+              <Button
+                variant="ghost"
+                disabled={busy || voice.paused}
+                onClick={() => void advancePreview().catch(() => {})}
+              >
+                {run?.stage === "questions"
+                  ? "Complete round"
+                  : run?.stage === "feedback"
+                    ? "Your questions"
+                    : run?.section === 2
+                      ? "Try the challenge"
+                      : "Continue"}
+                <ArrowRight size={15} />
+              </Button>
+            </div>
           )}
-        </div>
-        <div className="live-response-state" role="status">
-          <span className="live-response-icon" aria-hidden="true">
-            <Activity size={14} />
-          </span>
-          <span>{state.label}</span>
-        </div>
-      </section>
-
-      {children && <div className="live-lesson-slot">{children}</div>}
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submit(typed).catch(() => {});
+            }}
+          >
+            <input
+              aria-label={
+                run?.stage === "challenge"
+                  ? "Your answer"
+                  : "Question about this round"
+              }
+              placeholder={
+                run?.stage === "challenge"
+                  ? "Say your answer, or type it here…"
+                  : "Speak naturally, or type a question…"
+              }
+              value={typed}
+              maxLength={600}
+              disabled={voice.paused}
+              onChange={(event) => setTyped(event.target.value)}
+            />
+            <button
+              className="icon-button"
+              aria-label={
+                run?.stage === "challenge" ? "Submit answer" : "Send question"
+              }
+              disabled={busy || voice.paused || !typed.trim()}
+            >
+              <Send size={17} />
+            </button>
+          </form>
+        </footer>
+      )}
     </aside>
   );
 }

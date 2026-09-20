@@ -183,12 +183,12 @@ export function VoiceControls({
             {transcript ? "Hide" : "Show"}{" "}
             {voice.preview ? "preview conversation" : "transcript"}
           </button>
-          {!voice.preview && (
-            <span className="interruption-hint">
-              You can interrupt naturally with a question.
-            </span>
-          )}
         </>
+      )}
+      {active && !voice.preview && (
+        <span className="interruption-hint">
+          You can interrupt naturally with a question.
+        </span>
       )}
       {voice.working && !active && (
         <Button variant="ghost" onClick={voice.end}>

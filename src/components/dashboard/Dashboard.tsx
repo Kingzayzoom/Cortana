@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -29,17 +29,55 @@ export function Dashboard() {
     null,
   );
   const [whyOpen, setWhyOpen] = useState(false);
+  const [summaryReady, setSummaryReady] = useState<string | null>(null);
+  const [dismissedSummary, setDismissedSummary] = useState<string | null>(null);
+  const [participated, setParticipated] = useState(false);
+  const [enteredPreview, setEnteredPreview] = useState(false);
+  useEffect(() => {
+    if (voice.preview && !voice.paused) setEnteredPreview(true);
+    else if (!voice.preview) setEnteredPreview(false);
+  }, [voice.preview, voice.paused]);
+  useEffect(() => {
+    if (voice.connection === "connected" || (voice.preview && !voice.paused))
+      setParticipated(true);
+  }, [voice.connection, voice.preview, voice.paused]);
+  useEffect(() => {
+    if (!data?.run?.completed) return;
+    const id = data.run.id;
+    const timer = setTimeout(
+      () => setSummaryReady(id),
+      participated ? 1600 : 0,
+    );
+    return () => clearTimeout(timer);
+  }, [data?.run?.completed, data?.run?.id, participated]);
+  const completionMoment = Boolean(
+    data?.run?.completed && summaryReady !== data.run.id && participated,
+  );
+  const showSummary = Boolean(
+    data?.run?.completed &&
+    !completionMoment &&
+    dismissedSummary !== data.run.id,
+  );
   const recommendation = selectNextRound(data?.learningSignals ?? []);
   const transcript =
     transcriptOverride ?? data?.preferences.transcript ?? false;
   const liveMode = Boolean(
-    !data?.run?.completed &&
-    (voice.consentOpen ||
-      voice.working ||
-      voice.preview ||
-      ["connecting", "connected", "disconnecting"].includes(voice.connection)),
+    completionMoment ||
+    (!data?.run?.completed &&
+      (voice.consentOpen ||
+        voice.working ||
+        (voice.preview && (enteredPreview || !voice.paused)) ||
+        ["connecting", "connected", "disconnecting"].includes(
+          voice.connection,
+        ))),
   );
   const active = liveMode || data?.run?.completed;
+  useEffect(() => {
+    if (liveMode) window.scrollTo({ top: 0, behavior: "instant" });
+  }, [liveMode]);
+  useEffect(() => {
+    if (showSummary && voice.connection === "connected") voice.end();
+  }, [showSummary, voice]);
   const stage = active ? data?.run?.stage : "ready";
   const sessionSignals =
     data?.learningSignals?.filter(
@@ -64,7 +102,7 @@ export function Dashboard() {
 
   return (
     <>
-      {data?.run?.completed ? (
+      {showSummary ? (
         <section
           className="completion-scene"
           aria-labelledby="completion-heading"
@@ -78,12 +116,22 @@ export function Dashboard() {
             </p>
           </div>
           <LessonPanel />
+          <button
+            className="text-button return-dashboard"
+            onClick={() => {
+              setDismissedSummary(data!.run!.id);
+              voice.end();
+            }}
+          >
+            Return to dashboard <ArrowRight size={16} />
+          </button>
         </section>
       ) : (
         <>
           <div
             className={`dashboard-grid${liveMode ? " live-mode" : ""}`}
             data-conversation-mode={liveMode ? "live" : "dashboard"}
+            data-reduced-motion={data?.preferences.reducedMotion || undefined}
           >
             <section
               className="hero-column"
@@ -240,9 +288,10 @@ export function Dashboard() {
               </div>
             </aside>
 
-            <LiveConversationPanel active={liveMode}>
-              <LessonPanel embedded />
-            </LiveConversationPanel>
+            <LiveConversationPanel
+              key={data?.run?.id ?? "starting"}
+              active={liveMode}
+            />
           </div>
 
           <div

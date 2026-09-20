@@ -4,7 +4,7 @@ async function preview(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Explore in text mode" }).click();
   await expect(
-    page.getByRole("heading", { name: "Who was studied" }),
+    page.getByRole("log").getByText(/Researchers compared/),
   ).toBeVisible();
 }
 async function challenge(page: Page) {
@@ -13,7 +13,7 @@ async function challenge(page: Page) {
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByRole("button", { name: "Try the challenge" }).click();
   await expect(
-    page.getByText("Synthetic learning case", { exact: true }),
+    page.getByRole("region", { name: "Synthetic clinical challenge" }),
   ).toBeVisible();
 }
 test("desktop layout, animated WebGL orb, navigation and no page errors", async ({
@@ -79,7 +79,7 @@ test("missing voice configuration is honest and never requests microphone", asyn
     page.getByText("Local preview · microphone off", { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Who was studied" }),
+    page.getByRole("log").getByText(/Researchers compared/),
   ).toBeVisible();
 });
 test("complete round with clarification, evidence, unsupported question, reload and repeat", async ({
@@ -93,7 +93,10 @@ test("complete round with clarification, evidence, unsupported question, reload 
     .getByRole("button", { name: "Submit answer", exact: true })
     .click();
   await expect(
-    page.getByText("I won’t grade an unclear response.", { exact: false }),
+    page
+      .getByRole("log")
+      .getByRole("article")
+      .filter({ hasText: "I won’t grade an unclear response." }),
   ).toBeVisible();
   await page
     .getByRole("button", {
@@ -101,11 +104,9 @@ test("complete round with clarification, evidence, unsupported question, reload 
     })
     .click();
   await expect(
-    page.getByRole("heading", { name: "That’s the distinction." }),
+    page.getByRole("button", { name: "Your questions", exact: true }),
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: "See the evidence", exact: true })
-    .click();
+  await page.getByRole("button", { name: "View source", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Read the original source" }),
@@ -123,7 +124,7 @@ test("complete round with clarification, evidence, unsupported question, reload 
   await page.getByRole("button", { name: "Send question" }).click();
   await expect(
     page
-      .getByRole("region", { name: "Current learning section" })
+      .getByRole("log")
       .getByText("The sources in this round do not establish that.", {
         exact: false,
       }),
@@ -176,17 +177,13 @@ test("pause preserves section; supported questions do not advance it", async ({
     page.getByRole("button", { name: "Continue", exact: true }),
   ).toBeDisabled();
   await page.getByRole("button", { name: "Resume this section" }).click();
-  await expect(
-    page.getByRole("heading", { name: "What the study found" }),
-  ).toBeVisible();
-  await page.getByText("Have a question before continuing?").click();
+  await expect(page.getByRole("log").getByText(/main outcome/)).toBeVisible();
   await page
-    .getByRole("button", { name: "Who was studied?", exact: true })
-    .click();
-  await expect(page.locator(".question-reply")).toContainText("40% or less");
-  await expect(
-    page.getByRole("heading", { name: "What the study found" }),
-  ).toBeVisible();
+    .getByRole("textbox", { name: "Question about this round" })
+    .fill("Who was studied?");
+  await page.getByRole("button", { name: "Send question" }).click();
+  await expect(page.getByRole("log")).toContainText("40% or less");
+  await expect(page.getByRole("log").getByText(/main outcome/)).toBeVisible();
 });
 test("security, strict schemas, session isolation and duplicate submissions", async ({
   page,
@@ -413,7 +410,5 @@ test("reload preserves an incomplete section without activating the microphone",
     page.getByText("Round paused — microphone off.", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Resume this section" }).click();
-  await expect(
-    page.getByRole("heading", { name: "What the study found" }),
-  ).toBeVisible();
+  await expect(page.getByRole("log").getByText(/main outcome/)).toBeVisible();
 });
