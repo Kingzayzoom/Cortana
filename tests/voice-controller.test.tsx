@@ -43,7 +43,12 @@ const options = () => sdk.startSession.mock.lastCall![0] as HookOptions;
 beforeEach(() => {
   vi.clearAllMocks();
   sdk.isMuted = false;
-  learning.data = { run: null, review: null, voiceConfigured: true };
+  learning.data = {
+    run: null,
+    review: null,
+    voiceConfigured: true,
+    preferences: { name: "Dr. Patel" },
+  };
   learning.act.mockImplementation(async () => ({
     ...(learning.data as object),
     run: { id: "run-1", section: 0, stage: "briefing", completed: false },
@@ -317,4 +322,26 @@ it("records one briefing interruption for SDK replay and none for disconnect", a
     }),
   );
   expect(learning.observe).toHaveBeenCalledTimes(1);
+});
+
+it("sends the selected language to the agent and starts each load in English", async () => {
+  // Nothing has been chosen yet, so the very first session is English.
+  await start();
+  expect(options()).toMatchObject({
+    overrides: { agent: { language: "en" } },
+  });
+
+  // Choosing a language applies to the session that follows it.
+  act(() => voice.end());
+  act(() => options().onDisconnect?.({ reason: "user" }));
+  act(() => voice.setLanguage("es"));
+  await start();
+  expect(options()).toMatchObject({
+    overrides: { agent: { language: "es" } },
+  });
+
+  // Only the language is overridden: the prompt, first message and voice stay
+  // server-owned, so the browser cannot redirect what the agent says.
+  expect(options().overrides?.agent).toEqual({ language: "es" });
+  expect(options().overrides?.tts).toBeUndefined();
 });

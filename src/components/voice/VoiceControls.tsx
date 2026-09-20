@@ -10,11 +10,16 @@ import {
   MessageSquare,
   Headphones,
   ShieldCheck,
+  Languages,
 } from "lucide-react";
 import { useVoice } from "@/lib/voice/provider";
 import { useLearning } from "@/lib/learning/provider";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import {
+  SPOKEN_LANGUAGES,
+  spokenLanguage,
+} from "@/lib/voice/languages";
 export function VoiceStatus() {
   const voice = useVoice();
   let text = "Ready when you are.";
@@ -56,6 +61,33 @@ export function VoiceStatus() {
     </div>
   );
 }
+function LanguagePicker() {
+  const { data, busy } = useLearning();
+  const voice = useVoice();
+  return (
+    <div className="language-picker">
+      <label htmlFor="round-language">
+        <Languages size={13} />
+        Voice
+      </label>
+      <select
+        id="round-language"
+        value={voice.language}
+        disabled={!data || busy || voice.working}
+        onChange={(event) =>
+          voice.setLanguage(spokenLanguage(event.target.value))
+        }
+      >
+        {SPOKEN_LANGUAGES.map((language) => (
+          <option key={language.code} value={language.code}>
+            {language.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export function VoiceControls({
   transcript,
   onTranscript,
@@ -137,6 +169,7 @@ export function VoiceControls({
             Explore in text mode
             <ArrowRight size={14} />
           </button>
+          <LanguagePicker />
         </>
       )}
       {active && showTranscriptToggle && (

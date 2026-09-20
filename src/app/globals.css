@@ -3394,3 +3394,45 @@ svg {
     padding: 0 12px;
   }
 }
+
+/* ---- Spoken language picker ---- */
+.language-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 4px 6px 4px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--background);
+}
+.language-picker label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.language-picker select {
+  height: 26px;
+  max-width: 150px;
+  padding: 0 4px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+}
+.language-picker select:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+.language-picker select:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
