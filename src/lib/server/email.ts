@@ -29,9 +29,9 @@ export function emailConfigured() {
 }
 
 const headline: Record<FrontDeskRequest["reason"], string> = {
-  running_late: "is running late",
-  emergency: "reports an emergency",
-  other: "sent a message",
+  running_late: "running late",
+  emergency: "emergency",
+  other: "message",
 };
 
 /** Masks the address so a transcript or log never carries it in full. */
@@ -47,19 +47,20 @@ export async function notifyFrontDesk(request: FrontDeskRequest) {
       503,
     );
   const to = frontDeskAddress();
-  const eta = request.etaMinutes
-    ? ` Expected arrival: about ${request.etaMinutes} minutes.`
-    : "";
-  const subject = `[Demo] ${clinician.displayName} ${headline[request.reason]} — ${facility.unit}`;
+  // The voice says "Zabish"; anything written uses the real spelling.
+  const message = request.message.replace(/Zabish/g, "Zaybish");
+  const subject = `${clinician.displayName} — ${headline[request.reason]} (${facility.unit})`;
+  // Reads like a note from a colleague, not a form. One quiet line at the end
+  // keeps it honest about where it came from.
   const text = [
-    "This is a synthetic demonstration message from Cortana. No real patient or clinician is involved, and no action is required.",
+    `Hi — Cortana here, on behalf of ${clinician.displayName}.`,
     "",
-    `From: ${clinician.displayName}, ${clinician.role}, ${facility.unit}, ${facility.name}`,
-    `Reason: ${headline[request.reason]}.${eta}`,
+    message,
+    ...(request.etaMinutes
+      ? [`Expected in about ${request.etaMinutes} minutes.`]
+      : []),
     "",
-    `Message: ${request.message}`,
-    "",
-    "Sent by Cortana during a voice call, at the clinician's request.",
+    "Sent from a Cortana voice call · demonstration message",
   ].join("\n");
 
   let response: Response;
