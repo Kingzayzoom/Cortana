@@ -18,6 +18,8 @@ import {
 } from "@/lib/server/phone";
 import { localDate, streak } from "@/lib/learning/rules";
 import { ROUND_ID } from "@/lib/content/round";
+import { readActiveScenario } from "@/lib/context/store";
+import { buildPhoneBriefingContext } from "@/lib/context/selectors";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
@@ -42,9 +44,12 @@ export async function POST(request: Request) {
         parsed.error.issues[0]?.message ??
           "Check the phone number, the demo code and both confirmations.",
       );
-    const { accessCode, phoneNumber } = parsed.data;
+    const { accessCode, phoneNumber, mode } = parsed.data;
     if (!safeEqual(accessCode, process.env.CORTANA_DEMO_ACCESS_CODE!))
       throw new RequestError("That demo access code is incorrect.", 403);
+    const briefing = mode === "context" ? buildPhoneBriefingContext(await readActiveScenario(id)) : null;
+    if (mode === "context" && !briefing)
+      throw new RequestError("Activate a synthetic scenario before requesting a briefing.", 409);
     // A phone round is a fresh run against the caller's own saved progress.
     const run = await withProgress(id, (data) => {
       data.run = {
@@ -66,7 +71,9 @@ export async function POST(request: Request) {
     });
     const { conversationId } = await startOutboundCall(phoneNumber, {
       phone_session: await createPhoneSession(id, run.id),
-      learner_name: run.name,
+      context_mode: mode,
+      context_briefing: briefing ? JSON.stringify(briefing) : "",
+      learner_name: briefing?.clinicianName ?? run.name,
       round_id: ROUND_ID,
       streak_days: String(run.streakDays),
       returning_learner: run.completions > 0 ? "yes" : "no",

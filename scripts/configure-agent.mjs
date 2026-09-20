@@ -109,10 +109,11 @@ if (apply) {
     conversation_config: {
       agent: {
         first_message:
-          "Hello, I’m Cortana, your AI learning companion. Let’s take a moment with today’s evidence.",
+          "Hello, I’m Cortana, your AI learning companion. Let’s take a moment with your briefing.",
         disable_first_message_interruptions: false,
         dynamic_variables: {
           dynamic_variable_placeholders: {
+            context_mode: "round",
             ...agent.conversation_config.agent.dynamic_variables
               ?.dynamic_variable_placeholders,
             round_id: "dapa-hf-01",

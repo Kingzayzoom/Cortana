@@ -8,6 +8,7 @@ import type { Account, Progress, Snapshot } from "../learning/types";
 import { googleConfigured } from "./auth";
 import { localDate, streak } from "../learning/rules";
 export type StoredProgress = Progress & {
+  contextScenario?: import("../context/types").ContextScenario | null;
   requests: Record<string, { fingerprint: string; result: unknown }>;
 };
 export function emptyProgress(): StoredProgress {
@@ -189,7 +190,7 @@ export async function linkAccount(
   // Read without mutating: if the write below fails, nothing has been lost.
   const carried = carryFrom
     ? await withProgress(carryFrom, (data) =>
-        hasHistory(data) ? structuredClone(data) : null,
+        hasHistory(data) || data.contextScenario !== undefined ? structuredClone(data) : null,
       )
     : null;
 
@@ -205,6 +206,7 @@ export async function linkAccount(
       data.requests = carried.requests;
       data.learningSignals = carried.learningSignals ?? [];
       data.preferences = carried.preferences;
+      if (data.contextScenario === undefined) data.contextScenario = carried.contextScenario;
     }
     data.account = account;
     if (account.name && data.preferences.name === "Dr. Patel")
@@ -217,6 +219,7 @@ export async function linkAccount(
   if (adopted && carryFrom)
     await withProgress(carryFrom, (data) => {
       Object.assign(data, emptyProgress());
+      delete data.contextScenario;
     });
   return result;
 }

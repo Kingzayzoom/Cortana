@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Play,
@@ -110,7 +111,7 @@ export function VoiceControls({
       {voice.paused ? (
         <div className="active-controls">
           <Button
-            onClick={voice.preview ? voice.startPreview : voice.requestStart}
+            onClick={voice.preview ? voice.startPreview : () => voice.requestStart(voice.briefing ? "context" : "round")}
             disabled={voice.working}
           >
             <Play size={16} fill="currentColor" />
@@ -154,7 +155,7 @@ export function VoiceControls({
         <>
           <Button
             className="start-button"
-            onClick={voice.requestStart}
+            onClick={() => voice.requestStart()}
             disabled={!data || busy || voice.working}
           >
             <Play size={17} fill="currentColor" />
@@ -237,7 +238,7 @@ export function VoiceConsent() {
         <div className="config-notice">
           <strong>Voice connection not configured.</strong>
           <p>
-            The complete learning round is available as a local text preview.
+            {voice.briefing ? "A factual briefing preview is available in Context Feed." : "The complete learning round is available as a local text preview."}
           </p>
         </div>
       ) : (
@@ -279,7 +280,7 @@ export function VoiceConsent() {
           {voice.error}
         </p>
       )}
-      <Button
+      {voice.briefing ? <Button asChild variant="secondary"><Link href="/context" onClick={voice.closeConsent}>Return to briefing preview</Link></Button> : <Button
         className="full-width"
         variant={data?.voiceConfigured ? "secondary" : "primary"}
         onClick={voice.startPreview}
@@ -287,7 +288,7 @@ export function VoiceConsent() {
       >
         Open local preview
         <ArrowRight size={17} />
-      </Button>
+      </Button>}
       {voice.working && (
         <Button variant="ghost" onClick={voice.end}>
           Cancel connection

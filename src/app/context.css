@@ -1,0 +1,257 @@
+.context-card {
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.context-card h2,
+.context-card h3 {
+  margin: 6px 0 14px;
+}
+.context-card h4 {
+  margin: 24px 0 10px;
+}
+.context-card p {
+  line-height: 1.65;
+}
+.context-card-heading,
+.context-active-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.context-notice {
+  font-size: 12px;
+  color: #526383;
+  line-height: 1.6;
+}
+.context-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.context-import {
+  margin-top: 24px;
+  display: grid;
+  gap: 16px;
+}
+.context-import .field-label {
+  margin: 0;
+}
+.context-dropzone {
+  border: 1px dashed #a8b9cf;
+  border-radius: 14px;
+  background: #f8faff;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px 16px;
+  text-align: center;
+}
+.context-dropzone.is-dragging {
+  border-color: #436ee8;
+  background: #edf2ff;
+}
+.context-dropzone > span {
+  color: #64748b;
+  font-size: 12px;
+}
+.context-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.context-textarea {
+  min-height: 170px;
+  font-family: monospace;
+  margin: 12px 0;
+  resize: vertical;
+}
+.context-valid {
+  color: #27604c;
+  font-size: 14px;
+}
+.context-active-bar {
+  padding: 20px 0 28px;
+  border-bottom: 1px solid #e0e6ef;
+  flex-wrap: wrap;
+}
+.context-active-bar strong {
+  display: block;
+  margin-top: 8px;
+}
+.context-active-bar .context-actions {
+  margin: 0;
+}
+.context-section-heading {
+  margin: 28px 0;
+}
+.context-section-heading h2 {
+  margin: 8px 0;
+}
+.context-section-heading > p:not(.eyebrow) {
+  line-height: 1.7;
+}
+.context-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin: 24px 0;
+}
+.context-facts > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.context-facts span,
+.context-facts dt {
+  color: #66758b;
+  font-size: 12px;
+}
+.context-facts strong {
+  font-size: 15px;
+}
+.context-facts small {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #66758b;
+}
+.context-facts dd {
+  margin: 0;
+}
+.context-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.context-columns .context-card {
+  margin: 0;
+  min-width: 0;
+}
+.context-changes,
+.context-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+.context-changes li {
+  display: flex;
+  gap: 14px;
+  border-top: 1px solid #e8edf4;
+  padding: 20px 0;
+}
+.context-changes li:last-child {
+  padding-bottom: 0;
+}
+.context-direction {
+  color: #59708c;
+  background: #eef2f7;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+.direction-up {
+  color: #866135;
+  background: #fbf2e5;
+}
+.direction-down {
+  color: #3763ba;
+  background: #edf3ff;
+}
+.context-changes strong small {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: #66758b;
+}
+.context-changes p {
+  color: #66758b;
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+.context-changes .context-value {
+  font-size: 20px;
+  color: #283956;
+  letter-spacing: -0.5px;
+}
+.context-timeline li {
+  display: flex;
+  gap: 18px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eef1f6;
+}
+.context-timeline time {
+  font-variant-numeric: tabular-nums;
+  color: #5472a7;
+  font-size: 13px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+.context-timeline strong {
+  font-size: 14px;
+}
+.context-timeline small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #66758b;
+}
+.context-details > details {
+  margin-top: 20px;
+}
+.context-details summary,
+.context-import summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+.context-json {
+  max-height: 400px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.7;
+  padding: 16px;
+  background: #f7f9fc;
+}
+.context-education {
+  margin: 20px 0;
+}
+.context-card li {
+  line-height: 1.6;
+}
+@media (max-width: 900px) {
+  .context-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .context-columns {
+    grid-template-columns: 1fr;
+  }
+  .context-card {
+    padding: 20px;
+  }
+  .context-card-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .context-actions .button {
+    width: 100%;
+  }
+  .context-active-bar > div {
+    width: 100%;
+  }
+}

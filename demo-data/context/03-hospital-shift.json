@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "id": "hospital-shift",
+  "title": "Hospital · Shift overview",
+  "description": "Fictional unit operations and shift timeline. No assigned case.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish-001",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Fictional facility"
+  },
+  "shift": {
+    "date": "2026-09-19",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Review the unit huddle agenda.",
+      "Review the imaging schedule update."
+    ]
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [
+    {
+      "id": "hospital-huddle",
+      "time": "07:15",
+      "label": "Unit huddle",
+      "detail": "Review the fictional staffing and handoff plan."
+    },
+    {
+      "id": "hospital-echo",
+      "time": "09:00",
+      "label": "Imaging schedule update",
+      "detail": "The demo echo service opens at 09:00."
+    }
+  ],
+  "timeline": [
+    {
+      "id": "shift-start",
+      "time": "07:00",
+      "label": "Shift starts"
+    },
+    {
+      "id": "shift-huddle",
+      "time": "07:15",
+      "label": "Unit huddle"
+    },
+    {
+      "id": "shift-rounds",
+      "time": "10:00",
+      "label": "Multidisciplinary rounds"
+    }
+  ],
+  "educationTriggers": [],
+  "metadata": {
+    "createdAt": "2026-09-19T06:30:00-04:00",
+    "source": "demo",
+    "tags": [
+      "synthetic",
+      "cardiology"
+    ]
+  }
+}

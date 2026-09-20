@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { isContextTool, queryContext } from "@/lib/context/tools";
+import { readActiveScenario } from "@/lib/context/store";
 import {
   rateLimit,
   readBody,
@@ -18,6 +20,8 @@ const toolRequest = z
   .object({
     session: z.string().min(10).max(600),
     answer: z.string().trim().min(1).max(600).optional(),
+    caseId: z.string().min(1).max(80).optional(),
+    section: z.string().min(1).max(30).optional(),
   })
   .strict();
 export async function POST(
@@ -32,6 +36,16 @@ export async function POST(
       throw new RequestError("The tool request was not understood.");
     const { profileId, runId } = await readPhoneSession(parsed.data.session);
     await rateLimit(`phone-tool:${profileId}`, 60);
+    if (isContextTool(tool)) {
+      const { session: _session, ...args } = parsed.data;
+      void _session;
+      try {
+        return Response.json(queryContext(await readActiveScenario(profileId,runId),tool,args), {headers:{"Cache-Control":"no-store, private"}});
+      } catch(error) {
+        if (error instanceof z.ZodError) throw new RequestError("Invalid context tool parameters.");
+        throw error;
+      }
+    }
     const result = await run(tool, profileId, runId, parsed.data.answer);
     return Response.json(result, {
       headers: { "Cache-Control": "no-store, private" },

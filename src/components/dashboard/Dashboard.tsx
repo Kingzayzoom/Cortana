@@ -17,6 +17,7 @@ import { TranscriptPanel } from "@/components/voice/TranscriptPanel";
 import { VoiceControls } from "@/components/voice/VoiceControls";
 import { LessonPanel } from "@/components/learning/LessonPanel";
 import { ProgressCards } from "./ProgressCards";
+import { ContextFeedCard } from "@/components/context/ContextFeedView";
 import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
 import { Dialog } from "@/components/ui/dialog";
@@ -160,7 +161,7 @@ export function Dashboard() {
                 <h1 id="live-round-heading">
                   {liveMode ? "In conversation." : ""}
                 </h1>
-                <span>{liveMode ? "Heart failure, beyond diabetes" : ""}</span>
+                <span>{liveMode ? voice.briefing ? "Synthetic context briefing" : "Heart failure, beyond diabetes" : ""}</span>
               </div>
 
               <CortanaOrb />
@@ -300,6 +301,7 @@ export function Dashboard() {
             inert={liveMode ? true : undefined}
           >
             <div className="dashboard-lower-inner">
+              <ContextFeedCard />
               <ProgressCards />
             </div>
           </div>

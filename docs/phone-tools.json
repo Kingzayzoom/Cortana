@@ -8,13 +8,20 @@
       "api_schema": {
         "url": "__PUBLIC_URL__/api/phone/tools/get_round_context",
         "method": "POST",
-        "request_headers": { "Authorization": "Bearer __TOOL_SECRET__" },
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
         "request_body_schema": {
           "type": "object",
           "properties": {
-            "session": { "type": "string", "dynamic_variable": "phone_session" }
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
           },
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
         }
       }
     }
@@ -28,7 +35,9 @@
       "api_schema": {
         "url": "__PUBLIC_URL__/api/phone/tools/submit_answer",
         "method": "POST",
-        "request_headers": { "Authorization": "Bearer __TOOL_SECRET__" },
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
         "request_body_schema": {
           "type": "object",
           "properties": {
@@ -41,7 +50,10 @@
               "description": "The learner's actual final answer, in their own words. Pass an option letter only when they clearly said one."
             }
           },
-          "required": ["session", "answer"]
+          "required": [
+            "session",
+            "answer"
+          ]
         }
       }
     }
@@ -55,13 +67,271 @@
       "api_schema": {
         "url": "__PUBLIC_URL__/api/phone/tools/complete_round",
         "method": "POST",
-        "request_headers": { "Authorization": "Bearer __TOOL_SECRET__" },
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
         "request_body_schema": {
           "type": "object",
           "properties": {
-            "session": { "type": "string", "dynamic_variable": "phone_session" }
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
           },
-          "required": ["session"]
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_context_summary",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_context_summary",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "description": "Validated parameters for this client tool.",
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_shift_context",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_shift_context",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "description": "Validated parameters for this client tool.",
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_primary_case",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_primary_case",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "description": "Validated parameters for this client tool.",
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_recent_changes",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_recent_changes",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "caseId": {
+              "type": "string",
+              "description": "Use the exact case ID returned by the corresponding context tool; the educational challenge uses hf-case-01."
+            },
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "description": "Validated parameters for this client tool.",
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_case_section",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_case_section",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "caseId": {
+              "type": "string",
+              "description": "Use the exact case ID returned by the corresponding context tool; the educational challenge uses hf-case-01."
+            },
+            "section": {
+              "type": "string",
+              "enum": [
+                "history",
+                "status",
+                "vitals",
+                "labs",
+                "changes",
+                "schedule",
+                "review_items"
+              ],
+              "description": "The requested case section: history, status, vitals, labs, changes, schedule, or review_items."
+            },
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "required": [
+            "caseId",
+            "section",
+            "session"
+          ],
+          "description": "Validated parameters for this client tool."
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_scheduled_events",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_scheduled_events",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "caseId": {
+              "type": "string",
+              "description": "Use the exact case ID returned by the corresponding context tool; the educational challenge uses hf-case-01."
+            },
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "description": "Validated parameters for this client tool.",
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_hospital_timeline",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_hospital_timeline",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "description": "Validated parameters for this client tool.",
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_education_triggers",
+      "description": "Read the requested active synthetic scenario section for this signed call. Never infer missing facts; use the returned fallback.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_education_triggers",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "description": "Validated parameters for this client tool.",
+          "required": [
+            "session"
+          ]
         }
       }
     }

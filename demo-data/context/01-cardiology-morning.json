@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "1.0",
+  "id": "cardiology-morning",
+  "title": "Cardiology · Morning handoff",
+  "description": "A fictional cardiac step-down shift with overnight trends and pending labs.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish-001",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Fictional facility"
+  },
+  "shift": {
+    "date": "2026-09-19",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Review overnight changes.",
+      "Review repeat metabolic panel when available."
+    ]
+  },
+  "primaryCase": {
+    "id": "patient-024",
+    "displayName": "Synthetic Patient 024",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Female"
+    },
+    "reasonForAdmission": "Synthetic admission for HFrEF observation.",
+    "history": [
+      "HFrEF documented in this fictional case.",
+      "No diabetes recorded in the supplied history."
+    ],
+    "currentStatus": {
+      "summary": "Weight decreased and creatinine increased overnight.",
+      "vitals": {
+        "Blood pressure": "112/70 mmHg",
+        "Heart rate": "78 bpm",
+        "Oxygen saturation": "96%",
+        "Weight": "81.6 kg"
+      }
+    },
+    "changes": [
+      {
+        "id": "change-creatinine",
+        "concept": "Creatinine",
+        "direction": "up",
+        "previous": 1.2,
+        "current": 1.5,
+        "unit": "mg/dL",
+        "explanation": "Creatinine increased from 1.2 to 1.5 mg/dL.",
+        "timestamp": "2026-09-19T06:10:00-04:00"
+      },
+      {
+        "id": "change-weight",
+        "concept": "Weight",
+        "direction": "down",
+        "previous": 82.4,
+        "current": 81.6,
+        "unit": "kg",
+        "explanation": "Weight decreased from 82.4 to 81.6 kg, a change of 0.8 kg.",
+        "timestamp": "2026-09-19T06:30:00-04:00"
+      },
+      {
+        "id": "change-oxygen",
+        "concept": "Oxygen saturation",
+        "direction": "stable",
+        "previous": 96,
+        "current": 96,
+        "unit": "%",
+        "explanation": "Oxygen saturation remained at 96%."
+      }
+    ],
+    "labs": [
+      {
+        "id": "lab-creatinine",
+        "name": "Creatinine",
+        "value": 1.5,
+        "previous": 1.2,
+        "unit": "mg/dL",
+        "timestamp": "2026-09-19T06:10:00-04:00"
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "event-panel",
+        "time": "08:30",
+        "label": "Repeat metabolic panel",
+        "category": "lab",
+        "status": "scheduled"
+      },
+      {
+        "id": "event-rounds",
+        "time": "10:00",
+        "label": "Cardiology rounds",
+        "category": "rounds",
+        "status": "scheduled"
+      },
+      {
+        "id": "event-echo",
+        "time": "11:30",
+        "label": "Echo",
+        "category": "imaging",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Review the supplied renal-function trend before rounds."
+    ],
+    "allowedQuestions": [
+      "What changed since yesterday?",
+      "What is scheduled this morning?"
+    ]
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "timeline-note",
+      "time": "06:10",
+      "label": "Overnight note update",
+      "caseId": "patient-024"
+    },
+    {
+      "id": "timeline-vitals",
+      "time": "06:30",
+      "label": "Latest vitals recorded",
+      "caseId": "patient-024"
+    },
+    {
+      "id": "timeline-shift",
+      "time": "07:00",
+      "label": "Shift starts"
+    },
+    {
+      "id": "timeline-panel",
+      "time": "08:30",
+      "label": "Repeat metabolic panel",
+      "caseId": "patient-024"
+    },
+    {
+      "id": "timeline-rounds",
+      "time": "10:00",
+      "label": "Cardiology rounds"
+    },
+    {
+      "id": "timeline-echo",
+      "time": "11:30",
+      "label": "Echo scheduled",
+      "caseId": "patient-024"
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "edu-hf-001",
+      "topic": "Heart failure",
+      "reason": "The synthetic primary case includes HFrEF and a renal-function trend.",
+      "roundId": "dapa-hf-01"
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T06:30:00-04:00",
+    "source": "demo",
+    "tags": [
+      "synthetic",
+      "cardiology"
+    ]
+  }
+}

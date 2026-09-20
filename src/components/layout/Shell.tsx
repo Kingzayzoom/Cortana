@@ -22,6 +22,7 @@ import { useVoice } from "@/lib/voice/provider";
 import { AccountBadge, AuthNotice } from "./AccountControls";
 const navigation = [
   { href: "/", title: "Today", icon: Home },
+  { href: "/context", title: "Context Feed", icon: HeartPulse },
   { href: "/rounds", title: "My Rounds", icon: Layers },
   { href: "/evidence", title: "Evidence Library", icon: BookOpen },
   { href: "/profile", title: "Learning Profile", icon: ChartNoAxesCombined },

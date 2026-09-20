@@ -10,6 +10,7 @@ import {
 import { SettingsView } from "@/components/learning/SettingsView";
 import { ImpiricusSignalBridge } from "@/components/learning/ImpiricusSignalBridge";
 import { PhoneRoundView } from "@/components/phone/PhoneRoundView";
+import { ContextFeedView } from "@/components/context/ContextFeedView";
 export default async function Page({
   params,
 }: {
@@ -24,6 +25,8 @@ export default async function Page({
     profile: <ProfileView />,
     topics: <TopicsView />,
     phone: <PhoneRoundView />,
+    context: <ContextFeedView />,
+    "context/phone": <PhoneRoundView briefing />,
     settings: <SettingsView />,
     impiricus: <ImpiricusSignalBridge />,
   };

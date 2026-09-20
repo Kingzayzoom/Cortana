@@ -4,13 +4,16 @@ import { Phone, PhoneCall, ShieldCheck, Check } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";
 import { Button } from "@/components/ui/button";
 import { PageHeading } from "@/components/learning/SupportingViews";
+import { useContextScenario } from "@/lib/context/provider";
+import { SYNTHETIC_NOTICE } from "@/lib/context/selectors";
 
 type CallState =
   | { step: "form" }
   | { step: "calling"; to: string; conversationId: string | null }
   | { step: "ended"; to: string };
 
-export function PhoneRoundView() {
+export function PhoneRoundView({ briefing = false }: { briefing?: boolean }) {
+  const context = useContextScenario();
   const { data, refresh } = useLearning();
   const [number, setNumber] = useState(""),
     [code, setCode] = useState("");
@@ -58,6 +61,7 @@ export function PhoneRoundView() {
           phoneNumber: number.trim(),
           consent: true,
           permission: true,
+          mode: briefing ? "context" : "round",
         }),
       });
       const body = await response.json();
@@ -79,10 +83,11 @@ export function PhoneRoundView() {
   return (
     <>
       <PageHeading
-        eyebrow="Phone round"
+        eyebrow={briefing ? "Phone briefing" : "Phone round"}
         title="Cortana can call you."
-        description="Two minutes of evidence, on any phone. The same round, the same grading, no screen needed."
+        description={briefing ? "Changes, schedule, and review items from your active demo scenario." : "Two minutes of evidence, on any phone. The same round, the same grading, no screen needed."}
       />
+      {briefing && <div className="panel context-card"><strong>{context.activeScenario?.title ?? "No active scenario"}</strong><p>{SYNTHETIC_NOTICE}</p>{!context.phoneConfigured && <p>Phone briefings are not configured on this server.</p>}</div>}
       {call.step === "form" ? (
         <form className="settings-section" onSubmit={place}>
           <label className="field-label" htmlFor="phone-number">
@@ -147,6 +152,7 @@ export function PhoneRoundView() {
               type="submit"
               disabled={
                 busy ||
+                (briefing && (!context.phoneConfigured || !context.activeScenario)) ||
                 !consent ||
                 !permission ||
                 !number.trim() ||

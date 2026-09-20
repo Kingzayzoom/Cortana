@@ -134,11 +134,13 @@ const config = {
   conversation_config: {
     agent: {
       first_message:
-        "Hi {{learner_name}}, it's Cortana with your two-minute cardiology round. Is now a good time?",
+        "Hi {{learner_name}}, it's Cortana, your AI learning companion. Is now a good time for your synthetic demo briefing or learning round?",
       language: "en",
       prompt: { prompt, llm, tool_ids: toolIds },
       dynamic_variables: {
         dynamic_variable_placeholders: {
+          context_mode: "round",
+          context_briefing: "",
           learner_name: "Doctor",
           round_id: "dapa-hf-01",
           streak_days: "0",

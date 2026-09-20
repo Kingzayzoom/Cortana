@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0",
+  "id": "new-consult",
+  "title": "Cardiology · New consult",
+  "description": "A fictional consult request with pending results.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish-001",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Fictional facility"
+  },
+  "shift": {
+    "date": "2026-09-19",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Review the new consult."
+    ]
+  },
+  "primaryCase": {
+    "id": "patient-031",
+    "displayName": "Synthetic Patient 031",
+    "synthetic": true,
+    "demographics": {
+      "age": 58,
+      "sex": "Male"
+    },
+    "reasonForAdmission": "Evaluation of palpitations in a fictional case.",
+    "history": [
+      "Intermittent palpitations reported."
+    ],
+    "currentStatus": {
+      "summary": "Cardiology consult requested. Investigation results not supplied.",
+      "vitals": {
+        "Heart rate": "88 bpm"
+      }
+    },
+    "changes": [
+      {
+        "id": "change-consult",
+        "concept": "Cardiology consult",
+        "direction": "new",
+        "current": "Requested",
+        "explanation": "A cardiology consult was requested at 09:00."
+      }
+    ],
+    "labs": [],
+    "scheduledEvents": [
+      {
+        "id": "consult-visit",
+        "time": "10:30",
+        "label": "Cardiology consult review",
+        "category": "consult",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Review the supplied symptom timeline."
+    ],
+    "allowedQuestions": [
+      "Why was the consult requested?"
+    ]
+  },
+  "secondaryCases": [],
+  "consults": [
+    {
+      "id": "consult-cardio",
+      "caseId": "patient-031",
+      "specialty": "Cardiology",
+      "reason": "Review palpitations history.",
+      "time": "10:30",
+      "status": "scheduled"
+    }
+  ],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "timeline-request",
+      "time": "09:00",
+      "label": "Consult requested",
+      "caseId": "patient-031"
+    },
+    {
+      "id": "timeline-consult",
+      "time": "10:30",
+      "label": "Consult review",
+      "caseId": "patient-031"
+    }
+  ],
+  "educationTriggers": [],
+  "metadata": {
+    "createdAt": "2026-09-19T06:30:00-04:00",
+    "source": "demo",
+    "tags": [
+      "synthetic",
+      "cardiology"
+    ]
+  }
+}

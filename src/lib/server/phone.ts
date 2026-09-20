@@ -87,6 +87,7 @@ export const phoneCallRequest = z
       ),
     consent: z.literal(true),
     permission: z.literal(true),
+    mode: z.enum(["round", "context"]).default("round"),
   })
   .strict();
 

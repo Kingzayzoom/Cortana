@@ -23,6 +23,7 @@ import type {
 } from "../learning/types";
 import { voiceErrorMessage } from "./errors";
 import { VoiceTranscript } from "./transcript";
+import { contextToolNames, contextToolSchemas } from "../context/tools";
 import {
   clientAnswerTool,
   caseTool,
@@ -51,7 +52,8 @@ type VoiceValue = {
   working: boolean;
   conversationId: string | null;
   messages: Message[];
-  requestStart: () => void;
+  briefing: boolean;
+  requestStart: (mode?: "round" | "context") => void;
   closeConsent: () => void;
   start: (code: string) => Promise<void>;
   startPreview: () => Promise<void>;
@@ -73,6 +75,8 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
 }
 function VoiceController({ children }: { children: React.ReactNode }) {
   const learning = useLearning();
+  const [briefing, setBriefing] = useState(false);
+  const briefingRef = useRef(false);
   const [connection, setConnection] = useState<ConnectionState>("idle"),
     [activity, setActivity] = useState<VoiceActivity>("quiet");
   const [language, setLanguage] = useState<SpokenLanguage>(DEFAULT_LANGUAGE);
@@ -158,7 +162,20 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         }
       };
     return {
+      ...Object.fromEntries(contextToolNames.map((name) => [
+        name,
+        tool<unknown>(contextToolSchemas[name], async (params) => {
+          const response = await fetch(`/api/context/tools/${name}`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(params), cache: "no-store",
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || "Context lookup failed.");
+          return result;
+        }),
+      ])),
       get_round_context: tool(contextTool, () => ({
+        conversationMode: briefingRef.current ? "context" : "round",
         round,
         sources,
         checkpoint: current.current.data?.run,
@@ -396,6 +413,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         connectionType: "webrtc",
         clientTools: sessionTools,
         dynamicVariables: {
+          context_mode: briefingRef.current ? "context" : "round",
           round_id: round.id,
           section_id: round.sections[data!.run!.section].id,
           lesson_stage: data!.run!.stage,
@@ -545,12 +563,15 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         },
         paused,
         preview,
+        briefing,
         consentOpen,
         error,
         working,
         conversationId,
         messages: preview ? learning.messages : messages,
-        requestStart: () => {
+        requestStart: (mode = "round") => {
+          briefingRef.current = mode === "context";
+          setBriefing(mode === "context");
           if (!lock.current || stopReason.current === "error")
             setConsentOpen(true);
         },
