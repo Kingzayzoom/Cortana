@@ -153,42 +153,50 @@ describe("Placing a phone round", () => {
       demoScenarios[1].id,
     );
   });
-  it("sends the active context briefing and retrieves identical scoped facts on web and phone", async () => {
-    await setActiveScenario(state.profile, demoScenarios[1]);
-    expect((await call(callRequest({ mode: "context" }))).status).toBe(200);
-    const sent = JSON.parse(vi.mocked(fetch).mock.calls[0][1]!.body as string);
-    const variables =
-      sent.conversation_initiation_client_data.dynamic_variables;
-    expect(variables.context_mode).toBe("context");
-    expect(JSON.parse(variables.context_briefing)).toEqual(
-      buildPhoneBriefingContext(demoScenarios[1]),
-    );
-    const input = toolRequest("get_context_summary", {
-      session: variables.phone_session,
-    });
-    const phone = await tool(input.request, input.context);
-    const web = await webContextTool(
-      new Request(
-        "http://localhost:3100/api/context/tools/get_context_summary",
-        {
-          method: "POST",
-          headers: { origin: "http://localhost:3100", host: "localhost:3100" },
-          body: "{}",
-        },
-      ),
-      input.context,
-    );
-    expect(await phone.json()).toEqual(await web.json());
-    await setActiveScenario(state.profile, null);
-    const cleared = toolRequest("get_context_summary", {
-      session: variables.phone_session,
-    });
-    expect(
-      await (await tool(cleared.request, cleared.context)).json(),
-    ).toMatchObject({ available: false, message: CONTEXT_FALLBACK });
-    expect((await call(callRequest({ mode: "context" }))).status).toBe(409);
-    expect(fetch).toHaveBeenCalledTimes(1);
-  });
+  it.each(demoScenarios)(
+    "sends $id through the same scoped web and phone paths",
+    async (scenario) => {
+      await setActiveScenario(state.profile, scenario);
+      expect((await call(callRequest({ mode: "context" }))).status).toBe(200);
+      const sent = JSON.parse(
+        vi.mocked(fetch).mock.calls[0][1]!.body as string,
+      );
+      const variables =
+        sent.conversation_initiation_client_data.dynamic_variables;
+      expect(variables.context_mode).toBe("context");
+      expect(JSON.parse(variables.context_briefing)).toEqual(
+        buildPhoneBriefingContext(scenario),
+      );
+      const input = toolRequest("get_context_summary", {
+        session: variables.phone_session,
+      });
+      const phone = await tool(input.request, input.context);
+      const web = await webContextTool(
+        new Request(
+          "http://localhost:3100/api/context/tools/get_context_summary",
+          {
+            method: "POST",
+            headers: {
+              origin: "http://localhost:3100",
+              host: "localhost:3100",
+            },
+            body: "{}",
+          },
+        ),
+        input.context,
+      );
+      expect(await phone.json()).toEqual(await web.json());
+      await setActiveScenario(state.profile, null);
+      const cleared = toolRequest("get_context_summary", {
+        session: variables.phone_session,
+      });
+      expect(
+        await (await tool(cleared.request, cleared.context)).json(),
+      ).toMatchObject({ available: false, message: CONTEXT_FALLBACK });
+      expect((await call(callRequest({ mode: "context" }))).status).toBe(409);
+      expect(fetch).toHaveBeenCalledTimes(1);
+    },
+  );
   it("rejects unknown case sections and stale phone context sessions", async () => {
     const session = await startedSession();
     const bad = toolRequest("get_case_section", {

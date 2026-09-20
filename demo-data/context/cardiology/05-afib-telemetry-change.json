@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "1.0",
+  "id": "05-afib-telemetry-change",
+  "title": "Telemetry change / AF history",
+  "description": "A recorded rate change and explicit review request, without a new rhythm interpretation.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Review the recorded telemetry status change."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "review_soon",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "Review the recorded telemetry status change.",
+    "requestedArrival": "within 30 minutes"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-032",
+    "displayName": "Synthetic Patient 032",
+    "synthetic": true,
+    "demographics": {
+      "age": 73,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Telemetry observation.",
+    "history": [
+      "Documented atrial fibrillation history."
+    ],
+    "currentStatus": {
+      "summary": "New telemetry status change recorded; cardiology review requested. No new rhythm diagnosis supplied.",
+      "vitals": {
+        "bloodPressure": "112/68 mmHg",
+        "heartRate": "112 bpm",
+        "oxygenSaturation": "97% on room air"
+      }
+    },
+    "changes": [
+      {
+        "id": "rate-change",
+        "concept": "Recorded rate",
+        "direction": "up",
+        "previous": 84,
+        "current": 112,
+        "unit": "bpm",
+        "explanation": "Recorded rate changed from 84 to 112 bpm; no rhythm interpretation supplied.",
+        "timestamp": "2026-09-20T06:35:00-04:00"
+      }
+    ],
+    "labs": [],
+    "scheduledEvents": [
+      {
+        "id": "telemetry-review",
+        "time": "07:05",
+        "label": "Requested telemetry review",
+        "category": "consult",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Review the recorded telemetry status change."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "review_soon",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "Review the recorded telemetry status change.",
+      "requestedArrival": "within 30 minutes"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "rate-before",
+      "time": "06:00",
+      "label": "Previous rate",
+      "detail": "Recorded rate 84 bpm.",
+      "caseId": "patient-032"
+    },
+    {
+      "id": "rate-after",
+      "time": "06:35",
+      "label": "Telemetry status change",
+      "detail": "Recorded rate 112 bpm; review requested.",
+      "caseId": "patient-032"
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Atrial fibrillation evidence",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "cardiology",
+    "tags": [
+      "atrial fibrillation",
+      "telemetry",
+      "rate",
+      "review"
+    ]
+  }
+}

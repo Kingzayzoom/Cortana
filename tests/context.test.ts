@@ -34,7 +34,7 @@ describe("Synthetic context contracts", () => {
     const input = structuredClone(defaultScenario);
     input.timeline.reverse();
     expect(normalizeScenario(input).timeline[0].time).toBe("06:10");
-    expect(input.timeline[0].time).toBe("11:30");
+    expect(input.timeline[0].time).toBe("06:50");
   });
   it("rejects invalid JSON", () =>
     expect(() => parseScenarioJSON("{broken")).toThrow("Invalid JSON"));
@@ -149,9 +149,21 @@ describe("Bounded web/phone facts", () => {
   it("builds a bounded phone briefing from supplied values", () => {
     const b = buildPhoneBriefingContext(defaultScenario)!;
     expect(b.clinicianName).toBe("Dr. Zabish");
-    expect(b.recentChanges[0]).toMatchObject({ previous: 1.2, current: 1.5 });
-    expect(b.schedule[0].time).toBe("08:30");
+    expect(b.recentChanges[0]).toMatchObject({
+      previous: "118/72",
+      current: "88/56",
+    });
+    expect(b.schedule[0].time).toBe("07:30");
     expect(Object.keys(b)).toEqual([
+      "scenarioId",
+      "notice",
+      "grounding",
+      "physicianUrgency",
+      "hospitalStatus",
+      "hospitalEvents",
+      "timeline",
+      "secondaryCases",
+      "consults",
       "clinicianName",
       "shiftSummary",
       "primaryCaseSummary",
@@ -160,7 +172,7 @@ describe("Bounded web/phone facts", () => {
       "reviewItems",
       "educationTriggers",
     ]);
-    expect(previewBriefing(defaultScenario)).toContain("08:30");
+    expect(previewBriefing(defaultScenario)).toContain("07:30");
     expect(buildPhoneBriefingContext(null)).toBeNull();
     expect(previewBriefing(null)).toBe(CONTEXT_FALLBACK);
   });

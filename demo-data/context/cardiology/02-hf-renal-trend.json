@@ -1,0 +1,161 @@
+{
+  "schemaVersion": "1.0",
+  "id": "02-hf-renal-trend",
+  "title": "Heart failure / Renal trend",
+  "description": "Stable overnight with creatinine and weight trends for morning rounds.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Review the supplied renal and weight trends; other status is stable."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "review_soon",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "Review the supplied renal and weight trends; other status is stable.",
+    "requestedArrival": "before morning rounds"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-025",
+    "displayName": "Synthetic Patient 025",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Monitoring of documented HFrEF.",
+    "history": [
+      "Documented HFrEF."
+    ],
+    "currentStatus": {
+      "summary": "Otherwise stable overnight; renal and weight trends supplied for morning review.",
+      "vitals": {
+        "bloodPressure": "116/70 mmHg",
+        "heartRate": "78 bpm",
+        "oxygenSaturation": "97% on room air",
+        "weight": "81.6 kg"
+      }
+    },
+    "changes": [
+      {
+        "id": "change-creatinine",
+        "concept": "Creatinine",
+        "direction": "up",
+        "previous": 1.2,
+        "current": 1.5,
+        "unit": "mg/dL",
+        "explanation": "Creatinine increased from 1.2 to 1.5 mg/dL.",
+        "timestamp": "2026-09-20T06:45:00-04:00"
+      },
+      {
+        "id": "change-weight",
+        "concept": "Weight",
+        "direction": "down",
+        "previous": 82.4,
+        "current": 81.6,
+        "unit": "kg",
+        "explanation": "Weight decreased from 82.4 to 81.6 kg.",
+        "timestamp": "2026-09-20T06:45:00-04:00"
+      },
+      {
+        "id": "change-oxygen",
+        "concept": "Oxygen saturation",
+        "direction": "stable",
+        "previous": 97,
+        "current": 97,
+        "unit": "%",
+        "explanation": "Oxygen saturation remains 97% on room air.",
+        "timestamp": "2026-09-20T06:45:00-04:00"
+      }
+    ],
+    "labs": [
+      {
+        "id": "lab-creatinine",
+        "name": "Creatinine",
+        "value": 1.5,
+        "unit": "mg/dL",
+        "timestamp": "2026-09-20T06:30:00-04:00",
+        "previous": 1.2
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "renal-repeat",
+        "time": "08:30",
+        "label": "Repeat renal panel",
+        "category": "lab",
+        "status": "scheduled"
+      },
+      {
+        "id": "morning-rounds",
+        "time": "09:00",
+        "label": "Morning rounds",
+        "category": "rounds",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Review the supplied renal and weight trends; other status is stable."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "review_soon",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "Review the supplied renal and weight trends; other status is stable.",
+      "requestedArrival": "before morning rounds"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "timeline-handoff",
+      "time": "07:00",
+      "label": "Shift handoff",
+      "detail": "Stable overnight with creatinine and weight trends for morning rounds."
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Heart failure / renal monitoring",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context.",
+      "roundId": "dapa-hf-01"
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "cardiology",
+    "tags": [
+      "heart failure",
+      "renal monitoring",
+      "stable"
+    ]
+  }
+}

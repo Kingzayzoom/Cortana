@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "1.0",
+  "id": "04-chest-pain-consult",
+  "title": "Chest pain consult",
+  "description": "A new consult entered the queue with initial observations and pending interpretation.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "The requesting team asks for cardiology assessment of the new consult."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "review_soon",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "The requesting team asks for cardiology assessment of the new consult.",
+    "requestedArrival": "within 60 minutes"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-031",
+    "displayName": "Synthetic Patient 031",
+    "synthetic": true,
+    "demographics": {
+      "age": 54,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "New chest-pain consult request.",
+    "history": [
+      "History details not supplied."
+    ],
+    "currentStatus": {
+      "summary": "Initial observations supplied; ECG interpretation and final laboratory assessment are not supplied.",
+      "vitals": {
+        "bloodPressure": "128/76 mmHg",
+        "heartRate": "86 bpm",
+        "oxygenSaturation": "98% on room air"
+      }
+    },
+    "changes": [
+      {
+        "id": "consult-change",
+        "concept": "Consult status",
+        "direction": "new",
+        "previous": "Not queued",
+        "current": "Requested",
+        "unit": "",
+        "explanation": "A new chest-pain consult entered the queue at 06:40.",
+        "timestamp": "2026-09-20T06:40:00-04:00"
+      }
+    ],
+    "labs": [
+      {
+        "id": "initial-lab",
+        "name": "Initial laboratory summary",
+        "value": "Sample received; results pending",
+        "unit": "",
+        "timestamp": "2026-09-20T06:30:00-04:00"
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "consult-review",
+        "time": "07:40",
+        "label": "Requested cardiology review",
+        "category": "consult",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "The requesting team asks for cardiology assessment of the new consult.",
+      "ECG summary placeholder: tracing recorded; interpretation not supplied."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "review_soon",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "The requesting team asks for cardiology assessment of the new consult.",
+      "requestedArrival": "within 60 minutes"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [
+    {
+      "id": "consult-chest",
+      "caseId": "patient-031",
+      "specialty": "Cardiology",
+      "reason": "Chest-pain evaluation requested; no diagnosis supplied.",
+      "time": "06:40",
+      "status": "requested",
+      "unit": "Emergency Observation",
+      "physicianUrgency": {
+        "level": "review_soon",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "The requesting team asks for cardiology assessment of the new consult.",
+        "requestedArrival": "within 60 minutes"
+      }
+    }
+  ],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "timeline-handoff",
+      "time": "07:00",
+      "label": "Shift handoff",
+      "detail": "A new consult entered the queue with initial observations and pending interpretation."
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Evaluation framework / evidence refresher",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "cardiology",
+    "tags": [
+      "chest pain",
+      "consult",
+      "ECG",
+      "pending"
+    ]
+  }
+}

@@ -13,6 +13,20 @@ const time = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use HH:mm, for example 08:30");
 const timestamp = z.iso.datetime({ offset: true });
+export const urgencySchema = z.enum([
+  "routine",
+  "review_soon",
+  "urgent",
+  "immediate",
+]);
+export const physicianUrgencySchema = z
+  .object({
+    level: urgencySchema,
+    requestedBy: text,
+    reason: text,
+    requestedArrival: text,
+  })
+  .strict();
 export const clinicianSchema = z
   .object({ id, displayName: text, specialty: text, role: text })
   .strict();
@@ -79,6 +93,7 @@ export const caseSchema = z
       .object({ age: z.number().int().min(0).max(120), sex: text })
       .strict(),
     reasonForAdmission: text,
+    physicianUrgency: physicianUrgencySchema.optional(),
     history: list,
     currentStatus: z
       .object({
@@ -102,6 +117,8 @@ export const consultSchema = z
     caseId: id,
     specialty: text,
     reason: text,
+    physicianUrgency: physicianUrgencySchema.optional(),
+    unit: text.optional(),
     time: time.optional(),
     status: z.enum(["requested", "scheduled", "completed"]),
   })
@@ -131,6 +148,15 @@ export const contextScenarioSchema = z
     clinician: clinicianSchema,
     facility: facilitySchema,
     shift: shiftSchema,
+    physicianUrgency: physicianUrgencySchema.optional(),
+    hospitalStatus: z
+      .object({
+        overallStatus: z.enum(["normal", "busy", "high_activity"]),
+        summary: text,
+        events: z.array(hospitalEventSchema).max(30),
+      })
+      .strict()
+      .optional(),
     primaryCase: caseSchema.optional(),
     secondaryCases: z.array(caseSchema).max(5).default([]),
     consults: z.array(consultSchema).max(20).default([]),
@@ -141,6 +167,7 @@ export const contextScenarioSchema = z
       .object({
         createdAt: timestamp,
         source: z.literal("demo"),
+        category: z.enum(["cardiology", "operations", "escalation"]).optional(),
         tags: z.array(z.string().min(1).max(60)).max(20),
       })
       .strict(),

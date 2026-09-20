@@ -1,7 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
 const morning = JSON.parse(
-  readFileSync("demo-data/context/01-cardiology-morning.json", "utf8"),
+  readFileSync(
+    "demo-data/context/cardiology/01-hf-urgent-hypotension.json",
+    "utf8",
+  ),
 );
 test("select, preview, activate, reload and clear a shared scenario", async ({
   page,
@@ -10,13 +13,25 @@ test("select, preview, activate, reload and clear a shared scenario", async ({
   await expect(
     page.getByRole("heading", { name: "What changed?" }),
   ).toBeVisible();
-  await expect(page.getByText("1.2 → 1.5 mg/dL")).toBeVisible();
+  await expect(page.getByText(/118\/72.*88\/56 mmHg/).first()).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Call me with briefing" }),
   ).toBeDisabled();
   await page
-    .getByLabel("Choose a bundled scenario")
-    .selectOption("new-consult");
+    .getByRole("article", { name: "Chest pain consult", exact: true })
+    .getByRole("button", { name: "Preview", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toContainText("Synthetic Patient 031");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Activate scenario", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("activated");
+  await page
+    .getByRole("article", { name: "Chest pain consult", exact: true })
+    .getByRole("button", { name: "Preview", exact: true })
+    .click();
+  await page.keyboard.press("Escape");
   await expect(page.getByRole("status")).toContainText("Valid Cortana");
   await page.getByRole("button", { name: "Preview briefing" }).click();
   await expect(page.getByRole("dialog")).toContainText("Synthetic Patient 031");
@@ -24,7 +39,9 @@ test("select, preview, activate, reload and clear a shared scenario", async ({
   await page.getByRole("button", { name: "Activate scenario" }).click();
   await expect(page.getByRole("status")).toContainText("activated");
   await page.reload();
-  await expect(page.getByLabel("Active context")).toContainText("New consult");
+  await expect(page.getByLabel("Active context")).toContainText(
+    "Chest pain consult",
+  );
   const facts = await page.request.post("/api/context/tools/get_primary_case", {
     headers: { origin: new URL(page.url()).origin },
     data: {},
@@ -53,7 +70,9 @@ test("paste errors and upload HTML remain plain data", async ({ page }) => {
     .getByLabel("Scenario JSON", { exact: true })
     .fill('{"synthetic":false}');
   await page.getByRole("button", { name: "Validate JSON" }).click();
-  await expect(page.locator(".inline-error[role=alert]")).toContainText("synthetic");
+  await expect(page.locator(".inline-error[role=alert]")).toContainText(
+    "synthetic",
+  );
   await expect(
     page.getByRole("button", { name: "Activate scenario" }),
   ).toBeDisabled();
@@ -61,13 +80,11 @@ test("paste errors and upload HTML remain plain data", async ({ page }) => {
     ...morning,
     description: '<img src=x onerror="window.contextExecuted=true">',
   };
-  await page
-    .getByLabel("Upload JSON scenario", { exact: true })
-    .setInputFiles({
-      name: "scenario.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(upload)),
-    });
+  await page.getByLabel("Upload JSON scenario", { exact: true }).setInputFiles({
+    name: "scenario.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(upload)),
+  });
   await expect(page.getByRole("status")).toContainText("Valid Cortana");
   await expect(
     page.getByText(upload.description, { exact: true }),

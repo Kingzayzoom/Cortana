@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "1.0",
+  "id": "14-icu-transfer-request",
+  "title": "ICU transfer request",
+  "description": "An ICU evaluation / transfer request is pending; no completed transfer is recorded.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "The care team requests urgent evaluation of the ICU transfer request."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "urgent",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "The care team requests urgent evaluation of the ICU transfer request.",
+    "requestedArrival": "within 15 minutes"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-093",
+    "displayName": "Synthetic Patient 093",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Observation pending ICU evaluation.",
+    "history": [],
+    "currentStatus": {
+      "summary": "ICU evaluation / transfer request entered. Transfer has not been documented as completed.",
+      "vitals": {
+        "bloodPressure": "94/58 mmHg",
+        "heartRate": "106 bpm",
+        "oxygenSaturation": "93% on 2 L/min oxygen"
+      }
+    },
+    "changes": [
+      {
+        "id": "icu-request-change",
+        "concept": "Transfer request",
+        "direction": "new",
+        "previous": "Not requested",
+        "current": "Evaluation requested",
+        "unit": "",
+        "explanation": "ICU evaluation / transfer was requested at 06:40; completion is not documented.",
+        "timestamp": "2026-09-20T06:40:00-04:00"
+      }
+    ],
+    "labs": [],
+    "scheduledEvents": [
+      {
+        "id": "icu-evaluation",
+        "time": "06:55",
+        "label": "Requested ICU evaluation",
+        "category": "consult",
+        "status": "pending"
+      }
+    ],
+    "itemsForReview": [
+      "The care team requests urgent evaluation of the ICU transfer request."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "urgent",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "The care team requests urgent evaluation of the ICU transfer request.",
+      "requestedArrival": "within 15 minutes"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [
+    {
+      "id": "icu-consult",
+      "caseId": "patient-093",
+      "specialty": "Critical care",
+      "reason": "ICU evaluation / transfer request; decision pending.",
+      "time": "06:40",
+      "status": "requested",
+      "unit": "Cardiac Step-Down",
+      "physicianUrgency": {
+        "level": "urgent",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "The care team requests urgent evaluation of the ICU transfer request.",
+        "requestedArrival": "within 15 minutes"
+      }
+    }
+  ],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "icu-request-time",
+      "time": "06:40",
+      "label": "ICU evaluation requested",
+      "detail": "The case remains on Cardiac Step-Down; transfer completion not supplied.",
+      "caseId": "patient-093"
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Distinguishing requests from completed events",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "escalation",
+    "tags": [
+      "ICU",
+      "transfer",
+      "requested",
+      "urgent"
+    ]
+  }
+}

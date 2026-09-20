@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "1.0",
+  "id": "13-rapid-response",
+  "title": "Rapid-response activation",
+  "description": "A recorded rapid-response activation with an explicit immediate physician-review request.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "The scenario records a rapid-response activation and requests immediate physician review."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "immediate",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "The scenario records a rapid-response activation and requests immediate physician review.",
+    "requestedArrival": "immediately"
+  },
+  "hospitalStatus": {
+    "overallStatus": "high_activity",
+    "summary": "A rapid-response activation is recorded on Cardiac Step-Down; no cause is supplied.",
+    "events": [
+      {
+        "id": "rapid-hospital",
+        "time": "06:52",
+        "label": "Rapid response activated",
+        "detail": "Synthetic Patient 092 on Cardiac Step-Down; immediate physician review requested."
+      }
+    ]
+  },
+  "primaryCase": {
+    "id": "patient-092",
+    "displayName": "Synthetic Patient 092",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Monitored observation.",
+    "history": [],
+    "currentStatus": {
+      "summary": "The scenario records a rapid-response activation and requests immediate physician review.",
+      "vitals": {
+        "bloodPressure": "82/50 mmHg",
+        "heartRate": "122 bpm",
+        "oxygenSaturation": "89% on room air"
+      }
+    },
+    "changes": [
+      {
+        "id": "rapid-activation",
+        "concept": "Response status",
+        "direction": "new",
+        "previous": "Observation",
+        "current": "Rapid response activated",
+        "unit": "",
+        "explanation": "Rapid response activated at 06:52 on Cardiac Step-Down. No cause is supplied.",
+        "timestamp": "2026-09-20T06:52:00-04:00"
+      }
+    ],
+    "labs": [],
+    "scheduledEvents": [
+      {
+        "id": "rapid-review",
+        "time": "06:52",
+        "label": "Immediate physician review requested",
+        "category": "consult",
+        "status": "pending"
+      }
+    ],
+    "itemsForReview": [
+      "The scenario records a rapid-response activation and requests immediate physician review."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "immediate",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "The scenario records a rapid-response activation and requests immediate physician review.",
+      "requestedArrival": "immediately"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "rapid-measurements",
+      "time": "06:51",
+      "label": "Measurements recorded",
+      "detail": "BP 82/50 mmHg; HR 122 bpm; oxygen saturation 89% on room air.",
+      "caseId": "patient-092"
+    },
+    {
+      "id": "rapid-request",
+      "time": "06:52",
+      "label": "Rapid response activated",
+      "detail": "The scenario records a rapid-response activation and requests immediate physician review.",
+      "caseId": "patient-092"
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Reporting explicit escalation events",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "escalation",
+    "tags": [
+      "rapid response",
+      "immediate",
+      "activation"
+    ]
+  }
+}

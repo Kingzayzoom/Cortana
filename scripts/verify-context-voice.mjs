@@ -1,6 +1,6 @@
 import { chromium, expect } from "@playwright/test";
 import nextEnv from "@next/env";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 nextEnv.loadEnvConfig(process.cwd());
 const browser = await chromium.launch({
   args: [
@@ -61,6 +61,63 @@ try {
   const input = page.getByRole("textbox", {
     name: "Question about this round",
   });
+  const answers = page
+    .locator(".conversation-turn")
+    .filter({
+      has: page.locator(".conversation-speaker", { hasText: /^Cortana$/ }),
+    });
+  const sequence = [];
+  for (const step of [
+    {
+      file: "cardiology/01-hf-urgent-hypotension.json",
+      question:
+        "How urgently do they need me? Recheck the active scenario and report the supplied team request.",
+      expected: /urgent|15 minutes|fifteen minutes/i,
+    },
+    {
+      file: "cardiology/03-post-pci-stable.json",
+      question:
+        "I have activated a different scenario. What changed? Recheck the currently active scenario.",
+      expected:
+        /no (major |significant |new )?(overnight )?changes|stable overnight/i,
+    },
+    {
+      file: "escalation/13-rapid-response.json",
+      question:
+        "I have activated a different scenario. How urgently am I needed? Recheck the currently active scenario.",
+      expected: /immediate/i,
+    },
+  ]) {
+    const scenario = JSON.parse(
+      await readFile(`demo-data/context/${step.file}`, "utf8"),
+    );
+    const activated = await page.request.put(
+      new URL("/api/context", page.url()).href,
+      { data: scenario, headers: { origin: new URL(page.url()).origin } },
+    );
+    expect(activated.status()).toBe(200);
+    const before = await answers.count();
+    await input.fill(step.question);
+    await page
+      .getByRole("button", { name: "Send question", exact: true })
+      .click();
+    await expect
+      .poll(
+        async () => (await answers.allTextContents()).slice(before).join(" "),
+        { timeout: 45000 },
+      )
+      .toMatch(step.expected);
+    await expect
+      .poll(
+        () =>
+          calls.some(
+            (call) => call.scenarioId === scenario.id && call.status === 200,
+          ),
+        { timeout: 45000 },
+      )
+      .toBe(true);
+    sequence.push({ scenarioId: scenario.id, passed: true });
+  }
   await input.fill(
     "What is this synthetic patient's blood type? Answer only if the supplied scenario states it.",
   );
@@ -80,6 +137,7 @@ try {
     realElevenLabs: true,
     contextTools: calls,
     missingFactFallback: true,
+    scenarioSwitching: sequence,
     pageErrors: errors,
   };
   await writeFile(

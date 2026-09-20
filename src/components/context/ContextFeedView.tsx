@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { ArrowDown, ArrowRight, ArrowUp, FileJson, Upload } from "lucide-react";
 import { useContextScenario } from "@/lib/context/provider";
-import { demoScenarios } from "@/lib/context/demo";
+import {
+  defaultCatalogScenario,
+  getBundledScenario,
+  urgencyLabels,
+} from "@/lib/context/catalog";
+import { ScenarioLibrary } from "./ScenarioLibrary";
 import { parseScenarioFile, parseScenarioJSON } from "@/lib/context/normalize";
 import { SYNTHETIC_NOTICE, previewBriefing } from "@/lib/context/selectors";
 import type { ContextScenario } from "@/lib/context/types";
@@ -97,6 +102,85 @@ export function ContextFeedCard() {
     </section>
   );
 }
+function ScenarioSummary({ scenario: s }: { scenario: ContextScenario }) {
+  return (
+    <div className="scenario-preview-summary">
+      <dl className="context-facts">
+        <div>
+          <dt>Clinician</dt>
+          <dd>{s.clinician.displayName}</dd>
+        </div>
+        <div>
+          <dt>Hospital / unit</dt>
+          <dd>
+            {s.facility.displayName} · {s.facility.unit}
+          </dd>
+        </div>
+        <div>
+          <dt>Primary case</dt>
+          <dd>{s.primaryCase?.displayName ?? "No primary case supplied"}</dd>
+        </div>
+        <div>
+          <dt>Hospital status</dt>
+          <dd>
+            {s.hospitalStatus?.overallStatus.replaceAll("_", " ") ??
+              "Not supplied"}
+          </dd>
+        </div>
+      </dl>
+      <p>{s.primaryCase?.currentStatus.summary}</p>
+      <h4>Physician urgency</h4>
+      {s.physicianUrgency && (
+        <>
+          <span
+            className={`scenario-urgency urgency-${s.physicianUrgency.level}`}
+          >
+            {urgencyLabels[s.physicianUrgency.level]}
+          </span>
+          <p>
+            {s.physicianUrgency.requestedBy} ·{" "}
+            {s.physicianUrgency.requestedArrival}
+          </p>
+          <p>{s.physicianUrgency.reason}</p>
+        </>
+      )}
+      <h4>Important changes</h4>
+      <ul>
+        {s.primaryCase?.changes.map((c) => (
+          <li key={c.id}>{c.explanation}</li>
+        ))}
+      </ul>
+      {!s.primaryCase?.changes.length && <p>No case changes supplied.</p>}
+      <h4>Hospital context</h4>
+      <p>{s.hospitalStatus?.summary}</p>
+      <ul>
+        {s.secondaryCases.map((c) => (
+          <li key={c.id}>
+            {c.displayName}: {c.currentStatus.summary}
+          </li>
+        ))}
+      </ul>
+      <h4>Timeline</h4>
+      <ol className="context-timeline">
+        {s.timeline.map((e) => (
+          <li key={e.id}>
+            <time>{e.time}</time>
+            <div>
+              <strong>{e.label}</strong>
+              <small>{e.detail}</small>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <h4>Educational triggers</h4>
+      <ul>
+        {s.educationTriggers.map((e) => (
+          <li key={e.id}>{e.topic}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 function ScenarioDetails({ scenario: s }: { scenario: ContextScenario }) {
   const c = s.primaryCase;
   return (
@@ -128,6 +212,77 @@ function ScenarioDetails({ scenario: s }: { scenario: ContextScenario }) {
           <small>{c?.reasonForAdmission}</small>
         </div>
       </div>
+      <section
+        className="panel context-card"
+        aria-label="Physician urgency and hospital status"
+      >
+        <h3>Physician urgency</h3>
+        {s.physicianUrgency ? (
+          <>
+            <span
+              className={`scenario-urgency urgency-${s.physicianUrgency.level}`}
+            >
+              {urgencyLabels[s.physicianUrgency.level]}
+            </span>
+            <p>
+              <strong>{s.physicianUrgency.requestedBy}</strong> ?{" "}
+              {s.physicianUrgency.requestedArrival}
+            </p>
+            <p>{s.physicianUrgency.reason}</p>
+          </>
+        ) : (
+          <p className="muted">Physician urgency not supplied.</p>
+        )}
+        <h4>Hospital status</h4>
+        {s.hospitalStatus ? (
+          <>
+            <p>
+              <strong>
+                {s.hospitalStatus.overallStatus.replaceAll("_", " ")}
+              </strong>{" "}
+              ? {s.hospitalStatus.summary}
+            </p>
+            <ul className="context-timeline">
+              {s.hospitalStatus.events.map((e) => (
+                <li key={e.id}>
+                  <time>{e.time}</time>
+                  <div>
+                    <strong>{e.label}</strong>
+                    <small>{e.detail}</small>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <p className="muted">Hospital status not supplied.</p>
+        )}
+      </section>
+      {s.secondaryCases.length > 0 && (
+        <section className="panel context-card">
+          <h3>Other synthetic cases</h3>
+          <ul>
+            {s.secondaryCases.map((item) => (
+              <li key={item.id}>
+                <strong>{item.displayName}</strong> ?{" "}
+                {item.currentStatus.summary}
+                {item.physicianUrgency && (
+                  <p>
+                    {urgencyLabels[item.physicianUrgency.level]} ?{" "}
+                    {item.physicianUrgency.requestedBy} ?{" "}
+                    {item.physicianUrgency.requestedArrival}
+                  </p>
+                )}
+                {item.scheduledEvents.map((e) => (
+                  <p key={e.id}>
+                    {e.time} ? {e.label} ? {e.status}
+                  </p>
+                ))}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <div className="context-columns">
         <section className="panel context-card">
           <p className="eyebrow">SINCE LAST REVIEW</p>
@@ -317,8 +472,10 @@ export function ContextFeedView() {
   const [issues, setIssues] = useState<string[]>([]);
   const [notice, setNotice] = useState("");
   const [preview, setPreview] = useState(false);
+  const [catalogPreview, setCatalogPreview] = useState(false);
   const [dragging, setDragging] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const previewTrigger = useRef<HTMLElement | null>(null);
   const s = draft ?? context.activeScenario;
   const invalid = (e: unknown) => {
     setDraft(null);
@@ -356,6 +513,25 @@ export function ContextFeedView() {
         description="Drop in a synthetic scenario. Review the changes, then let Cortana brief you."
       />
       <p className="context-notice">{SYNTHETIC_NOTICE}</p>
+      <section className="context-active-bar" aria-label="Active context">
+        <div>
+          <span className="eyebrow">ACTIVE FOR WEB + PHONE</span>
+          <strong>
+            {context.loading
+              ? "Loading…"
+              : (context.activeScenario?.title ?? "No active scenario")}
+          </strong>
+        </div>
+        <BriefingActions />
+      </section>
+      <ScenarioLibrary
+        activeId={context.activeScenario?.id}
+        onPreview={(scenario) => {
+          previewTrigger.current = document.activeElement as HTMLElement;
+          validated(scenario);
+          setCatalogPreview(true);
+        }}
+      />
       <section
         className="panel context-card context-import"
         aria-labelledby="drop-in-title"
@@ -366,29 +542,6 @@ export function ContextFeedView() {
             One active scenario, shared by web and phone Cortana.
           </p>
         </div>
-        <label className="field-label" htmlFor="scenario-select">
-          Choose a bundled scenario
-        </label>
-        <select
-          id="scenario-select"
-          className="input"
-          value={
-            draft && demoScenarios.some((d) => d.id === draft.id)
-              ? draft.id
-              : ""
-          }
-          onChange={(e) => {
-            const next = demoScenarios.find((d) => d.id === e.target.value);
-            if (next) validated(next);
-          }}
-        >
-          <option value="">Select a demo…</option>
-          {demoScenarios.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.title}
-            </option>
-          ))}
-        </select>
         <div
           className={"context-dropzone" + (dragging ? " is-dragging" : "")}
           onDragOver={(e) => {
@@ -497,6 +650,23 @@ export function ContextFeedView() {
             Preview briefing
           </Button>
           <Button
+            variant="secondary"
+            disabled={context.busy || context.loading}
+            onClick={async () => {
+              const scenario = getBundledScenario(defaultCatalogScenario.id);
+              if (!scenario) return;
+              try {
+                await context.setActiveScenario(scenario);
+                setDraft(null);
+                setNotice(
+                  "Demo reset. Default scenario activated for web and phone.",
+                );
+              } catch {}
+            }}
+          >
+            Reset demo context
+          </Button>
+          <Button
             variant="ghost"
             disabled={!context.activeScenario || context.busy}
             onClick={async () => {
@@ -512,17 +682,6 @@ export function ContextFeedView() {
             Clear active context
           </Button>
         </div>
-      </section>
-      <section className="context-active-bar" aria-label="Active context">
-        <div>
-          <span className="eyebrow">ACTIVE FOR WEB + PHONE</span>
-          <strong>
-            {context.loading
-              ? "Loading…"
-              : (context.activeScenario?.title ?? "No active scenario")}
-          </strong>
-        </div>
-        <BriefingActions />
       </section>
       {s && (
         <section
@@ -541,6 +700,39 @@ export function ContextFeedView() {
           <ScenarioDetails scenario={s} />
         </section>
       )}
+      <Dialog
+        open={catalogPreview}
+        onOpenChange={setCatalogPreview}
+        title="Scenario summary"
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          previewTrigger.current?.focus();
+        }}
+        description={SYNTHETIC_NOTICE}
+        drawer
+      >
+        {draft && (
+          <>
+            <h3>{draft.title}</h3>
+            <p>{draft.description}</p>
+            <ScenarioSummary scenario={draft} />
+            {context.error && <p role="alert">{context.error}</p>}
+            <Button
+              disabled={context.busy || context.loading}
+              onClick={async () => {
+                try {
+                  await context.setActiveScenario(draft);
+                  setDraft(null);
+                  setCatalogPreview(false);
+                  setNotice("Scenario activated for web and phone.");
+                } catch {}
+              }}
+            >
+              {context.busy ? "Saving?" : "Activate scenario"}
+            </Button>
+          </>
+        )}
+      </Dialog>
       <Dialog
         open={preview}
         onOpenChange={setPreview}

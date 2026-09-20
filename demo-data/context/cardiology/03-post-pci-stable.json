@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "1.0",
+  "id": "03-post-pci-stable",
+  "title": "Post-PCI observation / Stable",
+  "description": "No major overnight changes; routine morning review remains scheduled.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Routine post-procedure observation review; no new concern recorded."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "routine",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "Routine post-procedure observation review; no new concern recorded.",
+    "requestedArrival": "at the scheduled morning review"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-026",
+    "displayName": "Synthetic Patient 026",
+    "synthetic": true,
+    "demographics": {
+      "age": 61,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Post-PCI observation.",
+    "history": [
+      "PCI completed the previous day; procedural details not supplied."
+    ],
+    "currentStatus": {
+      "summary": "Stable overnight. No major overnight changes were recorded.",
+      "vitals": {
+        "bloodPressure": "122/74 mmHg",
+        "heartRate": "72 bpm",
+        "oxygenSaturation": "98% on room air"
+      }
+    },
+    "changes": [
+      {
+        "id": "change-stability",
+        "concept": "Overnight status",
+        "direction": "stable",
+        "previous": "Stable",
+        "current": "Stable",
+        "unit": "",
+        "explanation": "No major overnight changes were recorded.",
+        "timestamp": "2026-09-20T06:45:00-04:00"
+      }
+    ],
+    "labs": [
+      {
+        "id": "pci-hemoglobin",
+        "name": "Hemoglobin",
+        "value": 13.1,
+        "unit": "g/dL",
+        "timestamp": "2026-09-20T06:30:00-04:00",
+        "previous": 13.1
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "pci-rounds",
+        "time": "09:15",
+        "label": "Routine morning review",
+        "category": "rounds",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Routine post-procedure observation review; no new concern recorded."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "routine",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "Routine post-procedure observation review; no new concern recorded.",
+      "requestedArrival": "at the scheduled morning review"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "timeline-handoff",
+      "time": "07:00",
+      "label": "Shift handoff",
+      "detail": "No major overnight changes; routine morning review remains scheduled."
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Post-procedure observation",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "cardiology",
+    "tags": [
+      "post PCI",
+      "stable",
+      "routine",
+      "no change"
+    ]
+  }
+}

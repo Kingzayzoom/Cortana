@@ -1,0 +1,141 @@
+{
+  "schemaVersion": "1.0",
+  "id": "15-new-admission",
+  "title": "New admission",
+  "description": "A new service arrival with initial observations, available history and pending studies.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "The admitting team requests review of the new admission and pending studies."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "review_soon",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "The admitting team requests review of the new admission and pending studies.",
+    "requestedArrival": "within 60 minutes"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-094",
+    "displayName": "Synthetic Patient 094",
+    "synthetic": true,
+    "demographics": {
+      "age": 64,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "New admission for observation of reported exertional breathlessness.",
+    "history": [
+      "Documented hypertension.",
+      "Prior procedure history not supplied."
+    ],
+    "currentStatus": {
+      "summary": "New synthetic admission; initial studies pending and physician review requested.",
+      "vitals": {
+        "bloodPressure": "134/78 mmHg",
+        "heartRate": "88 bpm",
+        "oxygenSaturation": "96% on room air"
+      }
+    },
+    "changes": [
+      {
+        "id": "admission-change",
+        "concept": "Service status",
+        "direction": "new",
+        "previous": "Not on service",
+        "current": "Admitted",
+        "unit": "",
+        "explanation": "Synthetic Patient 094 entered the service at 06:30.",
+        "timestamp": "2026-09-20T06:30:00-04:00"
+      }
+    ],
+    "labs": [
+      {
+        "id": "admission-lab",
+        "name": "Initial laboratory panel",
+        "value": "Pending",
+        "unit": "",
+        "timestamp": "2026-09-20T06:30:00-04:00"
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "admission-imaging",
+        "time": "08:00",
+        "label": "Pending chest imaging",
+        "category": "imaging",
+        "status": "pending"
+      },
+      {
+        "id": "admission-review",
+        "time": "07:30",
+        "label": "Requested admission review",
+        "category": "consult",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "The admitting team requests review of the new admission and pending studies."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "review_soon",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "The admitting team requests review of the new admission and pending studies.",
+      "requestedArrival": "within 60 minutes"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "admission-time",
+      "time": "06:30",
+      "label": "New patient arrival",
+      "detail": "Initial vitals recorded and admitting-team review requested.",
+      "caseId": "patient-094"
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Initial evaluation framework",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "escalation",
+    "tags": [
+      "new admission",
+      "arrival",
+      "pending studies",
+      "history"
+    ]
+  }
+}

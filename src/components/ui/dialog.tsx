@@ -9,6 +9,7 @@ export function Dialog({
   description,
   children,
   drawer = false,
+  onCloseAutoFocus,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -16,12 +17,14 @@ export function Dialog({
   description?: string;
   children: React.ReactNode;
   drawer?: boolean;
+  onCloseAutoFocus?: (event: Event) => void;
 }) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="dialog-overlay" />
         <DialogPrimitive.Content
+          onCloseAutoFocus={onCloseAutoFocus}
           className={cn("dialog-content", drawer && "dialog-drawer")}
           {...(!description ? { "aria-describedby": undefined } : {})}
         >

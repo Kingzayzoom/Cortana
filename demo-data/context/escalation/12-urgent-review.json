@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "1.0",
+  "id": "12-urgent-review",
+  "title": "Urgent team request",
+  "description": "The care team explicitly requests physician arrival within 15 minutes.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "The synthetic care team requested physician review after a documented status change."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "urgent",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "The synthetic care team requested physician review after a documented status change.",
+    "requestedArrival": "within 15 minutes"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-091",
+    "displayName": "Synthetic Patient 091",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Observation after a documented status change.",
+    "history": [],
+    "currentStatus": {
+      "summary": "The care team explicitly requested urgent physician review.",
+      "vitals": {
+        "bloodPressure": "92/60 mmHg",
+        "heartRate": "104 bpm",
+        "oxygenSaturation": "95% on room air"
+      }
+    },
+    "changes": [
+      {
+        "id": "urgent-status",
+        "concept": "Team review status",
+        "direction": "new",
+        "previous": "Routine observation",
+        "current": "Urgent review requested",
+        "unit": "",
+        "explanation": "The care team entered an urgent physician-review request at 06:50.",
+        "timestamp": "2026-09-20T06:50:00-04:00"
+      }
+    ],
+    "labs": [],
+    "scheduledEvents": [
+      {
+        "id": "urgent-arrival",
+        "time": "07:05",
+        "label": "Requested physician review",
+        "category": "consult",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "The synthetic care team requested physician review after a documented status change."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "urgent",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "The synthetic care team requested physician review after a documented status change.",
+      "requestedArrival": "within 15 minutes"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "urgent-request-time",
+      "time": "06:50",
+      "label": "Urgent review requested",
+      "detail": "Requested arrival: within 15 minutes.",
+      "caseId": "patient-091"
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Communicating a care-team request",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "escalation",
+    "tags": [
+      "urgent",
+      "team request",
+      "review"
+    ]
+  }
+}

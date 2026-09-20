@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "1.0",
+  "id": "10-procedure-delay",
+  "title": "Procedure delay",
+  "description": "Transport scheduling moved one synthetic case?s procedure from 10:00 to 11:30.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Review the updated procedure time and physician schedule."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "routine",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "Review the updated procedure time and physician schedule.",
+    "requestedArrival": "at the rescheduled 11:30 procedure"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": [
+      {
+        "id": "transport-delay",
+        "time": "06:50",
+        "label": "Procedure delayed",
+        "detail": "Transport scheduling changed the procedure for Synthetic Patient 071 to 11:30."
+      }
+    ]
+  },
+  "primaryCase": {
+    "id": "patient-071",
+    "displayName": "Synthetic Patient 071",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Elective procedure observation.",
+    "history": [],
+    "currentStatus": {
+      "summary": "Stable; the physician schedule changed because transport was rescheduled.",
+      "vitals": {
+        "bloodPressure": "126/74 mmHg",
+        "heartRate": "70 bpm"
+      }
+    },
+    "changes": [
+      {
+        "id": "procedure-time",
+        "concept": "Procedure time",
+        "direction": "changed",
+        "previous": "10:00",
+        "current": "11:30",
+        "unit": "",
+        "explanation": "Transport scheduling moved the procedure from 10:00 to 11:30.",
+        "timestamp": "2026-09-20T06:50:00-04:00"
+      }
+    ],
+    "labs": [],
+    "scheduledEvents": [
+      {
+        "id": "rescheduled-procedure",
+        "time": "11:30",
+        "label": "Rescheduled elective procedure",
+        "category": "procedure",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Review the updated procedure time and physician schedule."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "routine",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "Review the updated procedure time and physician schedule.",
+      "requestedArrival": "at the rescheduled 11:30 procedure"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "delay-recorded",
+      "time": "06:50",
+      "label": "Schedule updated",
+      "detail": "Original time 10:00; new time 11:30; transport scheduling reason.",
+      "caseId": "patient-071"
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Operational handoff accuracy",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "operations",
+    "tags": [
+      "procedure",
+      "delay",
+      "transport",
+      "schedule",
+      "routine"
+    ]
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "schemaVersion": "1.0",
+  "id": "08-evening-cross-cover",
+  "title": "Evening cross-cover",
+  "description": "Three routine handoff cases with one pending lab and one pending imaging result.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "19:00",
+    "endTime": "23:00",
+    "prioritySummary": [
+      "Review pending results when available during cross-cover."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "routine",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "Review pending results when available during cross-cover.",
+    "requestedArrival": "during evening cross-cover"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-051",
+    "displayName": "Synthetic Patient 051",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Evening cross-cover handoff.",
+    "history": [],
+    "currentStatus": {
+      "summary": "Stable; one routine laboratory result remains pending.",
+      "vitals": {
+        "bloodPressure": "120/72 mmHg",
+        "heartRate": "74 bpm"
+      }
+    },
+    "changes": [],
+    "labs": [
+      {
+        "id": "evening-pending",
+        "name": "Basic metabolic panel",
+        "value": "Pending",
+        "unit": "",
+        "timestamp": "2026-09-20T06:30:00-04:00"
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "evening-lab",
+        "time": "20:00",
+        "label": "Laboratory result review",
+        "category": "lab",
+        "status": "pending"
+      }
+    ],
+    "itemsForReview": [
+      "Review pending results when available during cross-cover."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "routine",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "Review pending results when available during cross-cover.",
+      "requestedArrival": "during evening cross-cover"
+    }
+  },
+  "secondaryCases": [
+    {
+      "id": "patient-052",
+      "displayName": "Synthetic Patient 052",
+      "synthetic": true,
+      "demographics": {
+        "age": 62,
+        "sex": "Not supplied"
+      },
+      "reasonForAdmission": "Imaging-result follow-up.",
+      "history": [],
+      "currentStatus": {
+        "summary": "Imaging completed; report pending.",
+        "vitals": {}
+      },
+      "changes": [],
+      "labs": [],
+      "scheduledEvents": [
+        {
+          "id": "evening-imaging",
+          "time": "20:30",
+          "label": "Imaging report review",
+          "category": "imaging",
+          "status": "pending"
+        }
+      ],
+      "itemsForReview": [
+        "Imaging-result follow-up."
+      ],
+      "allowedQuestions": [
+        "What changed?",
+        "How urgently do they need me?",
+        "What is scheduled?"
+      ],
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "Imaging-result follow-up.",
+        "requestedArrival": "during evening cross-cover"
+      }
+    },
+    {
+      "id": "patient-053",
+      "displayName": "Synthetic Patient 053",
+      "synthetic": true,
+      "demographics": {
+        "age": 62,
+        "sex": "Not supplied"
+      },
+      "reasonForAdmission": "Routine symptom review.",
+      "history": [],
+      "currentStatus": {
+        "summary": "No new symptom change recorded.",
+        "vitals": {}
+      },
+      "changes": [],
+      "labs": [],
+      "scheduledEvents": [],
+      "itemsForReview": [
+        "Routine symptom review."
+      ],
+      "allowedQuestions": [
+        "What changed?",
+        "How urgently do they need me?",
+        "What is scheduled?"
+      ],
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "Routine symptom review.",
+        "requestedArrival": "during evening cross-cover"
+      }
+    }
+  ],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "evening-start",
+      "time": "19:00",
+      "label": "Cross-cover starts",
+      "detail": "Three stable synthetic cases handed over."
+    },
+    {
+      "id": "evening-review",
+      "time": "21:00",
+      "label": "Routine review",
+      "detail": "Synthetic Patient 053 has a routine review item."
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Structured handoff",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "operations",
+    "tags": [
+      "shift",
+      "evening",
+      "handoff",
+      "routine",
+      "pending"
+    ]
+  }
+}

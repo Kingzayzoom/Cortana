@@ -1,0 +1,232 @@
+{
+  "schemaVersion": "1.0",
+  "id": "09-consult-backlog",
+  "title": "Consult backlog",
+  "description": "Three waiting consults: one review soon and two routine.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "The first consult carries an explicit review-soon request."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "review_soon",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "The first consult carries an explicit review-soon request.",
+    "requestedArrival": "before morning rounds"
+  },
+  "hospitalStatus": {
+    "overallStatus": "busy",
+    "summary": "Three consults are waiting; no urgent or immediate request recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-061",
+    "displayName": "Synthetic Patient 061",
+    "synthetic": true,
+    "demographics": {
+      "age": 58,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Waiting cardiology consultation.",
+    "history": [],
+    "currentStatus": {
+      "summary": "Consult queued; no diagnosis supplied.",
+      "vitals": {}
+    },
+    "changes": [],
+    "labs": [],
+    "scheduledEvents": [
+      {
+        "id": "queue-review",
+        "time": "08:00",
+        "label": "Consult queue review",
+        "category": "consult",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "The first consult carries an explicit review-soon request."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "review_soon",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "The first consult carries an explicit review-soon request.",
+      "requestedArrival": "before morning rounds"
+    }
+  },
+  "secondaryCases": [
+    {
+      "id": "patient-062",
+      "displayName": "Synthetic Patient 062",
+      "synthetic": true,
+      "demographics": {
+        "age": 62,
+        "sex": "Not supplied"
+      },
+      "reasonForAdmission": "Pre-procedure assessment request.",
+      "history": [],
+      "currentStatus": {
+        "summary": "Routine consult queued.",
+        "vitals": {}
+      },
+      "changes": [],
+      "labs": [],
+      "scheduledEvents": [],
+      "itemsForReview": [
+        "Pre-procedure assessment request."
+      ],
+      "allowedQuestions": [
+        "What changed?",
+        "How urgently do they need me?",
+        "What is scheduled?"
+      ],
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "Pre-procedure assessment request.",
+        "requestedArrival": "during scheduled rounds"
+      }
+    },
+    {
+      "id": "patient-063",
+      "displayName": "Synthetic Patient 063",
+      "synthetic": true,
+      "demographics": {
+        "age": 62,
+        "sex": "Not supplied"
+      },
+      "reasonForAdmission": "Follow-up of a supplied imaging report.",
+      "history": [],
+      "currentStatus": {
+        "summary": "Routine consult queued; no diagnosis supplied.",
+        "vitals": {}
+      },
+      "changes": [],
+      "labs": [],
+      "scheduledEvents": [],
+      "itemsForReview": [
+        "Follow-up of a supplied imaging report."
+      ],
+      "allowedQuestions": [
+        "What changed?",
+        "How urgently do they need me?",
+        "What is scheduled?"
+      ],
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "Follow-up of a supplied imaging report.",
+        "requestedArrival": "during scheduled rounds"
+      }
+    }
+  ],
+  "consults": [
+    {
+      "id": "queue-1",
+      "caseId": "patient-061",
+      "specialty": "Cardiology",
+      "reason": "Review a new symptom report; no diagnosis supplied.",
+      "time": "06:15",
+      "status": "requested",
+      "unit": "Medical Observation",
+      "physicianUrgency": {
+        "level": "review_soon",
+        "requestedBy": "Medical Observation Team",
+        "reason": "Review a new symptom report; no diagnosis supplied.",
+        "requestedArrival": "before morning rounds"
+      }
+    },
+    {
+      "id": "queue-2",
+      "caseId": "patient-062",
+      "specialty": "Cardiology",
+      "reason": "Pre-procedure assessment requested.",
+      "time": "06:25",
+      "status": "requested",
+      "unit": "Procedure Observation",
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Procedure Observation Team",
+        "reason": "Pre-procedure assessment requested.",
+        "requestedArrival": "during scheduled review"
+      }
+    },
+    {
+      "id": "queue-3",
+      "caseId": "patient-063",
+      "specialty": "Cardiology",
+      "reason": "Review a supplied imaging report.",
+      "time": "06:40",
+      "status": "requested",
+      "unit": "General Medicine",
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "General Medicine Team",
+        "reason": "Review a supplied imaging report.",
+        "requestedArrival": "during scheduled review"
+      }
+    }
+  ],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "queue-time-0",
+      "time": "06:15",
+      "label": "Consult entered queue",
+      "detail": "Review a new symptom report; no diagnosis supplied. Assigned unit: Medical Observation",
+      "caseId": "patient-061"
+    },
+    {
+      "id": "queue-time-1",
+      "time": "06:25",
+      "label": "Consult entered queue",
+      "detail": "Pre-procedure assessment requested. Assigned unit: Procedure Observation",
+      "caseId": "patient-062"
+    },
+    {
+      "id": "queue-time-2",
+      "time": "06:40",
+      "label": "Consult entered queue",
+      "detail": "Review a supplied imaging report. Assigned unit: General Medicine",
+      "caseId": "patient-063"
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Consult request prioritization",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "operations",
+    "tags": [
+      "consult",
+      "backlog",
+      "busy"
+    ]
+  }
+}

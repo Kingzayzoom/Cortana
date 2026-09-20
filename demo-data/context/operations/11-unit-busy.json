@@ -1,0 +1,221 @@
+{
+  "schemaVersion": "1.0",
+  "id": "11-unit-busy",
+  "title": "Busy cardiology unit",
+  "description": "One review-soon case, a stable case, an incoming consult and delayed imaging.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Review the pending laboratory trend before rounds."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "review_soon",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "Review the pending laboratory trend before rounds.",
+    "requestedArrival": "before morning rounds"
+  },
+  "hospitalStatus": {
+    "overallStatus": "busy",
+    "summary": "Several scheduled activities overlap; no urgent or immediate request is recorded.",
+    "events": [
+      {
+        "id": "busy-delay",
+        "time": "06:45",
+        "label": "Imaging delayed",
+        "detail": "Synthetic Patient 082 imaging moved from 09:30 to 11:00 because of scheduling."
+      },
+      {
+        "id": "busy-huddle",
+        "time": "07:20",
+        "label": "Team huddle",
+        "detail": "Review the laboratory follow-up, consult and revised imaging schedule."
+      }
+    ]
+  },
+  "primaryCase": {
+    "id": "patient-081",
+    "displayName": "Synthetic Patient 081",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Review of a pending laboratory trend.",
+    "history": [],
+    "currentStatus": {
+      "summary": "Stable observations; care team requests review soon.",
+      "vitals": {
+        "bloodPressure": "114/70 mmHg",
+        "heartRate": "82 bpm"
+      }
+    },
+    "changes": [],
+    "labs": [
+      {
+        "id": "busy-lab",
+        "name": "Renal panel",
+        "value": "Pending",
+        "unit": "",
+        "timestamp": "2026-09-20T06:30:00-04:00"
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "busy-rounds",
+        "time": "09:00",
+        "label": "Morning rounds",
+        "category": "rounds",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Review the pending laboratory trend before rounds."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "review_soon",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "Review the pending laboratory trend before rounds.",
+      "requestedArrival": "before morning rounds"
+    }
+  },
+  "secondaryCases": [
+    {
+      "id": "patient-082",
+      "displayName": "Synthetic Patient 082",
+      "synthetic": true,
+      "demographics": {
+        "age": 62,
+        "sex": "Not supplied"
+      },
+      "reasonForAdmission": "Routine observation.",
+      "history": [],
+      "currentStatus": {
+        "summary": "Stable; imaging schedule delayed.",
+        "vitals": {}
+      },
+      "changes": [],
+      "labs": [],
+      "scheduledEvents": [
+        {
+          "id": "busy-imaging",
+          "time": "11:00",
+          "label": "Rescheduled imaging",
+          "category": "imaging",
+          "status": "scheduled"
+        }
+      ],
+      "itemsForReview": [
+        "Routine observation."
+      ],
+      "allowedQuestions": [
+        "What changed?",
+        "How urgently do they need me?",
+        "What is scheduled?"
+      ],
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "Routine observation.",
+        "requestedArrival": "during scheduled rounds"
+      }
+    },
+    {
+      "id": "patient-083",
+      "displayName": "Synthetic Patient 083",
+      "synthetic": true,
+      "demographics": {
+        "age": 62,
+        "sex": "Not supplied"
+      },
+      "reasonForAdmission": "Incoming cardiology consult.",
+      "history": [],
+      "currentStatus": {
+        "summary": "Routine consult request entered; no diagnosis supplied.",
+        "vitals": {}
+      },
+      "changes": [],
+      "labs": [],
+      "scheduledEvents": [],
+      "itemsForReview": [
+        "Incoming cardiology consult."
+      ],
+      "allowedQuestions": [
+        "What changed?",
+        "How urgently do they need me?",
+        "What is scheduled?"
+      ],
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "Incoming cardiology consult.",
+        "requestedArrival": "during scheduled rounds"
+      }
+    }
+  ],
+  "consults": [
+    {
+      "id": "busy-consult",
+      "caseId": "patient-083",
+      "specialty": "Cardiology",
+      "reason": "Incoming consultation for review of supplied history.",
+      "time": "06:55",
+      "status": "requested",
+      "unit": "Cardiac Step-Down",
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "Incoming consultation for review of supplied history.",
+        "requestedArrival": "during scheduled review"
+      }
+    }
+  ],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "timeline-handoff",
+      "time": "07:00",
+      "label": "Shift handoff",
+      "detail": "One review-soon case, a stable case, an incoming consult and delayed imaging."
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Hospital-level situational awareness",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "operations",
+    "tags": [
+      "busy",
+      "unit",
+      "consult",
+      "imaging",
+      "huddle"
+    ]
+  }
+}

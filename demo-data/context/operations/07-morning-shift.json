@@ -1,0 +1,242 @@
+{
+  "schemaVersion": "1.0",
+  "id": "07-morning-shift",
+  "title": "Morning shift overview",
+  "description": "Three synthetic cases, one consult and a scheduled huddle; no urgent case.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Review the pending renal result before rounds."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "review_soon",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "Review the pending renal result before rounds.",
+    "requestedArrival": "before morning rounds"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": [
+      {
+        "id": "morning-huddle",
+        "time": "07:15",
+        "label": "Morning huddle",
+        "detail": "Three cases and one consult will be reviewed."
+      }
+    ]
+  },
+  "primaryCase": {
+    "id": "patient-041",
+    "displayName": "Synthetic Patient 041",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Morning review of a pending renal result.",
+    "history": [],
+    "currentStatus": {
+      "summary": "Stable observations; pending laboratory review is the highest supplied priority.",
+      "vitals": {
+        "bloodPressure": "118/70 mmHg",
+        "heartRate": "80 bpm"
+      }
+    },
+    "changes": [
+      {
+        "id": "morning-lab-pending",
+        "concept": "Laboratory status",
+        "direction": "new",
+        "previous": "Not ordered",
+        "current": "Pending",
+        "unit": "",
+        "explanation": "A renal panel is pending for review.",
+        "timestamp": "2026-09-20T06:45:00-04:00"
+      }
+    ],
+    "labs": [],
+    "scheduledEvents": [
+      {
+        "id": "morning-lab",
+        "time": "08:00",
+        "label": "Renal panel",
+        "category": "lab",
+        "status": "pending"
+      },
+      {
+        "id": "unit-rounds",
+        "time": "09:00",
+        "label": "Scheduled rounds",
+        "category": "rounds",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Review the pending renal result before rounds."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "review_soon",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "Review the pending renal result before rounds.",
+      "requestedArrival": "before morning rounds"
+    }
+  },
+  "secondaryCases": [
+    {
+      "id": "patient-042",
+      "displayName": "Synthetic Patient 042",
+      "synthetic": true,
+      "demographics": {
+        "age": 62,
+        "sex": "Not supplied"
+      },
+      "reasonForAdmission": "Post-procedure observation.",
+      "history": [],
+      "currentStatus": {
+        "summary": "Stable overnight; routine rounds.",
+        "vitals": {}
+      },
+      "changes": [],
+      "labs": [],
+      "scheduledEvents": [
+        {
+          "id": "morning-imaging",
+          "time": "10:30",
+          "label": "Scheduled echocardiogram",
+          "category": "imaging",
+          "status": "scheduled"
+        }
+      ],
+      "itemsForReview": [
+        "Post-procedure observation."
+      ],
+      "allowedQuestions": [
+        "What changed?",
+        "How urgently do they need me?",
+        "What is scheduled?"
+      ],
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "Post-procedure observation.",
+        "requestedArrival": "during scheduled rounds"
+      }
+    },
+    {
+      "id": "patient-043",
+      "displayName": "Synthetic Patient 043",
+      "synthetic": true,
+      "demographics": {
+        "age": 62,
+        "sex": "Not supplied"
+      },
+      "reasonForAdmission": "New cardiology consult.",
+      "history": [],
+      "currentStatus": {
+        "summary": "Initial assessment queued; routine review requested.",
+        "vitals": {}
+      },
+      "changes": [],
+      "labs": [],
+      "scheduledEvents": [],
+      "itemsForReview": [
+        "New cardiology consult."
+      ],
+      "allowedQuestions": [
+        "What changed?",
+        "How urgently do they need me?",
+        "What is scheduled?"
+      ],
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "New cardiology consult.",
+        "requestedArrival": "during scheduled rounds"
+      }
+    }
+  ],
+  "consults": [
+    {
+      "id": "morning-consult",
+      "caseId": "patient-043",
+      "specialty": "Cardiology",
+      "reason": "Routine consultation requested.",
+      "time": "06:50",
+      "status": "requested",
+      "unit": "Cardiac Step-Down",
+      "physicianUrgency": {
+        "level": "routine",
+        "requestedBy": "Cardiac Step-Down Team",
+        "reason": "Routine consultation requested.",
+        "requestedArrival": "during scheduled review"
+      }
+    }
+  ],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "shift-start",
+      "time": "07:00",
+      "label": "Shift starts",
+      "detail": "Dr. Zabish receives the handoff."
+    },
+    {
+      "id": "huddle-timeline",
+      "time": "07:15",
+      "label": "Morning huddle",
+      "detail": "No urgent case recorded."
+    },
+    {
+      "id": "rounds-timeline",
+      "time": "09:00",
+      "label": "Scheduled rounds",
+      "detail": "Three synthetic cases on the list."
+    },
+    {
+      "id": "imaging-timeline",
+      "time": "10:30",
+      "label": "Scheduled imaging",
+      "detail": "Echocardiogram for Synthetic Patient 042."
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Prioritizing supplied review requests",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "operations",
+    "tags": [
+      "shift",
+      "morning",
+      "huddle",
+      "consult"
+    ]
+  }
+}

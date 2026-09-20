@@ -1,0 +1,183 @@
+{
+  "schemaVersion": "1.0",
+  "id": "01-hf-urgent-hypotension",
+  "title": "Heart failure / Urgent hypotension",
+  "description": "A documented blood-pressure drop with a care-team request for review within 15 minutes.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Cardiology review requested after the recorded blood-pressure decrease."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "urgent",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "Cardiology review requested after the recorded blood-pressure decrease.",
+    "requestedArrival": "within 15 minutes"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": [
+      {
+        "id": "hospital-huddle",
+        "time": "07:10",
+        "label": "Morning huddle",
+        "detail": "The scheduled huddle remains on the unit calendar."
+      }
+    ]
+  },
+  "primaryCase": {
+    "id": "patient-024",
+    "displayName": "Synthetic Patient 024",
+    "synthetic": true,
+    "demographics": {
+      "age": 67,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Observation for documented HFrEF.",
+    "history": [
+      "Documented HFrEF; supplied ejection fraction 30%."
+    ],
+    "currentStatus": {
+      "summary": "The team recorded decreased blood pressure and requested urgent cardiology review.",
+      "vitals": {
+        "bloodPressure": "88/56 mmHg",
+        "heartRate": "108 bpm",
+        "oxygenSaturation": "94% on room air"
+      }
+    },
+    "changes": [
+      {
+        "id": "change-bp",
+        "concept": "Blood pressure",
+        "direction": "down",
+        "previous": "118/72",
+        "current": "88/56",
+        "unit": "mmHg",
+        "explanation": "Blood pressure decreased from 118/72 at 06:10 to 88/56 at 06:45.",
+        "timestamp": "2026-09-20T06:45:00-04:00"
+      },
+      {
+        "id": "change-rate",
+        "concept": "Heart rate",
+        "direction": "up",
+        "previous": 82,
+        "current": 108,
+        "unit": "bpm",
+        "explanation": "Heart rate increased from 82 to 108 bpm.",
+        "timestamp": "2026-09-20T06:45:00-04:00"
+      },
+      {
+        "id": "change-oxygen",
+        "concept": "Oxygen saturation",
+        "direction": "down",
+        "previous": 97,
+        "current": 94,
+        "unit": "%",
+        "explanation": "Oxygen saturation decreased from 97% to 94% on room air.",
+        "timestamp": "2026-09-20T06:45:00-04:00"
+      }
+    ],
+    "labs": [
+      {
+        "id": "lab-creatinine",
+        "name": "Creatinine",
+        "value": 1.3,
+        "unit": "mg/dL",
+        "timestamp": "2026-09-20T06:30:00-04:00",
+        "previous": 1.2
+      },
+      {
+        "id": "lab-potassium",
+        "name": "Potassium",
+        "value": 4.2,
+        "unit": "mmol/L",
+        "timestamp": "2026-09-20T06:30:00-04:00"
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "repeat-labs",
+        "time": "07:30",
+        "label": "Repeat basic metabolic panel",
+        "category": "lab",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Cardiology review requested after the recorded blood-pressure decrease."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "urgent",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "Cardiology review requested after the recorded blood-pressure decrease.",
+      "requestedArrival": "within 15 minutes"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "timeline-baseline",
+      "time": "06:10",
+      "label": "Previous vitals recorded",
+      "detail": "BP 118/72 mmHg; HR 82 bpm; oxygen saturation 97% on room air.",
+      "caseId": "patient-024"
+    },
+    {
+      "id": "timeline-change",
+      "time": "06:45",
+      "label": "Latest vitals recorded",
+      "detail": "BP 88/56 mmHg; HR 108 bpm; oxygen saturation 94% on room air.",
+      "caseId": "patient-024"
+    },
+    {
+      "id": "timeline-request",
+      "time": "06:50",
+      "label": "Urgent review requested",
+      "detail": "Cardiac Step-Down requested Dr. Zabish within 15 minutes.",
+      "caseId": "patient-024"
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Heart failure",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context.",
+      "roundId": "dapa-hf-01"
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "cardiology",
+    "tags": [
+      "heart failure",
+      "hypotension",
+      "urgent",
+      "team review"
+    ]
+  }
+}

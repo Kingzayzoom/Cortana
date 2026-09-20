@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "1.0",
+  "id": "06-anticoag-review",
+  "title": "Anticoagulation review",
+  "description": "A supplied INR trend and repeat laboratory check for routine review.",
+  "synthetic": true,
+  "clinician": {
+    "id": "clinician-zabish",
+    "displayName": "Dr. Zabish",
+    "specialty": "Cardiology",
+    "role": "Attending cardiologist"
+  },
+  "facility": {
+    "id": "facility-meridian",
+    "displayName": "Meridian Demo Hospital",
+    "unit": "Cardiac Step-Down",
+    "locationLabel": "Synthetic teaching facility"
+  },
+  "shift": {
+    "date": "2026-09-20",
+    "startTime": "07:00",
+    "endTime": "19:00",
+    "prioritySummary": [
+      "Review the supplied INR trend; medication and dose decisions are outside this scenario."
+    ]
+  },
+  "physicianUrgency": {
+    "level": "routine",
+    "requestedBy": "Cardiac Step-Down Team",
+    "reason": "Review the supplied INR trend; medication and dose decisions are outside this scenario.",
+    "requestedArrival": "during morning rounds"
+  },
+  "hospitalStatus": {
+    "overallStatus": "normal",
+    "summary": "Routine unit activity; no other escalation recorded.",
+    "events": []
+  },
+  "primaryCase": {
+    "id": "patient-033",
+    "displayName": "Synthetic Patient 033",
+    "synthetic": true,
+    "demographics": {
+      "age": 69,
+      "sex": "Not supplied"
+    },
+    "reasonForAdmission": "Scheduled anticoagulation-related laboratory review.",
+    "history": [
+      "Anticoagulation monitoring documented; agent and dose not supplied."
+    ],
+    "currentStatus": {
+      "summary": "No new symptoms or bleeding event recorded in this scenario.",
+      "vitals": {
+        "bloodPressure": "124/72 mmHg",
+        "heartRate": "76 bpm"
+      }
+    },
+    "changes": [
+      {
+        "id": "inr-change",
+        "concept": "INR",
+        "direction": "up",
+        "previous": 2.2,
+        "current": 2.4,
+        "unit": "ratio",
+        "explanation": "INR increased from 2.2 to 2.4; no target range or dose is supplied.",
+        "timestamp": "2026-09-20T06:45:00-04:00"
+      }
+    ],
+    "labs": [
+      {
+        "id": "inr-lab",
+        "name": "INR",
+        "value": 2.4,
+        "unit": "ratio",
+        "timestamp": "2026-09-20T06:30:00-04:00",
+        "previous": 2.2
+      }
+    ],
+    "scheduledEvents": [
+      {
+        "id": "inr-repeat",
+        "time": "11:00",
+        "label": "Scheduled repeat INR",
+        "category": "lab",
+        "status": "scheduled"
+      }
+    ],
+    "itemsForReview": [
+      "Review the supplied INR trend; medication and dose decisions are outside this scenario."
+    ],
+    "allowedQuestions": [
+      "What changed?",
+      "How urgently do they need me?",
+      "What is scheduled?"
+    ],
+    "physicianUrgency": {
+      "level": "routine",
+      "requestedBy": "Cardiac Step-Down Team",
+      "reason": "Review the supplied INR trend; medication and dose decisions are outside this scenario.",
+      "requestedArrival": "during morning rounds"
+    }
+  },
+  "secondaryCases": [],
+  "consults": [],
+  "hospitalEvents": [],
+  "timeline": [
+    {
+      "id": "timeline-handoff",
+      "time": "07:00",
+      "label": "Shift handoff",
+      "detail": "A supplied INR trend and repeat laboratory check for routine review."
+    }
+  ],
+  "educationTriggers": [
+    {
+      "id": "education-1",
+      "topic": "Anticoagulation evidence",
+      "reason": "Optional educational refresher prompted by the supplied synthetic context."
+    }
+  ],
+  "metadata": {
+    "createdAt": "2026-09-19T12:00:00Z",
+    "source": "demo",
+    "category": "cardiology",
+    "tags": [
+      "anticoagulation",
+      "INR",
+      "routine",
+      "lab"
+    ]
+  }
+}

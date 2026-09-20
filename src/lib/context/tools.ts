@@ -59,6 +59,14 @@ export function queryContext(
           clinician: s.clinician,
           facility: s.facility,
           shift: s.shift,
+          hospitalStatus: s.hospitalStatus ?? null,
+          physicianUrgency: s.physicianUrgency ?? null,
+          secondaryCases: s.secondaryCases.map((c) => ({
+            caseId: c.id,
+            displayName: c.displayName,
+            currentStatus: c.currentStatus,
+            physicianUrgency: c.physicianUrgency ?? null,
+          })),
           consults: s.consults,
         };
         break;
@@ -68,6 +76,7 @@ export function queryContext(
               caseId: item.id,
               displayName: item.displayName,
               demographics: item.demographics,
+              physicianUrgency: item.physicianUrgency ?? null,
               reasonForAdmission: item.reasonForAdmission,
               history: item.history,
               currentStatus: item.currentStatus,
@@ -82,8 +91,16 @@ export function queryContext(
         break;
       case "get_hospital_timeline":
         result =
-          s.timeline.length || s.hospitalEvents.length
-            ? { timeline: s.timeline, hospitalEvents: s.hospitalEvents }
+          s.timeline.length ||
+          s.hospitalEvents.length ||
+          s.hospitalStatus?.events.length
+            ? {
+                timeline: s.timeline,
+                hospitalEvents: [
+                  ...s.hospitalEvents,
+                  ...(s.hospitalStatus?.events ?? []),
+                ],
+              }
             : null;
         break;
       case "get_education_triggers":
