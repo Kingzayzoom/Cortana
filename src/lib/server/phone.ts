@@ -16,6 +16,13 @@ import {
   sources,
   unsupportedAnswer,
 } from "../content/round";
+import {
+  briefing,
+  clinician,
+  facility,
+  notInBriefing,
+} from "../content/briefing";
+import { topics } from "../content/topics";
 import type { Run } from "../learning/types";
 
 // A phone round runs the same lesson as the browser, but ElevenLabs reaches this
@@ -242,6 +249,38 @@ async function withRun<T>(
 // The lesson content and authority the phone agent is allowed to use. The answer
 // key stays on this server, exactly as in the browser round.
 export const phoneTools = {
+  // The call opens with this. It needs no active round, so a briefing question
+  // can never fail because the learning round moved on.
+  get_shift_briefing: () => ({
+    synthetic: true,
+    disclosure:
+      "This is a synthetic briefing. No real patient or unit is described.",
+    clinician: {
+      sayThisName: clinician.spokenName,
+      specialty: clinician.specialty,
+    },
+    facility,
+    briefing,
+    ifAskedForSomethingMissing: notInBriefing,
+    youMayNotAdvise:
+      "State what the briefing records and who requested it. Do not interpret findings or recommend management.",
+  }),
+
+  // Quizzes may only use topics that actually have a round behind them.
+  get_topics: () => ({
+    topics: topics.map(({ id, name, available }) => ({ id, name, available })),
+    availableNow: topics
+      .filter((topic) => topic.available)
+      .map(({ id, name, minutes, summary }) => ({
+        id,
+        name,
+        minutes,
+        summary,
+      })),
+    ifUnavailable:
+      "Say that topic doesn't have a round yet, and offer one that does.",
+  }),
+
   get_round_context: (profileId: string, runId: string) =>
     withRun(profileId, runId, (data, run) => ({
       learner: {

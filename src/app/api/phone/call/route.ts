@@ -20,6 +20,7 @@ import { localDate, streak } from "@/lib/learning/rules";
 import { ROUND_ID } from "@/lib/content/round";
 import { readActiveScenario } from "@/lib/context/store";
 import { buildPhoneBriefingContext } from "@/lib/context/selectors";
+import { clinician } from "@/lib/content/briefing";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
@@ -73,7 +74,9 @@ export async function POST(request: Request) {
       phone_session: await createPhoneSession(id, run.id),
       context_mode: mode,
       context_briefing: briefing ? JSON.stringify(briefing) : "",
-      learner_name: briefing?.clinicianName ?? run.name,
+      // The demo briefing names the clinician it belongs to, and carries the
+      // spelling the voice should speak rather than the one shown on screen.
+      learner_name: briefing?.clinicianName ?? clinician.spokenName,
       round_id: ROUND_ID,
       streak_days: String(run.streakDays),
       returning_learner: run.completions > 0 ? "yes" : "no",

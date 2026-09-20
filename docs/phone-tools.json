@@ -2,6 +2,60 @@
   {
     "tool_config": {
       "type": "webhook",
+      "name": "get_shift_briefing",
+      "description": "Get this clinician's synthetic shift briefing: the urgent item, the primary case, other patients, consults and the timeline. Call this first on every call and speak only what it returns.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_shift_briefing",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
+      "name": "get_topics",
+      "description": "List the learning topics that have a round behind them. Call this before offering or discussing a quiz, and never offer a topic marked unavailable.",
+      "response_timeout_secs": 20,
+      "api_schema": {
+        "url": "__PUBLIC_URL__/api/phone/tools/get_topics",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer __TOOL_SECRET__"
+        },
+        "request_body_schema": {
+          "type": "object",
+          "properties": {
+            "session": {
+              "type": "string",
+              "dynamic_variable": "phone_session"
+            }
+          },
+          "required": [
+            "session"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "tool_config": {
+      "type": "webhook",
       "name": "get_round_context",
       "description": "Get the authoritative round, its sources, the synthetic case and this learner's saved checkpoint. Call this first and use the returned bundle instead of model memory.",
       "response_timeout_secs": 20,

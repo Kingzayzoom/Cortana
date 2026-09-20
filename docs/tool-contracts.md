@@ -2,15 +2,15 @@
 
 Register all seven tools as **Client** tools. Set **Wait for response / expects_response = true** for every tool and a 20-second timeout. The names and parameter schemas must exactly match `src/lib/validation/contracts.ts`. The JSON file `docs/elevenlabs-tools.json` contains the corresponding provider tool configurations.
 
-| Name | Parameters | Result and authority |
-| --- | --- | --- |
-| `get_round_context` | `roundId: "dapa-hf-01"` | Curated content, citations and checkpoint |
-| `show_stage` | `stageId`: briefing, challenge or questions; optional `sectionId`: population, finding or limitation | Server validates ordered transitions and saves the checkpoint |
-| `show_case` | `caseId: "hf-case-01"` | Opens the stored synthetic case after the final briefing |
-| `show_evidence` | `sourceIds`: one or two of dapa-hf and dapa-diabetes | Opens stored evidence; accepts no arbitrary content |
-| `submit_answer` | Fixed roundId and questionId; actual answer (the app supplies the UUID) | Server grades and persists |
-| `complete_round` | Fixed roundId (the app supplies the UUID) | Server requires an answered case and questions stage; only server awards XP |
-| `get_next_review` | Empty object | Actual saved review date and reason |
+| Name                | Parameters                                                                                           | Result and authority                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `get_round_context` | `roundId: "dapa-hf-01"`                                                                              | Curated content, citations and checkpoint                                   |
+| `show_stage`        | `stageId`: briefing, challenge or questions; optional `sectionId`: population, finding or limitation | Server validates ordered transitions and saves the checkpoint               |
+| `show_case`         | `caseId: "hf-case-01"`                                                                               | Opens the stored synthetic case after the final briefing                    |
+| `show_evidence`     | `sourceIds`: one or two of dapa-hf and dapa-diabetes                                                 | Opens stored evidence; accepts no arbitrary content                         |
+| `submit_answer`     | Fixed roundId and questionId; actual answer (the app supplies the UUID)                              | Server grades and persists                                                  |
+| `complete_round`    | Fixed roundId (the app supplies the UUID)                                                            | Server requires an answered case and questions stage; only server awards XP |
+| `get_next_review`   | Empty object                                                                                         | Actual saved review date and reason                                         |
 
 The provider export includes the names, fields, requiredness and accepted ID enums. ElevenLabs requires parameter descriptions and does not accept `additionalProperties`, string length/format or item-count constraints in the same form as Zod's full JSON schema. The runtime uses the original strict Zod schemas for all of those checks.
 
