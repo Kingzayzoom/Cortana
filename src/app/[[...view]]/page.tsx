@@ -10,6 +10,7 @@ import {
 import { SettingsView } from "@/components/learning/SettingsView";
 import { ImpiricusSignalBridge } from "@/components/learning/ImpiricusSignalBridge";
 import { PhoneRoundView } from "@/components/phone/PhoneRoundView";
+import { EmailSummaryFeature } from "@/components/email-summary/EmailSummaryFeature";
 export default async function Page({
   params,
 }: {
@@ -26,6 +27,7 @@ export default async function Page({
     phone: <PhoneRoundView />,
     settings: <SettingsView />,
     impiricus: <ImpiricusSignalBridge />,
+    "email-summary": <EmailSummaryFeature />,
   };
   if (!(route in screens)) notFound();
   return <Shell>{screens[route]}</Shell>;

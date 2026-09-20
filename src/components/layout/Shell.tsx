@@ -16,6 +16,7 @@ import {
   AudioLines,
   Workflow,
   Phone,
+  Mail,
 } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
@@ -28,6 +29,7 @@ const navigation = [
   { href: "/topics", title: "Topics", icon: Shapes },
   { href: "/impiricus", title: "Signal Bridge", icon: Workflow },
   { href: "/phone", title: "Phone Round", icon: Phone },
+  { href: "/email-summary", title: "Email Summary", icon: Mail },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname(),
