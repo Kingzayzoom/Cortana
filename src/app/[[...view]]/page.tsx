@@ -12,6 +12,7 @@ import { ImpiricusSignalBridge } from "@/components/learning/ImpiricusSignalBrid
 import { PhoneRoundView } from "@/components/phone/PhoneRoundView";
 import { ContextFeedView } from "@/components/context/ContextFeedView";
 import { PrimeHome,PrimeSessionView } from "@/components/prime/PrimeViews";
+import { EmailSummaryFeature } from "@/components/email-summary/EmailSummaryFeature";
 export default async function Page({
   params,
 }: {
@@ -33,6 +34,7 @@ export default async function Page({
     "context/phone": <PhoneRoundView briefing />,
     settings: <SettingsView />,
     impiricus: <ImpiricusSignalBridge />,
+    "email-summary": <EmailSummaryFeature />,
   };
   if (!(route in screens)) notFound();
   return <Shell>{screens[route]}</Shell>;
