@@ -125,7 +125,7 @@ test("actual preview events, replay safety, privacy, persistence and export", as
   expect(JSON.stringify(payload)).not.toMatch(
     /Jane|12345|transcript|accessCode/,
   );
-  await page.getByRole("link", { name: "Signal Bridge", exact: true }).click();
+  await page.goto("/impiricus");
   await expect(
     page.getByRole("heading", { name: "Go beyond engagement." }),
   ).toBeVisible();

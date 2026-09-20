@@ -44,7 +44,7 @@ test("start reveals only the conversation surface, cancel restores the dashboard
     "dashboard",
   );
   await expect(
-    page.getByRole("heading", { name: /Today.s Round/ }),
+    page.getByRole("heading", { name: "Your daily clinical conversation." }),
   ).toBeVisible();
 });
 

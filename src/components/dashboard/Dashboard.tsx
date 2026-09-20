@@ -1,36 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  ArrowRight,
-  BookOpen,
-  Check,
-  Clock3,
-  FileText,
-  HeartPulse,
-  Lightbulb,
-  UserRound,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { CortanaOrb } from "@/components/voice/CortanaOrb";
 import { LiveConversationPanel } from "@/components/voice/LiveConversationPanel";
 import { TranscriptPanel } from "@/components/voice/TranscriptPanel";
 import { VoiceControls } from "@/components/voice/VoiceControls";
 import { LessonPanel } from "@/components/learning/LessonPanel";
-import { ProgressCards } from "./ProgressCards";
 import { ContextFeedCard } from "@/components/context/ContextFeedView";
 import { DailyPrimeCard } from "@/components/prime/PrimeViews";
 import { useLearning } from "@/lib/learning/provider";
 import { useVoice } from "@/lib/voice/provider";
-import { Dialog } from "@/components/ui/dialog";
-import { selectNextRound } from "@/lib/adaptive-learning/selectNextRound";
 
 export function Dashboard() {
-  const { data, openEvidence } = useLearning();
+  const { data } = useLearning();
   const voice = useVoice();
   const [transcriptOverride, setTranscriptOverride] = useState<boolean | null>(
     null,
   );
-  const [whyOpen, setWhyOpen] = useState(false);
   const [summaryReady, setSummaryReady] = useState<string | null>(null);
   const [dismissedSummary, setDismissedSummary] = useState<string | null>(null);
   const [participated, setParticipated] = useState(false);
@@ -60,7 +47,6 @@ export function Dashboard() {
     !completionMoment &&
     dismissedSummary !== data.run.id,
   );
-  const recommendation = selectNextRound(data?.learningSignals ?? []);
   const transcript =
     transcriptOverride ?? data?.preferences.transcript ?? false;
   const liveMode = Boolean(
@@ -73,34 +59,12 @@ export function Dashboard() {
           voice.connection,
         ))),
   );
-  const active = liveMode || data?.run?.completed;
   useEffect(() => {
     if (liveMode) window.scrollTo({ top: 0, behavior: "instant" });
   }, [liveMode]);
   useEffect(() => {
     if (showSummary && voice.connection === "connected") voice.end();
   }, [showSummary, voice]);
-  const stage = active ? data?.run?.stage : "ready";
-  const sessionSignals =
-    data?.learningSignals?.filter(
-      (event) => event.sessionId === data.run?.id,
-    ) ?? [];
-  const finishedStages = [
-    sessionSignals.some((event) => event.type === "briefing_completed"),
-    sessionSignals.some((event) => event.type === "question_asked"),
-    Boolean(data?.run?.grade),
-    Boolean(data?.run?.completed),
-  ];
-  const current =
-    stage === "briefing"
-      ? 0
-      : stage === "challenge" || stage === "feedback"
-        ? 2
-        : stage === "questions" || stage === "completed"
-          ? stage === "completed"
-            ? 3
-            : 1
-          : -1;
 
   return (
     <>
@@ -188,108 +152,6 @@ export function Dashboard() {
               )}
             </section>
 
-            <aside
-              className="round-column dashboard-round-column"
-              aria-hidden={liveMode}
-              inert={liveMode ? true : undefined}
-            >
-              <section className="round-card panel">
-                <div className="round-title">
-                  <h2>Today’s Round</h2>
-                  <span className="round-count">01</span>
-                </div>
-                <p className="round-duration">
-                  <Clock3 size={15} />
-                  About 2 minutes <span>·</span> Cardiology
-                </p>
-                <ol className="round-stages">
-                  {[
-                    {
-                      title: "Briefing",
-                      description: "An evidence-based perspective",
-                      icon: FileText,
-                    },
-                    {
-                      title: "Ask anything",
-                      description: "Follow a question at any point",
-                      icon: Lightbulb,
-                    },
-                    {
-                      title: "Clinical challenge",
-                      description: "One synthetic clinical case",
-                      icon: UserRound,
-                    },
-                    {
-                      title: "Reinforcement",
-                      description: "Practice with a reason to revisit",
-                      icon: Lightbulb,
-                    },
-                  ].map((item, index) => (
-                    <li
-                      key={item.title}
-                      className={`${current === index ? "stage-active" : ""} ${finishedStages[index] ? "stage-complete" : ""}`}
-                      aria-current={current === index ? "step" : undefined}
-                    >
-                      <span className="stage-number">
-                        {finishedStages[index] ? (
-                          <Check size={15} />
-                        ) : (
-                          `0${index + 1}`
-                        )}
-                      </span>
-                      <item.icon size={21} strokeWidth={1.6} />
-                      <div>
-                        <strong>{item.title}</strong>
-                        <p>{item.description}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-                <div className="round-focus">
-                  <p className="focus-label">TODAY&apos;S FOCUS</p>
-                  <button
-                    className="focus-topic"
-                    onClick={() => openEvidence("dapa-hf")}
-                  >
-                    <span className="focus-icon">
-                      <HeartPulse size={26} strokeWidth={1.55} />
-                    </span>
-                    <span>
-                      <strong>Heart failure</strong>
-                      <small>Beyond diabetes. Into the evidence.</small>
-                    </span>
-                    <ArrowRight size={17} />
-                  </button>
-                  <p className="focus-description">
-                    Explore who was studied in DAPA-HF, and why that distinction
-                    matters.
-                  </p>
-                  <button
-                    className="text-button"
-                    onClick={() => setWhyOpen(true)}
-                  >
-                    Why this round?
-                  </button>
-                  <button
-                    className="text-button round-source-link"
-                    onClick={() => openEvidence("dapa-hf")}
-                  >
-                    <BookOpen size={15} />
-                    View round sources
-                    <ArrowRight size={15} />
-                  </button>
-                </div>
-              </section>
-              <div className="daily-note">
-                <span className="note-line" />
-                <p>
-                  Make room for
-                  <br />
-                  <em>a little more knowing.</em>
-                </p>
-              </div>
-            </aside>
-
             <LiveConversationPanel
               key={data?.run?.id ?? "starting"}
               active={liveMode}
@@ -304,24 +166,12 @@ export function Dashboard() {
             <div className="dashboard-lower-inner">
               <ContextFeedCard />
               <DailyPrimeCard />
-              <ProgressCards />
             </div>
           </div>
         </>
       )}
 
-      <Dialog
-        open={whyOpen}
-        onOpenChange={setWhyOpen}
-        title="Why this round?"
-        description="A transparent recommendation from your learning activity."
-      >
-        <p>{recommendation?.reason}</p>
-        <p className="small muted">
-          The current demo supports one reviewed DAPA-HF round. It does not
-          infer clinical ability or select unsupported topics.
-        </p>
-      </Dialog>
+
     </>
   );
 }

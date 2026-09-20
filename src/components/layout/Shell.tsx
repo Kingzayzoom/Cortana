@@ -14,7 +14,6 @@ import {
   X,
   ChevronDown,
   AudioLines,
-  Workflow,
   Phone,
 } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";
@@ -29,7 +28,6 @@ const navigation = [
   { href: "/evidence", title: "Evidence Library", icon: BookOpen },
   { href: "/profile", title: "Learning Profile", icon: ChartNoAxesCombined },
   { href: "/topics", title: "Topics", icon: Shapes },
-  { href: "/impiricus", title: "Signal Bridge", icon: Workflow },
   { href: "/phone", title: "Phone Round", icon: Phone },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
@@ -159,13 +157,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="sidebar-note">
-            <span className="tiny-orbit" />
-            <p>
-              A little learning.
-              <br />A daily habit.
-            </p>
-          </div>
           <Link
             href="/settings"
             className={`nav-link ${pathname === "/settings" ? "selected" : ""}`}

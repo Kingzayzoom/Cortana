@@ -241,8 +241,8 @@ function Scene({
         ));
 
     const targetSpeed =
-      0.18 + Math.max(curInRef.current, curOutRef.current) * 0.8;
-    animSpeedRef.current += (targetSpeed - animSpeedRef.current) * 0.12;
+      0.42 + Math.max(curInRef.current, curOutRef.current) * 0.65;
+    animSpeedRef.current += (targetSpeed - animSpeedRef.current) * (1 - Math.exp(-dt * 5));
 
     u.uAnimation.value += reducedMotion
       ? 0
@@ -538,7 +538,14 @@ void main() {
     vec2 refracted = uv * (0.8 + 0.25 * z);
     refracted.x += z * 0.23;
     refracted.y += z * 0.30 * sin(uv.x * 2.2);
-    float drift = uAnimation * 0.24;
+    // Slow counterflow makes the surface visibly fluid without moving the silhouette.
+    float drift = uAnimation * 0.48;
+    float turn = 0.18 * sin(drift * 0.65);
+    refracted = mat2(cos(turn), -sin(turn), sin(turn), cos(turn)) * refracted;
+    refracted += z * vec2(
+        0.10 * sin(refracted.y * 3.0 + drift * 1.2),
+        0.08 * cos(refracted.x * 3.4 - drift * 0.9)
+    );
     float field = noise2D(refracted * 2.2 + vec2(drift, -drift * 0.45));
     float ribbon = sin(refracted.y * 5.5 + refracted.x * 3.5 + field * (10.0 + energy) + drift);
     float fold = sin(refracted.y * 7.0 - refracted.x * 4.0 + field * 10.0 - drift * 0.4);
