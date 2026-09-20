@@ -11,6 +11,8 @@ import {
 } from "@/lib/server/session";
 import {
   assertToolSecret,
+  GUEST_SESSION,
+  guestTools,
   phoneTools,
   readPhoneSession,
 } from "@/lib/server/phone";
@@ -24,13 +26,15 @@ const toolRequest = z
     answer: z.string().trim().min(1).max(600).optional(),
     caseId: z.string().min(1).max(80).optional(),
     section: z.string().min(1).max(30).optional(),
-    sessionId:z.string().uuid().optional(),
-    questionId:z.string().min(1).max(80).optional(),
+    sessionId: z.string().uuid().optional(),
+    questionId: z.string().min(1).max(80).optional(),
     // Front desk message. The recipient is never one of these fields.
     reason: z.string().max(40).optional(),
     message: z.string().max(400).optional(),
     etaMinutes: z.number().optional(),
     confirmed: z.boolean().optional(),
+    // Supplied by the platform so a guest briefing stays the same all call.
+    conversationId: z.string().max(120).optional(),
   })
   .strict();
 export async function POST(
@@ -43,13 +47,38 @@ export async function POST(
     const parsed = toolRequest.safeParse(await readBody(request));
     if (!parsed.success)
       throw new RequestError("The tool request was not understood.");
+    if (parsed.data.session === GUEST_SESSION) {
+      await rateLimit("phone-guest", 120);
+      const seed =
+        parsed.data.conversationId || `guest-${new Date().getUTCHours()}`;
+      if (tool === "get_shift_briefing")
+        return Response.json(guestTools.get_shift_briefing(seed), {
+          headers: { "Cache-Control": "no-store, private" },
+        });
+      if (tool === "get_topics")
+        return Response.json(guestTools.get_topics(), {
+          headers: { "Cache-Control": "no-store, private" },
+        });
+      throw new RequestError(
+        "That isn't available on an inbound call. Offer to call them back from the app, where their progress is saved.",
+        409,
+      );
+    }
     const { profileId, runId } = await readPhoneSession(parsed.data.session);
     await rateLimit(`phone-tool:${profileId}`, 60);
-    if(isPrimeTool(tool)){
-      await readActiveScenario(profileId,runId);
-      const {session: _session,...args}=parsed.data;void _session;
-      try{return Response.json(await runPrimeTool(profileId,tool,args),{headers:{"Cache-Control":"no-store, private"}});}
-      catch(e){if(e instanceof z.ZodError)throw new RequestError("Invalid Prime tool parameters.");throw e;}
+    if (isPrimeTool(tool)) {
+      await readActiveScenario(profileId, runId);
+      const { session: _session, ...args } = parsed.data;
+      void _session;
+      try {
+        return Response.json(await runPrimeTool(profileId, tool, args), {
+          headers: { "Cache-Control": "no-store, private" },
+        });
+      } catch (e) {
+        if (e instanceof z.ZodError)
+          throw new RequestError("Invalid Prime tool parameters.");
+        throw e;
+      }
     }
     if (isContextTool(tool)) {
       const { session: _session, ...args } = parsed.data;

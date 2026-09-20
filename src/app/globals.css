@@ -3584,3 +3584,42 @@ svg {
 @media (max-width: 760px) {
   .dashboard-grid:not(.live-mode) .orb-halo { inset: 9% -5% 0; }
 }
+
+/* Live phone transcript, readable across a room. */
+.call-transcript {
+  margin-top: 18px;
+  max-height: 420px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 6px;
+}
+.call-line {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.call-line strong {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted, #6b7280);
+}
+.call-cortana span {
+  color: var(--text, #1f2937);
+}
+.call-caller span {
+  color: var(--primary, #2563eb);
+}
+.call-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted, #6b7280);
+  font-style: italic;
+}

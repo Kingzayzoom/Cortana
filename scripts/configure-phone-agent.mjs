@@ -150,8 +150,10 @@ const config = {
   name: "Cortana Phone",
   conversation_config: {
     agent: {
-      first_message:
-        "Hi {{learner_name}}, it's Cortana, your AI learning companion. Is now a good time for your synthetic demo briefing or learning round?",
+      // No dynamic variable here: an inbound caller supplies none, and
+      // ElevenLabs refuses the conversation if the first message needs one.
+      // The agent greets by name in its next breath, once the briefing loads.
+      first_message: "Hi, it's Cortana here with your morning briefing.",
       language: existingAgent?.conversation_config.agent.language ?? "en",
       prompt: {
         prompt,
@@ -179,7 +181,9 @@ const config = {
           round_id: "dapa-hf-01",
           streak_days: "0",
           returning_learner: "no",
-          phone_session: "",
+          // Inbound callers have no signed session; this value tells the
+          // server they are a guest, and keeps the tools satisfied.
+          phone_session: "guest-inbound-caller",
         },
       },
     },

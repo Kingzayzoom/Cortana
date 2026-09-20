@@ -51,6 +51,23 @@ export async function createPhoneSession(profileId: string, runId: string) {
   return `${payload}.${await hmac(`phone:${payload}`)}`;
 }
 
+// Someone who dials the number has no profile behind them, so the agent sends
+// this instead of a signed session. They can hear a briefing and ask about it;
+// nothing that writes to a learner's progress is available.
+export const GUEST_SESSION = "guest-inbound-caller";
+
+export const guestTools = {
+  // Without a conversation to seed from, the briefing rotates through the
+  // library by the hour: steady inside one call, different later in the day.
+  get_shift_briefing: (conversationId: string) => ({
+    ...phoneTools.get_shift_briefing(conversationId),
+    guest: true,
+    unavailableOnThisCall:
+      "Saving progress, grading answers and messaging the front desk need the learner's own profile. Offer to call them back from the app instead.",
+  }),
+  get_topics: () => phoneTools.get_topics(),
+};
+
 export async function readPhoneSession(token: string) {
   const [payload, signature] = token.split(".");
   const unknown = new RequestError("This call session is not recognized.", 401);

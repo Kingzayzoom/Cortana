@@ -12,7 +12,13 @@ type CallState =
   | { step: "calling"; to: string; conversationId: string | null }
   | { step: "ended"; to: string };
 
-export function PhoneRoundView({ briefing = false, prime = false }: { briefing?: boolean; prime?:boolean }) {
+export function PhoneRoundView({
+  briefing = false,
+  prime = false,
+}: {
+  briefing?: boolean;
+  prime?: boolean;
+}) {
   const context = useContextScenario();
   const { data, refresh } = useLearning();
   const [number, setNumber] = useState(""),
@@ -23,8 +29,13 @@ export function PhoneRoundView({ briefing = false, prime = false }: { briefing?:
   const [error, setError] = useState<string | null>(null),
     [busy, setBusy] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval>>(undefined);
+  const [lines, setLines] = useState<
+    { id: string; role: string; text: string }[]
+  >([]);
+  const foot = useRef<HTMLDivElement>(null);
 
-  // Follow the call so the page can show progress the moment it ends.
+  // Follow the call so the room can read it on screen while one person holds
+  // the phone, and so the page updates the moment it ends.
   useEffect(() => {
     if (call.step !== "calling" || !call.conversationId) return;
     const conversationId = call.conversationId,
@@ -36,6 +47,7 @@ export function PhoneRoundView({ briefing = false, prime = false }: { briefing?:
           { cache: "no-store" },
         );
         const body = await response.json();
+        if (Array.isArray(body.transcript)) setLines(body.transcript);
         if (["done", "failed", "processing"].includes(body.status)) {
           clearInterval(timer.current);
           setCall({ step: "ended", to });
@@ -44,9 +56,13 @@ export function PhoneRoundView({ briefing = false, prime = false }: { briefing?:
       } catch {
         // A status hiccup shouldn't interrupt a call that is going fine.
       }
-    }, 5000);
+    }, 2500);
     return () => clearInterval(timer.current);
   }, [call, refresh]);
+
+  useEffect(() => {
+    foot.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [lines.length]);
 
   const place = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -83,11 +99,27 @@ export function PhoneRoundView({ briefing = false, prime = false }: { briefing?:
   return (
     <>
       <PageHeading
-        eyebrow={prime ? "Phone Prime" : briefing ? "Phone briefing" : "Phone round"}
+        eyebrow={
+          prime ? "Phone Prime" : briefing ? "Phone briefing" : "Phone round"
+        }
         title="Cortana can call you."
-        description={briefing ? "Changes, schedule, and review items from your active demo scenario." : "Two minutes of evidence, on any phone. The same round, the same grading, no screen needed."}
+        description={
+          briefing
+            ? "Changes, schedule, and review items from your active demo scenario."
+            : "Two minutes of evidence, on any phone. The same round, the same grading, no screen needed."
+        }
       />
-      {briefing && <div className="panel context-card"><strong>{context.activeScenario?.title ?? "No active scenario"}</strong><p>{SYNTHETIC_NOTICE}</p>{!context.phoneConfigured && <p>Phone briefings are not configured on this server.</p>}</div>}
+      {briefing && (
+        <div className="panel context-card">
+          <strong>
+            {context.activeScenario?.title ?? "No active scenario"}
+          </strong>
+          <p>{SYNTHETIC_NOTICE}</p>
+          {!context.phoneConfigured && (
+            <p>Phone briefings are not configured on this server.</p>
+          )}
+        </div>
+      )}
       {call.step === "form" ? (
         <form className="settings-section" onSubmit={place}>
           <label className="field-label" htmlFor="phone-number">
@@ -153,7 +185,8 @@ export function PhoneRoundView({ briefing = false, prime = false }: { briefing?:
               disabled={
                 busy ||
                 (prime && !context.phoneConfigured) ||
-                (briefing && (!context.phoneConfigured || !context.activeScenario)) ||
+                (briefing &&
+                  (!context.phoneConfigured || !context.activeScenario)) ||
                 !consent ||
                 !permission ||
                 !number.trim() ||
@@ -195,6 +228,32 @@ export function PhoneRoundView({ briefing = false, prime = false }: { briefing?:
             {data?.streak === 1 ? "" : "s"}
             {data?.review ? ` · Next review ${data.review.date}` : ""}
           </p>
+          <div className="call-transcript" aria-live="polite">
+            {lines.length === 0 ? (
+              <p className="small muted">
+                {call.step === "calling"
+                  ? "The conversation appears here as you speak."
+                  : "No transcript was recorded for this call."}
+              </p>
+            ) : (
+              lines.map((line) =>
+                line.role === "action" ? (
+                  <p key={line.id} className="call-line call-action">
+                    <Check size={14} className="inline-icon" />
+                    {line.text}
+                  </p>
+                ) : (
+                  <p key={line.id} className={`call-line call-${line.role}`}>
+                    <strong>
+                      {line.role === "cortana" ? "Cortana" : "You"}
+                    </strong>
+                    <span>{line.text}</span>
+                  </p>
+                ),
+              )
+            )}
+            <div ref={foot} />
+          </div>
           <div className="settings-save">
             <Button
               variant="secondary"

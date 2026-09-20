@@ -8,6 +8,19 @@ import {
 import { withProgress } from "@/lib/server/store";
 import { phoneConfigured } from "@/lib/server/phone";
 export const runtime = "nodejs";
+// Tool calls worth showing the room. Anything else stays behind the scenes.
+const ACTIONS: Record<string, string> = {
+  get_shift_briefing: "Loaded the shift briefing",
+  get_topics: "Checked which topics have a round",
+  get_round_context: "Opened the evidence round",
+  submit_answer: "Sent the answer to the server for grading",
+  complete_round: "Saved the completed round",
+  email_front_desk: "Sent a message to the front desk",
+  get_context_summary: "Loaded the active scenario",
+  get_prime_session: "Opened today's practice",
+  submit_prime_answer: "Graded a practice answer on the server",
+  complete_prime: "Saved today's practice",
+};
 // Lets the page follow its own call. A profile can only ask about the
 // conversation stored on its current run.
 export async function GET(request: Request) {
@@ -41,10 +54,36 @@ export async function GET(request: Request) {
         "The call status is unavailable right now.",
         response?.status === 404 ? 404 : 502,
       );
-    const body = await response.json().catch(() => null);
-    const status = (body as { status?: string } | null)?.status ?? "unknown";
+    const body = (await response.json().catch(() => null)) as {
+      status?: string;
+      transcript?: {
+        role?: string;
+        message?: string | null;
+        tool_calls?: { tool_name?: string }[];
+      }[];
+    } | null;
+    // The room watches the call on screen while one person holds the phone,
+    // so the page gets the words plus a note when Cortana acts on a request.
+    const transcript = (body?.transcript ?? []).flatMap((line, index) => {
+      const rows = [];
+      const text = line.message?.trim();
+      if (text)
+        rows.push({
+          id: `${index}-said`,
+          role: line.role === "agent" ? "cortana" : "caller",
+          text,
+        });
+      for (const call of line.tool_calls ?? [])
+        if (call.tool_name && ACTIONS[call.tool_name])
+          rows.push({
+            id: `${index}-${call.tool_name}`,
+            role: "action",
+            text: ACTIONS[call.tool_name],
+          });
+      return rows;
+    });
     return Response.json(
-      { status },
+      { status: body?.status ?? "unknown", transcript },
       { headers: { "Cache-Control": "no-store, private" } },
     );
   } catch (error) {

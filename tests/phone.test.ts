@@ -446,6 +446,40 @@ describe("Phone agent tools", () => {
     expect(patients.size).toBeGreaterThan(1);
   });
 
+  it("gives an inbound caller the briefing but nothing that writes", async () => {
+    const guest = { session: "guest-inbound-caller" };
+    const ask = async (name: string, body: Record<string, unknown> = {}) => {
+      const { request, context } = toolRequest(name, { ...guest, ...body });
+      const response = await tool(request, context);
+      return { status: response.status, body: await response.json() };
+    };
+    const briefing = await ask("get_shift_briefing", {
+      conversationId: "conv_guest_1",
+    });
+    expect(briefing.status).toBe(200);
+    expect(briefing.body.guest).toBe(true);
+    expect(briefing.body.briefing.urgent.patient).toMatch(/^(Mr|Ms)\./);
+    expect((await ask("get_topics")).status).toBe(200);
+    // Everything that touches a learner's saved progress is declined.
+    for (const name of [
+      "get_round_context",
+      "complete_round",
+      "email_front_desk",
+      "get_prime_session",
+    ]) {
+      const refused = await ask(name);
+      expect(refused.status).toBe(409);
+      expect(refused.body.error).toMatch(/inbound call/);
+    }
+    // The same call hears the same patients; another call may hear others.
+    const again = await ask("get_shift_briefing", {
+      conversationId: "conv_guest_1",
+    });
+    expect(again.body.briefing.urgent.fullName).toBe(
+      briefing.body.briefing.urgent.fullName,
+    );
+  });
+
   it("offers only topics that have a round behind them", async () => {
     const session = await startedSession();
     const { request, context } = toolRequest("get_topics", { session });

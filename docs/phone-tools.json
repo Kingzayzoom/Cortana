@@ -17,11 +17,13 @@
             "session": {
               "type": "string",
               "dynamic_variable": "phone_session"
+            },
+            "conversationId": {
+              "type": "string",
+              "dynamic_variable": "system__conversation_id"
             }
           },
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -47,11 +49,7 @@
             },
             "reason": {
               "type": "string",
-              "enum": [
-                "running_late",
-                "emergency",
-                "other"
-              ],
+              "enum": ["running_late", "emergency", "other"],
               "description": "Why the message is being sent."
             },
             "message": {
@@ -67,12 +65,7 @@
               "description": "True only after you read the message back and the clinician agreed to send it."
             }
           },
-          "required": [
-            "session",
-            "reason",
-            "message",
-            "confirmed"
-          ]
+          "required": ["session", "reason", "message", "confirmed"]
         }
       }
     }
@@ -97,9 +90,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -124,9 +115,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -155,10 +144,7 @@
               "description": "The learner's actual final answer, in their own words. Pass an option letter only when they clearly said one."
             }
           },
-          "required": [
-            "session",
-            "answer"
-          ]
+          "required": ["session", "answer"]
         }
       }
     }
@@ -183,9 +169,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -211,9 +195,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -239,9 +221,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -267,9 +247,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -299,9 +277,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -343,11 +319,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "caseId",
-            "section",
-            "session"
-          ],
+          "required": ["caseId", "section", "session"],
           "description": "Validated parameters for this client tool."
         }
       }
@@ -378,9 +350,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -406,9 +376,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -434,9 +402,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -462,9 +428,7 @@
             }
           },
           "description": "Validated parameters for this client tool.",
-          "required": [
-            "session"
-          ]
+          "required": ["session"]
         }
       }
     }
@@ -501,12 +465,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "sessionId",
-            "questionId",
-            "answer",
-            "session"
-          ],
+          "required": ["sessionId", "questionId", "answer", "session"],
           "description": "Validated parameters for this client tool."
         }
       }
@@ -536,10 +495,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "sessionId",
-            "session"
-          ],
+          "required": ["sessionId", "session"],
           "description": "Validated parameters for this client tool."
         }
       }
@@ -569,10 +525,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "sessionId",
-            "session"
-          ],
+          "required": ["sessionId", "session"],
           "description": "Validated parameters for this client tool."
         }
       }
@@ -606,11 +559,7 @@
               "dynamic_variable": "phone_session"
             }
           },
-          "required": [
-            "sessionId",
-            "questionId",
-            "session"
-          ],
+          "required": ["sessionId", "questionId", "session"],
           "description": "Validated parameters for this client tool."
         }
       }
