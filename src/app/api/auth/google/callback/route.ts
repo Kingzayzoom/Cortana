@@ -1,11 +1,14 @@
-// GET /api/auth/google/callback — finishes Google sign-in, links the account
-// to a profile (carrying anonymous progress over on first sign-in) and swaps
-// the session cookie. Failures redirect home with a short error code.
+// GET /api/auth/google/callback — the one redirect URI registered with the
+// Google OAuth client. Finishes sign-in: links the account to a profile
+// (carrying anonymous progress over on first sign-in) and swaps the session
+// cookie. Failures redirect home with a short error code. Gmail connections
+// come back here too and are handed to the email briefing.
 import {
   accountId,
   completeGoogleAuth,
   consumeOAuthCookie,
 } from "@/lib/server/auth";
+import { gmailCallback, isGmailState } from "@/lib/server/email-summary/auth";
 import { appOrigin } from "@/lib/server/http";
 import { RequestError } from "@/lib/server/errors";
 import { profileSession, setProfileSession } from "@/lib/server/session";
@@ -22,6 +25,8 @@ const CODES: Record<number, string> = {
 };
 
 export async function GET(request: Request) {
+  if (isGmailState(new URL(request.url).searchParams.get("state")))
+    return gmailCallback(request);
   const origin = appOrigin(request);
   const back = (result: string) =>
     Response.redirect(`${origin}/?auth_error=${result}`, 302);

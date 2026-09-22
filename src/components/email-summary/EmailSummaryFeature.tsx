@@ -2,7 +2,7 @@
 // /email-summary: connect Gmail, read the morning briefing, refresh it, or
 // disconnect. OAuth errors arrive as ?email_error= codes and are explained here.
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { EmailSummaryStatus } from "@/lib/email-summary/types";
 import { EmailDraftDemo } from "./EmailDraftDemo";
 
@@ -14,7 +14,7 @@ const errors: Record<string, string> = {
   google_unreachable:
     "The server could not reach Google to finish Gmail sign-in. Check its internet access and try again.",
   google_rejected:
-    "Google rejected the Gmail token exchange. Check that the client ID, client secret, and redirect URI belong to the same OAuth client.",
+    "Google rejected the Gmail token exchange. Check that the client ID and secret belong to the OAuth client that has /api/auth/google/callback registered.",
   google_response:
     "Google did not grant all requested Gmail permissions. Try connecting again.",
   gmail_unreachable:
@@ -39,11 +39,15 @@ export function EmailSummaryFeature() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set on the return from Google, so the first briefing is built right away
+  // instead of waiting for the morning cron.
+  const [firstBriefing, setFirstBriefing] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const oauthError = params.get("email_error");
     if (oauthError) setError(errors[oauthError] ?? errors.failed);
+    if (params.has("email_connected")) setFirstBriefing(true);
     if (oauthError || params.has("email_connected")) {
       window.history.replaceState(null, "", "/email-summary");
     }
@@ -69,7 +73,7 @@ export function EmailSummaryFeature() {
     };
   }, []);
 
-  async function refresh() {
+  const refresh = useCallback(async () => {
     setBusy(true);
     setError(null);
     try {
@@ -90,7 +94,13 @@ export function EmailSummaryFeature() {
     } finally {
       setBusy(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    if (!firstBriefing || !status) return;
+    setFirstBriefing(false);
+    if (status.connected && !status.summary) void refresh();
+  }, [firstBriefing, status, refresh]);
 
   async function disconnect() {
     if (!window.confirm("Disconnect Gmail and remove saved email briefings?"))

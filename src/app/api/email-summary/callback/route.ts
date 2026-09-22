@@ -1,40 +1,8 @@
-// GET /api/email-summary/callback — Google redirects here after the Gmail
-// consent screen. Stores the encrypted tokens, then returns to /email-summary
-// with either email_connected=1 or an email_error code.
-import {
-  completeGmailOAuth,
-  GmailOAuthError,
-} from "@/lib/server/email-summary/auth";
-import { config } from "@/lib/server/email-summary/config";
-import { RequestError } from "@/lib/server/errors";
+// GET /api/email-summary/callback — for a Google client that registers this
+// path. The default flow returns through /api/auth/google/callback instead,
+// which hands Gmail requests to the same gmailCallback.
+import { gmailCallback } from "@/lib/server/email-summary/auth";
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request) {
-  const destination = new URL("/email-summary", config().redirectUri);
-  const params = new URL(request.url).searchParams;
-  if (params.get("error")) {
-    destination.searchParams.set("email_error", "denied");
-    return Response.redirect(destination, 302);
-  }
-  const code = params.get("code"),
-    state = params.get("state");
-  if (!code || !state) {
-    destination.searchParams.set("email_error", "expired");
-    return Response.redirect(destination, 302);
-  }
-  try {
-    await completeGmailOAuth(code, state);
-    destination.searchParams.set("email_connected", "1");
-  } catch (error) {
-    destination.searchParams.set(
-      "email_error",
-      error instanceof GmailOAuthError
-        ? error.code
-        : error instanceof RequestError && error.status === 401
-          ? "expired"
-          : "failed",
-    );
-  }
-  return Response.redirect(destination, 302);
-}
+export const GET = gmailCallback;

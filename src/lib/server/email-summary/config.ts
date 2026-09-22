@@ -12,25 +12,14 @@ export function required(name: string) {
   return value;
 }
 
+// No redirect URI here: Gmail shares the Google client and its registered
+// callback with sign-in (see ./auth.ts).
 export function config() {
-  const supabaseUrl = new URL(required("SUPABASE_URL"));
-  const redirectUri = new URL(required("GOOGLE_REDIRECT_URI"));
-  if (
-    redirectUri.pathname !== "/api/email-summary/callback" ||
-    redirectUri.search ||
-    redirectUri.hash ||
-    (redirectUri.protocol !== "https:" && redirectUri.hostname !== "localhost")
-  )
-    throw new RequestError(
-      "GOOGLE_REDIRECT_URI must be the registered Email Summary callback URL.",
-      503,
-    );
   return {
-    supabaseUrl,
+    supabaseUrl: new URL(required("SUPABASE_URL")),
     serviceKey: required("SUPABASE_SERVICE_ROLE_KEY"),
     clientId: required("GOOGLE_CLIENT_ID"),
     clientSecret: required("GOOGLE_CLIENT_SECRET"),
-    redirectUri: redirectUri.toString(),
   };
 }
 

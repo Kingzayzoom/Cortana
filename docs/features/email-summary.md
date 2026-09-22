@@ -17,9 +17,10 @@ Supabase, two tables (`supabase/migrations/20260919000000_email_summary.sql`), r
 ## Setup
 
 1. Apply the migration: `node --env-file=.env.local scripts/apply-email-summary-migration.mjs --apply`.
-2. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, `GEMINI_API_KEY` and `CRON_SECRET`.
-3. Enable the Gmail API on the Google project and register `GOOGLE_REDIRECT_URI` (`<origin>/api/email-summary/callback`) as a redirect URI, alongside the sign-in callback if the same client serves both. Local testing needs its own `localhost` redirect URI.
-4. On Vercel, `vercel.json` schedules `/api/email-summary/cron` at 13:00 UTC, which is morning Eastern.
+2. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GEMINI_API_KEY` and `CRON_SECRET`.
+3. In the Google Cloud project: enable the **Gmail API**, and on the OAuth consent screen either publish the app or add each Gmail account as a **test user** (`gmail.readonly` is a restricted scope).
+
+Gmail shares the Google sign-in client and its redirect URI, `<origin>/api/auth/google/callback`. That callback recognises a Gmail return by its `state` and hands it to the email briefing, so there is no second redirect URI to register. For local testing, register `http://localhost:3100/api/auth/google/callback` as well. 4. On Vercel, `vercel.json` schedules `/api/email-summary/cron` at 13:00 UTC, which is morning Eastern.
 
 Rotating the Supabase service key changes the token encryption key, so every inbox must reconnect.
 
