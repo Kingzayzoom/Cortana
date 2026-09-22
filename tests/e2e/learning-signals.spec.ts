@@ -131,7 +131,7 @@ test("actual preview events, replay safety, privacy, persistence and export", as
   ).toBeVisible();
   await expect(page.getByText("Question asked", { exact: true })).toBeVisible();
   await page.screenshot({
-    path: "artifacts/learning-signal-bridge-desktop.png",
+    path: "test-results/learning-signal-bridge-desktop.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -146,7 +146,7 @@ test("actual preview events, replay safety, privacy, persistence and export", as
     )
     .toBeLessThanOrEqual(0);
   await page.screenshot({
-    path: "artifacts/learning-signal-bridge-mobile.png",
+    path: "test-results/learning-signal-bridge-mobile.png",
     fullPage: true,
   });
   const isolated = await page.context().browser()!.newContext();

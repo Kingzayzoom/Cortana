@@ -9,6 +9,19 @@ const morning = JSON.parse(
 test("select, preview, activate, reload and clear a shared scenario", async ({
   page,
 }) => {
+  // Pin the phone to unconfigured, so the result doesn't depend on whether
+  // this machine's .env.local can place calls.
+  await page.route("**/api/context", async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    // A reload can dispose a request mid-flight; that request no longer matters.
+    try {
+      const response = await route.fetch();
+      await route.fulfill({
+        response,
+        json: { ...(await response.json()), phoneConfigured: false },
+      });
+    } catch {}
+  });
   await page.goto("/context");
   await expect(
     page.getByRole("heading", { name: "What changed?" }),
