@@ -1,77 +1,75 @@
 # Cortana
 
-A voice-first cardiology learning workspace: listen, ask, practice, reinforce. Cortana adds observable learning signals after engagement: questions explored, evidence revisited, deterministic practice outcomes and transparent reinforcement. The existing white dashboard and audio-reactive orb are preserved.
+A voice-first clinical learning companion for physicians. Cortana delivers a shift briefing and a two-minute evidence round by phone or in the browser, and the server — never the model — decides what is correct.
 
-The active application is at the repository root, using `src/app/`. The previous CortexAi implementation, including its Gemini backend, is preserved under `legacy/` and excluded from this application's build and lint checks.
+Live at [cortana.health](https://cortana.health). Built at VT Hacks 2026.
 
-## Run
+> Educational prototype. Every patient, unit and briefing is synthetic. No clinical validation, accredited credit, HIPAA compliance, or patient-outcome claim.
 
-```powershell
+## What it does
+
+**It calls you.** Cortana rings a clinician with their morning briefing: the patient she would flag, what changed, who asked for review and by when. She answers questions from that briefing only, declines to advise on management, and can pass a message to the front desk when asked — reading it back for confirmation before sending. Dial the number yourself and she answers as a guest, with the briefing but no access to anyone's saved progress.
+
+**It teaches.** A two-minute round on one real trial (DAPA-HF, NEJM 2019, and its JAMA diabetes subgroup): three briefing sections, a synthetic case, and a question graded against an answer key that never leaves the server. Ask something the sources do not establish and Cortana says so instead of inventing an answer.
+
+**It remembers.** Practice history, XP awarded exactly once, streaks and review dates, all timezone-aware. Progress from a phone call appears in the browser, because both channels write to the same profile.
+
+**It watches the call.** While Cortana is on the phone, the web page streams the transcript, labelled speaker by speaker, with a line whenever she acts — loading the briefing, grading an answer, sending a message.
+
+## The rule behind the architecture
+
+The model speaks. It never decides.
+
+Grading, XP, streaks and review scheduling are computed on the server from stored state. The agent asks for a grade through a tool call and reads back what it is given. Scenario text, uploaded briefings and source excerpts are treated as data, never as instructions. An unclear spoken answer returns a request to clarify rather than a guess.
+
+## Running it
+
+```bash
 npm ci
 npm run dev -- --port 3100
 ```
 
-Open **http://localhost:3100**. Port 3000 was already occupied in the development workspace. No ElevenLabs credentials are needed for the full, explicitly labeled local text preview.
+Open http://localhost:3100. With no credentials at all, the full round runs in a clearly labelled text preview: no microphone, no network calls, no pretence of a live connection.
 
-For live voice, preserve your existing `.env.local`, add the actual `ELEVENLABS_API_KEY` and `ELEVENLABS_AGENT_ID`, then run `node scripts/prepare-local.mjs`. This creates local session security without exposing secrets. Configure the existing agent using [ElevenLabs setup](docs/elevenlabs-setup.md), [agent instructions](docs/agent-prompt.md), and [tool contracts](docs/tool-contracts.md). The presence of frontend tools alone does not configure the ElevenLabs account.
+For live voice, copy `.env.example` to `.env.local`, add your ElevenLabs key and agent, then run `node scripts/prepare-local.mjs` to generate the session secret and demo access code. [ElevenLabs setup](docs/elevenlabs-setup.md) covers the agent side; [phone rounds](docs/phone-round.md) covers Twilio or a SIP carrier.
 
-## What works
+## Checks
 
-- Structured learning signals persisted atomically with progress, real Learning Pulse metrics and deterministic next-round recommendations limited to supported content.
-- A readable completion summary and validated JSON export, without raw transcripts, audio or patient identifiers in analytics.
-- A native `/impiricus` signal bridge explaining how this proposed learning layer could supplement ION, Pulse, Spark and Ascend. Actual Cortana events, no Impiricus API or partnership claim.
-
-- Responsive reference-based dashboard and working Today, My Rounds, Evidence Library, Learning Profile, Topics, and Settings views.
-- Official ElevenLabs UI orb foundation with a luminous blue/cyan/violet/pink sphere material, true input/output level adapters, reduced motion, hidden-tab rendering controls and an explicit fallback.
-- One stable ElevenLabs React provider, `POST /api/elevenlabs/token`, microphone mute, final-event transcript, interruption callbacks and saved section recovery. Pause is available only in local text preview.
-- Three briefing sections, one synthetic case, deterministic server grading for text/buttons/agent tools, stored citation drawers, scoped questions and completion.
-- Persistent local-server progress, exactly-once completion XP, actual practice history and timezone-aware review/streak rules.
-- Explicit configuration/error states and local preview without fake connected or listening claims.
-
-## Validation
-
-```powershell
-npm run typecheck
-npm run lint
-npm test
-npm run test:e2e
-node scripts/accessibility-check.mjs
-npm run build
+```bash
+npm run typecheck && npm run lint && npm run format:check
+npm test          # 229 unit tests
+npm run test:e2e  # 7 Playwright suites, expects a dev server on 3100
+npm run test:a11y # WCAG scan of every view
 ```
 
-Browser tests expect a dev server at port 3100. Override with `CORTANA_TEST_URL` if needed. The tests cover the complete local flow, origin/schema rejection, profile isolation, duplicate requests, honest missing configuration, navigation, desktop/mobile layout, animated WebGL frames and the synthetic audio harness at `/dev/orb`. That harness is unavailable in production.
+CI runs all of these on every push and pull request.
 
-For real voice, the API key needs **Write access for ElevenAgents / Conversational AI (`convai_write`)** to mint a token; Read access alone is insufficient. `node scripts/verify-live-voice.mjs --headed` exercises the actual SDK, WebRTC and host microphone without fake audio. After that base connection succeeds, review `node scripts/configure-agent.mjs` and apply the prepared learning setup with `node scripts/configure-agent.mjs --apply`. Account changes are backed up under `.cortana/`; the model and voice are preserved.
+## Layout
 
-For a production build locally: `npm run build`, then `npm start -- --port 3100`.
+```
+src/app/            routes and API endpoints
+  api/phone/        outbound calls, agent tools, live status
+  api/learning/     the round: stages, grading, completion
+  api/prime/        daily three-question practice
+  api/context/      uploaded synthetic scenarios
+  api/email-summary/ optional Gmail morning briefing
+src/lib/server/     session, storage, phone, email, auth — the authority
+src/lib/content/    the round, the briefing library, spoken number forms
+src/components/     views, the WebGL orb, voice controls
+docs/               setup, agent prompts, tool contracts, verification
+scripts/            agent configuration and verification tooling
+tests/              unit tests, Playwright suites, fixtures
+```
 
-## Deploy to Vercel
+Storage is Upstash Redis in production and a local file adapter in development, behind one `withProgress` function that serialises each profile's read-modify-write with a distributed lock.
 
-Vercel runs the API as serverless functions with a read-only file system and no shared memory, so progress, locks and rate limits use Upstash Redis there. Locally, the app keeps using `.cortana/` files unless Redis variables are set.
+## Documentation
 
-1. Import the GitHub repository in Vercel (framework preset: Next.js; defaults are fine).
-2. In the project, open **Storage → Marketplace → Upstash (Redis)**, create a free database and connect it to the project. This adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
-3. Under **Settings → Environment Variables**, add `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID`, `CORTANA_DEMO_ACCESS_CODE` and `CORTANA_SESSION_SECRET` (the same values as `.env.local`).
-4. Redeploy. The Profile page reads "Saved in the demo database" when Redis is active.
+- [Architecture and request paths](docs/architecture.md)
+- [Phone rounds](docs/phone-round.md) · [ElevenLabs setup](docs/elevenlabs-setup.md) · [tool contracts](docs/tool-contracts.md)
+- [Browser agent prompt](docs/agent-prompt.md) · [phone agent prompt](docs/phone-agent-prompt.md)
+- [Verification record](docs/verification.md) · [design](docs/design.md) · [product](docs/product.md)
 
-Without Redis on Vercel, the API answers with an explicit "Connect Upstash Redis" error instead of failing on the file system; server errors appear in the Vercel function logs with a `[cortana]` prefix. To test the Redis path locally, run `node tests/upstash-emulator.mjs` and start the app with the printed `KV_REST_API_*` values.
+## Name
 
-## Phone rounds
-
-Cortana can also call a learner and run the same round by phone, graded by this server. See [phone rounds](docs/phone-round.md) for the Twilio and agent setup.
-
-## Handoff
-
-- [Learning signals and integration boundaries](docs/learning-signals.md)
-- [Focused security review](docs/security-review-learning-signals.md)
-
-- [Demo sequence](docs/demo-script.md)
-- [Phone rounds](docs/phone-round.md)
-- [Implementation choices and limitations](docs/implementation-notes.md)
-- [Verification results](docs/verification.md)
-- [Agent tool JSON](docs/elevenlabs-tools.json)
-- [Versioned knowledge document](docs/round-knowledge.md)
-- [Environment variable template](.env.example)
-- [Upstream orb license](vendor/elevenlabs-ui-LICENSE.md)
-
-Educational prototype · Synthetic cases only. No claims of clinical validation, accredited credit, HIPAA compliance, or patient-outcome improvement.
+"Cortana" is a Microsoft trademark for an AI assistant. A rename is planned before any non-demonstration use.
