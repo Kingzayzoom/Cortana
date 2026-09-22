@@ -386,9 +386,9 @@ try {
   process.exitCode = 1;
 } finally {
   await browser.close();
-  await mkdir("artifacts", { recursive: true });
+  await mkdir(".cortana", { recursive: true });
   await writeFile(
-    "artifacts/live-voice-verification.json",
+    ".cortana/live-voice-verification.json",
     JSON.stringify(report, null, 2),
   );
   console.log(JSON.stringify(report, null, 2));

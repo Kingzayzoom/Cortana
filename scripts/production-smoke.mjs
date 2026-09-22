@@ -11,7 +11,7 @@ await page.goto("http://localhost:3101");
 await page.getByRole("button", { name: "Start today’s round" }).waitFor();
 await page.locator("canvas").waitFor();
 await page.waitForTimeout(1200);
-await mkdir("artifacts", { recursive: true });
+await mkdir("docs/assets", { recursive: true });
 await page.screenshot({
   path: "docs/assets/cortana-desktop.png",
   fullPage: true,
