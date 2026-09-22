@@ -61,11 +61,9 @@ try {
   const input = page.getByRole("textbox", {
     name: "Question about this round",
   });
-  const answers = page
-    .locator(".conversation-turn")
-    .filter({
-      has: page.locator(".conversation-speaker", { hasText: /^Cortana$/ }),
-    });
+  const answers = page.locator(".conversation-turn").filter({
+    has: page.locator(".conversation-speaker", { hasText: /^Cortana$/ }),
+  });
   const sequence = [];
   for (const step of [
     {

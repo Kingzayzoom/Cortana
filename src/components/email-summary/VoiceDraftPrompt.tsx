@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { RecordedVoicePrompt } from "./RecordedVoicePrompt";
 
-type RecognitionResult = { results: ArrayLike<ArrayLike<{ transcript: string }>> };
+type RecognitionResult = {
+  results: ArrayLike<ArrayLike<{ transcript: string }>>;
+};
 type RecognitionError = { error: string };
 type BrowserRecognition = {
   lang: string;
@@ -21,7 +23,11 @@ type RecognitionWindow = Window & {
   webkitSpeechRecognition?: new () => BrowserRecognition;
 };
 
-export function VoiceDraftPrompt({ onMessage }: { onMessage: (message: string) => void }) {
+export function VoiceDraftPrompt({
+  onMessage,
+}: {
+  onMessage: (message: string) => void;
+}) {
   const recognitionRef = useRef<BrowserRecognition | null>(null);
   const promptRef = useRef<SpeechSynthesisUtterance | null>(null);
   const retryWithoutPrompt = useRef(false);
@@ -31,7 +37,9 @@ export function VoiceDraftPrompt({ onMessage }: { onMessage: (message: string) =
 
   useEffect(() => {
     const browser = window as RecognitionWindow;
-    setAvailable(Boolean(browser.SpeechRecognition || browser.webkitSpeechRecognition));
+    setAvailable(
+      Boolean(browser.SpeechRecognition || browser.webkitSpeechRecognition),
+    );
     return () => {
       if (promptRef.current) {
         promptRef.current.onend = null;
@@ -53,9 +61,12 @@ export function VoiceDraftPrompt({ onMessage }: { onMessage: (message: string) =
     }
     if (phase === "asking") return;
     const browser = window as RecognitionWindow;
-    const Recognition = browser.SpeechRecognition ?? browser.webkitSpeechRecognition;
+    const Recognition =
+      browser.SpeechRecognition ?? browser.webkitSpeechRecognition;
     if (!Recognition) {
-      setError("Voice input is unavailable in this browser. Type your message below instead.");
+      setError(
+        "Voice input is unavailable in this browser. Type your message below instead.",
+      );
       return;
     }
     setError(null);
@@ -73,15 +84,18 @@ export function VoiceDraftPrompt({ onMessage }: { onMessage: (message: string) =
     recognition.onresult = (event) => {
       const message = event.results[0]?.[0]?.transcript?.trim();
       if (message) onMessage(message);
-      else setError("I didn't catch that. Try again or type your message below.");
+      else
+        setError("I didn't catch that. Try again or type your message below.");
     };
     recognition.onerror = (event) => {
       retryWithoutPrompt.current = event.error === "not-allowed";
-      setError(event.error === "not-allowed"
-        ? "Microphone access was blocked. Allow access and tap Cortana again, or type below."
-        : event.error === "no-speech"
-          ? "I didn't catch that. Try again or type your message below."
-          : "Voice input could not start. Type your message below instead.");
+      setError(
+        event.error === "not-allowed"
+          ? "Microphone access was blocked. Allow access and tap Cortana again, or type below."
+          : event.error === "no-speech"
+            ? "I didn't catch that. Try again or type your message below."
+            : "Voice input could not start. Type your message below instead.",
+      );
     };
     recognition.onend = () => {
       recognitionRef.current = null;
@@ -98,15 +112,22 @@ export function VoiceDraftPrompt({ onMessage }: { onMessage: (message: string) =
       } catch {
         recognitionRef.current = null;
         setPhase("idle");
-        setError("Voice input could not start. Type your message below instead.");
+        setError(
+          "Voice input could not start. Type your message below instead.",
+        );
       }
     };
-    if (retryWithoutPrompt.current || !window.speechSynthesis ||
-        typeof SpeechSynthesisUtterance === "undefined") {
+    if (
+      retryWithoutPrompt.current ||
+      !window.speechSynthesis ||
+      typeof SpeechSynthesisUtterance === "undefined"
+    ) {
       listen();
       return;
     }
-    const prompt = new SpeechSynthesisUtterance("What message would you like me to draft?");
+    const prompt = new SpeechSynthesisUtterance(
+      "What message would you like me to draft?",
+    );
     promptRef.current = prompt;
     prompt.onend = listen;
     prompt.onerror = listen;
@@ -120,19 +141,37 @@ export function VoiceDraftPrompt({ onMessage }: { onMessage: (message: string) =
 
   if (available === false) return <RecordedVoicePrompt onMessage={onMessage} />;
 
-  return <div className="email-voice-prompt">
-    <button type="button" className={`email-voice-button email-voice-button--${phase}`}
-      onClick={speakAndListen} disabled={available !== true || phase === "asking"}
-      aria-pressed={phase === "listening"}
-      aria-label={phase === "listening" ? "Stop listening" : "Ask Cortana to draft by voice"}>
-      <span className="email-voice-orb" aria-hidden="true" />
-    </button>
-    <div>
-      <strong>Cortana voice draft</strong>
-      <p aria-live="polite">{phase === "asking" ? "What message would you like me to draft?"
-        : phase === "listening" ? "Listening… tap the icon to stop."
-          : "Tap the icon and tell Cortana what to draft."}</p>
-      {error && <p className="email-voice-note" role="alert">{error}</p>}
+  return (
+    <div className="email-voice-prompt">
+      <button
+        type="button"
+        className={`email-voice-button email-voice-button--${phase}`}
+        onClick={speakAndListen}
+        disabled={available !== true || phase === "asking"}
+        aria-pressed={phase === "listening"}
+        aria-label={
+          phase === "listening"
+            ? "Stop listening"
+            : "Ask Cortana to draft by voice"
+        }
+      >
+        <span className="email-voice-orb" aria-hidden="true" />
+      </button>
+      <div>
+        <strong>Cortana voice draft</strong>
+        <p aria-live="polite">
+          {phase === "asking"
+            ? "What message would you like me to draft?"
+            : phase === "listening"
+              ? "Listening… tap the icon to stop."
+              : "Tap the icon and tell Cortana what to draft."}
+        </p>
+        {error && (
+          <p className="email-voice-note" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
     </div>
-  </div>;
+  );
 }

@@ -1,4 +1,9 @@
-import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import {
+  createHash,
+  createHmac,
+  randomBytes,
+  timingSafeEqual,
+} from "node:crypto";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { RequestError } from "../errors";
@@ -10,8 +15,13 @@ const OAUTH_COOKIE = "cortana_gmail_oauth";
 const SESSION_COOKIE = "cortana_gmail_session";
 const SESSION_AGE_SECONDS = 60 * 60 * 24 * 90;
 export type GmailOAuthErrorCode =
-  | "google_unreachable" | "google_rejected" | "google_response"
-  | "gmail_unreachable" | "gmail_denied" | "gmail_response" | "storage";
+  | "google_unreachable"
+  | "google_rejected"
+  | "google_response"
+  | "gmail_unreachable"
+  | "gmail_denied"
+  | "gmail_response"
+  | "storage";
 
 export class GmailOAuthError extends Error {
   constructor(public readonly code: GmailOAuthErrorCode) {
@@ -26,7 +36,8 @@ const cookieOptions = {
 };
 
 function equal(a: string, b: string) {
-  const x = Buffer.from(a), y = Buffer.from(b);
+  const x = Buffer.from(a),
+    y = Buffer.from(b);
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
@@ -43,9 +54,13 @@ export async function connectedAccount() {
   const age = Math.floor(Date.now() / 1000) - Number(issued);
   if (
     !z.string().uuid().safeParse(id).success ||
-    !Number.isInteger(age) || age < 0 || age > SESSION_AGE_SECONDS ||
-    !mac || !equal(sign(`${id}.${issued}`), mac)
-  ) return null;
+    !Number.isInteger(age) ||
+    age < 0 ||
+    age > SESSION_AGE_SECONDS ||
+    !mac ||
+    !equal(sign(`${id}.${issued}`), mac)
+  )
+    return null;
   return connectionById(id);
 }
 
@@ -62,7 +77,8 @@ export async function beginGmailOAuth() {
   const issued = Math.floor(Date.now() / 1000).toString();
   const payload = `${state}.${verifier}.${issued}.read`;
   (await cookies()).set(OAUTH_COOKIE, `${payload}.${sign(payload)}`, {
-    ...cookieOptions, maxAge: 600,
+    ...cookieOptions,
+    maxAge: 600,
   });
   const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   url.searchParams.set("client_id", settings.clientId);
@@ -72,7 +88,10 @@ export async function beginGmailOAuth() {
   url.searchParams.set("access_type", "offline");
   url.searchParams.set("prompt", "consent select_account");
   url.searchParams.set("state", state);
-  url.searchParams.set("code_challenge", createHash("sha256").update(verifier).digest("base64url"));
+  url.searchParams.set(
+    "code_challenge",
+    createHash("sha256").update(verifier).digest("base64url"),
+  );
   url.searchParams.set("code_challenge_method", "S256");
   return url.toString();
 }
@@ -92,15 +111,26 @@ export async function completeGmailOAuth(code: string, state: string) {
   const [cookieState, verifier, issued] = parts;
   const mode = parts.length === 5 ? parts[3] : "read";
   const mac = parts.length === 5 ? parts[4] : parts[3];
-  const payload = parts.length === 5
-    ? `${cookieState}.${verifier}.${issued}.${mode}`
-    : `${cookieState}.${verifier}.${issued}`;
+  const payload =
+    parts.length === 5
+      ? `${cookieState}.${verifier}.${issued}.${mode}`
+      : `${cookieState}.${verifier}.${issued}`;
   const age = Math.floor(Date.now() / 1000) - Number(issued);
   if (
-    !cookieState || !verifier || !mac || mode !== "read" ||
-    !Number.isInteger(age) || age < 0 || age > 600 ||
-    !equal(state, cookieState) || !equal(mac, sign(payload))
-  ) throw new RequestError("Gmail authorization expired. Try connecting again.", 401);
+    !cookieState ||
+    !verifier ||
+    !mac ||
+    mode !== "read" ||
+    !Number.isInteger(age) ||
+    age < 0 ||
+    age > 600 ||
+    !equal(state, cookieState) ||
+    !equal(mac, sign(payload))
+  )
+    throw new RequestError(
+      "Gmail authorization expired. Try connecting again.",
+      401,
+    );
 
   const settings = config();
   let response: Response;
@@ -130,18 +160,25 @@ export async function completeGmailOAuth(code: string, state: string) {
     throw new GmailOAuthError("google_response");
   }
   const parsed = tokenSchema.safeParse(tokenBody);
-  const granted = new Set(parsed.success ? parsed.data.scope.split(/\s+/).filter(Boolean) : []);
+  const granted = new Set(
+    parsed.success ? parsed.data.scope.split(/\s+/).filter(Boolean) : [],
+  );
   if (!parsed.success || granted.size !== 1 || !granted.has(GMAIL_SCOPE))
     throw new GmailOAuthError("google_response");
   let profile: { emailAddress: string };
   try {
-    profile = z.object({ emailAddress: z.string().email() }).parse(
-      await gmailGet("profile", parsed.data.access_token),
-    );
+    profile = z
+      .object({ emailAddress: z.string().email() })
+      .parse(await gmailGet("profile", parsed.data.access_token));
   } catch (error) {
-    throw new GmailOAuthError(error instanceof RequestError && error.message === "Gmail could not be reached."
-      ? "gmail_unreachable" : error instanceof RequestError && error.status === 409
-        ? "gmail_denied" : "gmail_response");
+    throw new GmailOAuthError(
+      error instanceof RequestError &&
+        error.message === "Gmail could not be reached."
+        ? "gmail_unreachable"
+        : error instanceof RequestError && error.status === 409
+          ? "gmail_denied"
+          : "gmail_response",
+    );
   }
   let connection;
   try {
@@ -158,6 +195,7 @@ export async function completeGmailOAuth(code: string, state: string) {
   const issuedAt = Math.floor(Date.now() / 1000).toString();
   const sessionPayload = `${connection.id}.${issuedAt}`;
   jar.set(SESSION_COOKIE, `${sessionPayload}.${sign(sessionPayload)}`, {
-    ...cookieOptions, maxAge: SESSION_AGE_SECONDS,
+    ...cookieOptions,
+    maxAge: SESSION_AGE_SECONDS,
   });
 }

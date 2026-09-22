@@ -33,7 +33,7 @@ export async function POST(request: Request) {
         accessCode: z.string().max(200),
         runId: z.string().uuid(),
         consent: z.literal(true),
-        mode:z.enum(["round","prime"]).default("round"),
+        mode: z.enum(["round", "prime"]).default("round"),
       })
       .strict()
       .safeParse(await readBody(request));
@@ -46,8 +46,13 @@ export async function POST(request: Request) {
     )
       throw new RequestError("That demo access code is incorrect.", 403);
     await withProgress(id, (data) => {
-      if(parsed.data.mode==="prime"){
-        if(!data.prime?.sessions.some(s=>s.id===parsed.data.runId&&s.startedAt&&!s.completedAt))throw new RequestError("Start a current Prime first.",409);
+      if (parsed.data.mode === "prime") {
+        if (
+          !data.prime?.sessions.some(
+            (s) => s.id === parsed.data.runId && s.startedAt && !s.completedAt,
+          )
+        )
+          throw new RequestError("Start a current Prime first.", 409);
         return;
       }
       if (data.run?.id !== parsed.data.runId || data.run.completed)

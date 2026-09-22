@@ -64,7 +64,9 @@ test("Prime keyboard, mobile, reduced motion and safe public payload", async ({
   const data = await response.json();
   expect(JSON.stringify(data)).not.toContain("correctOptionId");
   await expect(page).toHaveURL(/prime\/session/);
-  await expect(page.getByText("Question 1 of 3", {exact:true})).toBeVisible();
+  await expect(
+    page.getByText("Question 1 of 3", { exact: true }),
+  ).toBeVisible();
   await page.getByRole("heading", { level: 1 }).focus();
   await page.keyboard.press("1");
   await page.keyboard.press("Enter");

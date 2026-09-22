@@ -9,11 +9,15 @@ const generatedSchema = z.object({
   headline: z.string().min(1).max(500),
   actionItems: z.array(z.string().max(500)).max(6),
   notes: z.array(z.string().max(500)).max(6),
-  items: z.array(z.object({
-    title: z.string().max(180),
-    detail: z.string().max(500),
-    type: z.enum(["urgent", "meeting", "request", "update"]),
-  })).max(8),
+  items: z
+    .array(
+      z.object({
+        title: z.string().max(180),
+        detail: z.string().max(500),
+        type: z.enum(["urgent", "meeting", "request", "update"]),
+      }),
+    )
+    .max(8),
 });
 
 const responseSchema = {
@@ -23,13 +27,17 @@ const responseSchema = {
     actionItems: { type: "ARRAY", items: { type: "STRING" }, maxItems: 6 },
     notes: { type: "ARRAY", items: { type: "STRING" }, maxItems: 6 },
     items: {
-      type: "ARRAY", maxItems: 8,
+      type: "ARRAY",
+      maxItems: 8,
       items: {
         type: "OBJECT",
         properties: {
           title: { type: "STRING" },
           detail: { type: "STRING" },
-          type: { type: "STRING", enum: ["urgent", "meeting", "request", "update"] },
+          type: {
+            type: "STRING",
+            enum: ["urgent", "meeting", "request", "update"],
+          },
         },
         required: ["title", "detail", "type"],
       },
@@ -41,7 +49,9 @@ const responseSchema = {
 function emptySummary() {
   return generatedSchema.parse({
     headline: "No recent inbox messages matched the briefing filters.",
-    actionItems: [], notes: [], items: [],
+    actionItems: [],
+    notes: [],
+    items: [],
   });
 }
 
@@ -80,45 +90,70 @@ async function summarizeMessages(messages: SourceMessage[]) {
       },
     );
   } catch {
-    throw new RequestError("Gemini could not be reached to create the briefing.", 502);
+    throw new RequestError(
+      "Gemini could not be reached to create the briefing.",
+      502,
+    );
   }
-  if (!response.ok) throw new RequestError("Gemini could not create the briefing.", 502);
-  const body = z.object({
-    candidates: z.array(z.object({
-      content: z.object({ parts: z.array(z.object({ text: z.string().optional() })) }),
-    })).min(1),
-  }).safeParse(await response.json());
+  if (!response.ok)
+    throw new RequestError("Gemini could not create the briefing.", 502);
+  const body = z
+    .object({
+      candidates: z
+        .array(
+          z.object({
+            content: z.object({
+              parts: z.array(z.object({ text: z.string().optional() })),
+            }),
+          }),
+        )
+        .min(1),
+    })
+    .safeParse(await response.json());
   const text = body.success
-    ? body.data.candidates[0].content.parts.map((part) => part.text ?? "").join("")
+    ? body.data.candidates[0].content.parts
+        .map((part) => part.text ?? "")
+        .join("")
     : "";
   try {
     return generatedSchema.parse(JSON.parse(text));
   } catch {
-    throw new RequestError("Gemini returned an invalid briefing. Please retry.", 502);
+    throw new RequestError(
+      "Gemini returned an invalid briefing. Please retry.",
+      502,
+    );
   }
 }
 
 export function summaryDate(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: SUMMARY_TIME_ZONE,
-    year: "numeric", month: "2-digit", day: "2-digit",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   }).formatToParts(date);
   const get = (type: string) => parts.find((part) => part.type === type)?.value;
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
-export async function generateSummary(connection: Connection, skipExisting = false) {
+export async function generateSummary(
+  connection: Connection,
+  skipExisting = false,
+) {
   const date = summaryDate();
-  if (skipExisting && await latestSummary(connection.id, date)) return false;
+  if (skipExisting && (await latestSummary(connection.id, date))) return false;
   const messages = await fetchRecentInbox(connection);
   const generated = await summarizeMessages(messages);
   const summary: EmailSummary = {
     ...generated,
     generatedAt: new Date().toISOString(),
     totalEmails: messages.length,
-    urgentCount: generated.items.filter((item) => item.type === "urgent").length,
-    meetingCount: generated.items.filter((item) => item.type === "meeting").length,
-    requestCount: generated.items.filter((item) => item.type === "request").length,
+    urgentCount: generated.items.filter((item) => item.type === "urgent")
+      .length,
+    meetingCount: generated.items.filter((item) => item.type === "meeting")
+      .length,
+    requestCount: generated.items.filter((item) => item.type === "request")
+      .length,
   };
   await saveSummary(connection.id, date, messages, summary);
   return true;

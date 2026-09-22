@@ -12,7 +12,9 @@ const OAUTH_COOKIE = "cortana_oauth";
 const googleVerifier = new OAuth2Client();
 
 export function googleConfigured() {
-  return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+  return Boolean(
+    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+  );
 }
 
 /** Google subjects are numeric strings. Constrain them: this value names a file. */
@@ -38,9 +40,7 @@ export async function beginGoogleAuth(request: Request) {
     );
   const state = base64url(randomBytes(24));
   const verifier = base64url(randomBytes(32));
-  const challenge = base64url(
-    createHash("sha256").update(verifier).digest(),
-  );
+  const challenge = base64url(createHash("sha256").update(verifier).digest());
   const payload = `${state}.${verifier}`;
   const jar = await cookies();
   jar.set(OAUTH_COOKIE, `${payload}.${await hmac(`oauth:${payload}`)}`, {
@@ -108,13 +108,25 @@ async function readIdToken(idToken: string) {
   if (!claims.success)
     throw new RequestError("Google returned an incomplete sign-in token.", 502);
   if (!ISSUERS.includes(claims.data.iss))
-    throw new RequestError("That sign-in token came from an unexpected issuer.", 401);
+    throw new RequestError(
+      "That sign-in token came from an unexpected issuer.",
+      401,
+    );
   if (claims.data.aud !== process.env.GOOGLE_CLIENT_ID)
-    throw new RequestError("That sign-in token was issued for another application.", 401);
+    throw new RequestError(
+      "That sign-in token was issued for another application.",
+      401,
+    );
   if (claims.data.exp * 1000 <= Date.now())
-    throw new RequestError("That sign-in attempt expired. Please try again.", 401);
+    throw new RequestError(
+      "That sign-in attempt expired. Please try again.",
+      401,
+    );
   if (claims.data.email && claims.data.email_verified === false)
-    throw new RequestError("Verify your Google email address, then sign in again.", 403);
+    throw new RequestError(
+      "Verify your Google email address, then sign in again.",
+      403,
+    );
   return claims.data;
 }
 
@@ -125,7 +137,10 @@ export async function completeGoogleAuth(
   verifier: string,
 ) {
   if (!googleConfigured())
-    throw new RequestError("Google sign-in is not configured on this server.", 503);
+    throw new RequestError(
+      "Google sign-in is not configured on this server.",
+      503,
+    );
   let response: Response;
   try {
     response = await fetch(TOKEN, {
@@ -143,28 +158,49 @@ export async function completeGoogleAuth(
       signal: AbortSignal.timeout(12_000),
     });
   } catch (error) {
-    if (error instanceof Error && ["TimeoutError", "AbortError"].includes(error.name))
-      throw new RequestError("Google sign-in timed out. Please try again.", 504);
-    throw new RequestError("The server could not reach Google. Check the network and retry.", 502);
+    if (
+      error instanceof Error &&
+      ["TimeoutError", "AbortError"].includes(error.name)
+    )
+      throw new RequestError(
+        "Google sign-in timed out. Please try again.",
+        504,
+      );
+    throw new RequestError(
+      "The server could not reach Google. Check the network and retry.",
+      502,
+    );
   }
   // Never surface the provider body: it carries tokens and client details.
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const detail = JSON.stringify(body ?? {}).toLowerCase();
     if (detail.includes("invalid_grant"))
-      throw new RequestError("That sign-in link was already used or expired. Please try again.", 401);
+      throw new RequestError(
+        "That sign-in link was already used or expired. Please try again.",
+        401,
+      );
     if (detail.includes("redirect_uri_mismatch"))
       throw new RequestError(
         "This server's redirect URI is not registered on the Google OAuth client.",
         500,
       );
     if (detail.includes("invalid_client"))
-      throw new RequestError("Google rejected this application's credentials.", 500);
-    throw new RequestError("Google could not complete the sign-in. Please try again.", 502);
+      throw new RequestError(
+        "Google rejected this application's credentials.",
+        500,
+      );
+    throw new RequestError(
+      "Google could not complete the sign-in. Please try again.",
+      502,
+    );
   }
   const token = z.object({ id_token: z.string().min(1) }).safeParse(body);
   if (!token.success)
-    throw new RequestError("Google did not return a sign-in token. Please try again.", 502);
+    throw new RequestError(
+      "Google did not return a sign-in token. Please try again.",
+      502,
+    );
   const claims = await readIdToken(token.data.id_token);
   return {
     provider: "google" as const,

@@ -15,11 +15,14 @@ export function config() {
   const redirectUri = new URL(required("GOOGLE_REDIRECT_URI"));
   if (
     redirectUri.pathname !== "/api/email-summary/callback" ||
-    redirectUri.search || redirectUri.hash ||
+    redirectUri.search ||
+    redirectUri.hash ||
     (redirectUri.protocol !== "https:" && redirectUri.hostname !== "localhost")
-  ) throw new RequestError(
-    "GOOGLE_REDIRECT_URI must be the registered Email Summary callback URL.", 503,
-  );
+  )
+    throw new RequestError(
+      "GOOGLE_REDIRECT_URI must be the registered Email Summary callback URL.",
+      503,
+    );
   return {
     supabaseUrl,
     serviceKey: required("SUPABASE_SERVICE_ROLE_KEY"),

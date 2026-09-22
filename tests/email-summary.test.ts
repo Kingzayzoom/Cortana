@@ -8,10 +8,12 @@ const message = {
   labelIds: ["INBOX"],
   snippet: " Please   review  this request. ",
   internalDate: String(now - 60 * 60 * 1000),
-  payload: { headers: [
-    { name: "From", value: "Dr. Smith <smith@example.com>" },
-    { name: "Subject", value: "  Friday   meeting " },
-  ] },
+  payload: {
+    headers: [
+      { name: "From", value: "Dr. Smith <smith@example.com>" },
+      { name: "Subject", value: "  Friday   meeting " },
+    ],
+  },
 };
 
 describe("Gmail morning briefing input", () => {
@@ -25,25 +27,57 @@ describe("Gmail morning briefing input", () => {
   });
 
   it("excludes non-inbox, spam, promotions, social, trash, and newsletters", () => {
-    expect(sourceFromGmailMessage({ ...message, labelIds: [] }, now)).toBeNull();
-    for (const label of ["SPAM", "TRASH", "CATEGORY_PROMOTIONS", "CATEGORY_SOCIAL", "CATEGORY_FORUMS"]) {
-      expect(sourceFromGmailMessage({ ...message, labelIds: ["INBOX", label] }, now)).toBeNull();
+    expect(
+      sourceFromGmailMessage({ ...message, labelIds: [] }, now),
+    ).toBeNull();
+    for (const label of [
+      "SPAM",
+      "TRASH",
+      "CATEGORY_PROMOTIONS",
+      "CATEGORY_SOCIAL",
+      "CATEGORY_FORUMS",
+    ]) {
+      expect(
+        sourceFromGmailMessage({ ...message, labelIds: ["INBOX", label] }, now),
+      ).toBeNull();
     }
-    expect(sourceFromGmailMessage({
-      ...message,
-      payload: { headers: [...message.payload.headers,
-        { name: "List-Unsubscribe", value: "<mailto:leave@example.com>" }] },
-    }, now)).toBeNull();
-    expect(sourceFromGmailMessage({
-      ...message,
-      payload: { headers: [{ name: "Subject", value: "Weekly newsletter" }] },
-    }, now)).toBeNull();
+    expect(
+      sourceFromGmailMessage(
+        {
+          ...message,
+          payload: {
+            headers: [
+              ...message.payload.headers,
+              { name: "List-Unsubscribe", value: "<mailto:leave@example.com>" },
+            ],
+          },
+        },
+        now,
+      ),
+    ).toBeNull();
+    expect(
+      sourceFromGmailMessage(
+        {
+          ...message,
+          payload: {
+            headers: [{ name: "Subject", value: "Weekly newsletter" }],
+          },
+        },
+        now,
+      ),
+    ).toBeNull();
   });
 
   it("rejects messages older than the recent inbox window", () => {
-    expect(sourceFromGmailMessage({
-      ...message, internalDate: String(now - 31 * 60 * 60 * 1000),
-    }, now)).toBeNull();
+    expect(
+      sourceFromGmailMessage(
+        {
+          ...message,
+          internalDate: String(now - 31 * 60 * 60 * 1000),
+        },
+        now,
+      ),
+    ).toBeNull();
   });
 
   it("uses Eastern calendar dates for the daily run", () => {
@@ -54,7 +88,10 @@ describe("Gmail morning briefing input", () => {
 
 describe("mock email drafts", () => {
   it("uses the spoken delay in a sample staff update", () => {
-    const draft = makeMockEmailDraft("Tell the staff I'm running 20 minutes late", "clinic staff");
+    const draft = makeMockEmailDraft(
+      "Tell the staff I'm running 20 minutes late",
+      "clinic staff",
+    );
     expect(draft.subject).toBe("Running Late");
     expect(draft.body).toContain("Hi team,");
     expect(draft.body).toContain("20 minutes late");

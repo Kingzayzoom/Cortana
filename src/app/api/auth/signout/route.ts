@@ -11,7 +11,10 @@ export async function POST(request: Request) {
     assertOrigin(request);
     await clearProfileSession();
     // The next bootstrap issues a fresh anonymous profile.
-    return Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
+    return Response.json(
+      { ok: true },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch (error) {
     return safeError(error);
   }

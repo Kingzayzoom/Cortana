@@ -20,9 +20,7 @@
     "date": "2026-09-19",
     "startTime": "07:00",
     "endTime": "19:00",
-    "prioritySummary": [
-      "Review the new consult."
-    ]
+    "prioritySummary": ["Review the new consult."]
   },
   "primaryCase": {
     "id": "patient-031",
@@ -33,9 +31,7 @@
       "sex": "Male"
     },
     "reasonForAdmission": "Evaluation of palpitations in a fictional case.",
-    "history": [
-      "Intermittent palpitations reported."
-    ],
+    "history": ["Intermittent palpitations reported."],
     "currentStatus": {
       "summary": "Cardiology consult requested. Investigation results not supplied.",
       "vitals": {
@@ -61,12 +57,8 @@
         "status": "scheduled"
       }
     ],
-    "itemsForReview": [
-      "Review the supplied symptom timeline."
-    ],
-    "allowedQuestions": [
-      "Why was the consult requested?"
-    ]
+    "itemsForReview": ["Review the supplied symptom timeline."],
+    "allowedQuestions": ["Why was the consult requested?"]
   },
   "secondaryCases": [],
   "consults": [
@@ -98,9 +90,6 @@
   "metadata": {
     "createdAt": "2026-09-19T06:30:00-04:00",
     "source": "demo",
-    "tags": [
-      "synthetic",
-      "cardiology"
-    ]
+    "tags": ["synthetic", "cardiology"]
   }
 }

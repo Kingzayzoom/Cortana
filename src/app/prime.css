@@ -191,7 +191,15 @@
   gap: 12px;
   margin: 0;
 }
-.prime-options legend { position:absolute; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.prime-options legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .prime-option {
   display: flex;
   gap: 16px;

@@ -28,7 +28,11 @@ import {
   redirectUri,
 } from "../src/lib/server/auth";
 import { profileSession, setProfileSession } from "../src/lib/server/session";
-import { emptyProgress, linkAccount, withProgress } from "../src/lib/server/store";
+import {
+  emptyProgress,
+  linkAccount,
+  withProgress,
+} from "../src/lib/server/store";
 
 const CLIENT_ID = "123.apps.googleusercontent.com";
 const request = () =>
@@ -58,7 +62,10 @@ const validClaims = (overrides: Record<string, unknown> = {}) => ({
 const tokenResponds = (body: unknown, ok = true) =>
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () => new Response(JSON.stringify(body), { status: ok ? 200 : 400 })),
+    vi.fn(
+      async () =>
+        new Response(JSON.stringify(body), { status: ok ? 200 : 400 }),
+    ),
   );
 
 beforeEach(async () => {
@@ -66,7 +73,10 @@ beforeEach(async () => {
   vi.stubEnv("CORTANA_SESSION_SECRET", "s".repeat(48));
   vi.stubEnv("GOOGLE_CLIENT_ID", CLIENT_ID);
   vi.stubEnv("GOOGLE_CLIENT_SECRET", "google-client-secret-never-returned");
-  vi.stubEnv("CORTANA_DATA_DIR", await mkdtemp(path.join(tmpdir(), "cortana-auth-")));
+  vi.stubEnv(
+    "CORTANA_DATA_DIR",
+    await mkdtemp(path.join(tmpdir(), "cortana-auth-")),
+  );
   googleAuth.verifyIdToken.mockReset();
   googleAuth.verifyIdToken.mockImplementation(
     async ({ idToken: token }: { idToken: string; audience: string }) => {
@@ -85,11 +95,15 @@ afterEach(() => {
 describe("authorization request", () => {
   it("sends PKCE and a state that the callback can verify", async () => {
     const url = new URL(await beginGoogleAuth(request()));
-    expect(url.origin + url.pathname).toBe("https://accounts.google.com/o/oauth2/v2/auth");
+    expect(url.origin + url.pathname).toBe(
+      "https://accounts.google.com/o/oauth2/v2/auth",
+    );
     expect(url.searchParams.get("code_challenge_method")).toBe("S256");
     expect(url.searchParams.get("code_challenge")).toMatch(/^[\w-]{43}$/);
     expect(url.searchParams.get("redirect_uri")).toBe(redirectUri(request()));
-    expect(await consumeOAuthCookie(url.searchParams.get("state")!)).toMatch(/^[\w-]+$/);
+    expect(await consumeOAuthCookie(url.searchParams.get("state")!)).toMatch(
+      /^[\w-]+$/,
+    );
   });
 
   it("never puts the verifier in the authorization URL", async () => {
@@ -117,7 +131,10 @@ describe("id token claims", () => {
   const exchange = () => completeGoogleAuth(request(), "auth-code", "verifier");
 
   it("accepts a well-formed token and returns only safe fields", async () => {
-    tokenResponds({ id_token: idToken(validClaims()), access_token: "secret-access-token" });
+    tokenResponds({
+      id_token: idToken(validClaims()),
+      access_token: "secret-access-token",
+    });
     const account = await exchange();
     expect(account).toEqual({
       provider: "google",
@@ -135,41 +152,60 @@ describe("id token claims", () => {
 
   it("rejects a token when Google's signature verification fails", async () => {
     tokenResponds({ id_token: idToken(validClaims()) });
-    googleAuth.verifyIdToken.mockRejectedValueOnce(new Error("invalid signature"));
+    googleAuth.verifyIdToken.mockRejectedValueOnce(
+      new Error("invalid signature"),
+    );
     await expect(exchange()).rejects.toThrow(/could not verify/i);
   });
 
   it("rejects another application's audience", async () => {
-    tokenResponds({ id_token: idToken(validClaims({ aud: "999.apps.googleusercontent.com" })) });
+    tokenResponds({
+      id_token: idToken(validClaims({ aud: "999.apps.googleusercontent.com" })),
+    });
     await expect(exchange()).rejects.toThrow(/issued for another application/i);
   });
 
   it("rejects an unexpected issuer", async () => {
-    tokenResponds({ id_token: idToken(validClaims({ iss: "https://evil.example" })) });
+    tokenResponds({
+      id_token: idToken(validClaims({ iss: "https://evil.example" })),
+    });
     await expect(exchange()).rejects.toThrow(/unexpected issuer/i);
   });
 
   it("rejects an expired token", async () => {
-    tokenResponds({ id_token: idToken(validClaims({ exp: Math.floor(Date.now() / 1000) - 5 })) });
+    tokenResponds({
+      id_token: idToken(
+        validClaims({ exp: Math.floor(Date.now() / 1000) - 5 }),
+      ),
+    });
     await expect(exchange()).rejects.toThrow(/expired/i);
   });
 
   it("rejects an unverified email", async () => {
-    tokenResponds({ id_token: idToken(validClaims({ email_verified: false })) });
+    tokenResponds({
+      id_token: idToken(validClaims({ email_verified: false })),
+    });
     await expect(exchange()).rejects.toThrow(/verify your google email/i);
   });
 
   it("rejects a subject that could escape the data directory", async () => {
-    tokenResponds({ id_token: idToken(validClaims({ sub: "../../etc/passwd" })) });
+    tokenResponds({
+      id_token: idToken(validClaims({ sub: "../../etc/passwd" })),
+    });
     await expect(exchange()).rejects.toThrow(/incomplete sign-in token/i);
   });
 
   it("does not leak the provider error body", async () => {
-    tokenResponds({ error: "invalid_grant", client_secret: "leaked-secret" }, false);
+    tokenResponds(
+      { error: "invalid_grant", client_secret: "leaked-secret" },
+      false,
+    );
     // Assert on the caught error directly: `.rejects.not` would also pass if
     // the call unexpectedly resolved.
     const error = await exchange().then(
-      () => { throw new Error("exchange should have rejected"); },
+      () => {
+        throw new Error("exchange should have rejected");
+      },
       (caught: Error) => caught,
     );
     expect(error.message).toMatch(/already used or expired/i);
@@ -185,7 +221,8 @@ describe("profile linking", () => {
     name: "Dr. Maya Patel",
     picture: null,
   };
-  const file = (id: string) => path.join(process.env.CORTANA_DATA_DIR!, `${id}.json`);
+  const file = (id: string) =>
+    path.join(process.env.CORTANA_DATA_DIR!, `${id}.json`);
 
   it("carries anonymous progress into the account on first sign-in", async () => {
     const anonymous = "11111111-1111-4111-8111-111111111111";
@@ -199,7 +236,11 @@ describe("profile linking", () => {
         version: "2026-09-19.1",
       });
     });
-    const result = await linkAccount(anonymous, accountId(account.subject), account);
+    const result = await linkAccount(
+      anonymous,
+      accountId(account.subject),
+      account,
+    );
     expect(result.xp).toBe(120);
     expect(result.account?.email).toBe("clinician@example.com");
     expect(result.signedIn).toBe(true);
@@ -216,14 +257,20 @@ describe("profile linking", () => {
     const existing = { ...emptyProgress(), practiceDays: ["2026-09-01"] };
     await writeFile(file(accountId(account.subject)), JSON.stringify(existing));
     const anonymous = "22222222-2222-4222-8222-222222222222";
-    await withProgress(anonymous, (data) => data.practiceDays.push("2026-09-19"));
+    await withProgress(anonymous, (data) =>
+      data.practiceDays.push("2026-09-19"),
+    );
 
-    const result = await linkAccount(anonymous, accountId(account.subject), account);
+    const result = await linkAccount(
+      anonymous,
+      accountId(account.subject),
+      account,
+    );
     expect(result.practiceDays).toEqual(["2026-09-01"]);
     // The anonymous profile is left untouched rather than silently destroyed.
-    expect(JSON.parse(await readFile(file(anonymous), "utf8")).practiceDays).toEqual([
-      "2026-09-19",
-    ]);
+    expect(
+      JSON.parse(await readFile(file(anonymous), "utf8")).practiceDays,
+    ).toEqual(["2026-09-19"]);
   });
 
   it("signs the account cookie so a profile id cannot be forged", async () => {

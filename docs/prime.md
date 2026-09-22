@@ -28,4 +28,3 @@ Run npm run agent:export and node scripts/configure-agent.mjs --apply to attach 
 ## Checks
 
 Unit tests cover selection, review intervals, invalid/ambiguous answers, first-answer persistence, concurrent duplicate requests, reward idempotency, midnight behavior, profile isolation, evidence events, and voice tool contracts. Browser tests cover the full quiz, evidence drawer, reload, completion, mobile, keyboard and CSRF handling.
-

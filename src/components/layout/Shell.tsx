@@ -33,7 +33,7 @@ const navigation = [
   { href: "/email-summary", title: "Email Summary", icon: Mail },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
-  const prime=usePrime();
+  const prime = usePrime();
   const pathname = usePathname(),
     { data, error, refresh, clearError } = useLearning(),
     voice = useVoice();
@@ -153,7 +153,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
             >
               <Icon size={20} strokeWidth={1.65} />
               {title}
-              {href==="/prime" && prime.data && !prime.data.session?.completedAt && <span className="prime-nav-daily">Daily</span>}
+              {href === "/prime" &&
+                prime.data &&
+                !prime.data.session?.completedAt && (
+                  <span className="prime-nav-daily">Daily</span>
+                )}
               {pathname === href && <span className="nav-indicator" />}
             </Link>
           ))}
@@ -188,7 +192,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </button>
           <div className="header-greeting">
             <h2>
-              {greeting}, {data?.account?.name || data?.preferences.name || "Dr. Patel"}.
+              {greeting},{" "}
+              {data?.account?.name || data?.preferences.name || "Dr. Patel"}.
             </h2>
             <p>Ready for today’s round?</p>
           </div>

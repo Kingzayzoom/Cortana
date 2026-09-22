@@ -49,10 +49,16 @@ export async function POST(request: Request) {
     const { accessCode, phoneNumber, mode } = parsed.data;
     if (!safeEqual(accessCode, process.env.CORTANA_DEMO_ACCESS_CODE!))
       throw new RequestError("That demo access code is incorrect.", 403);
-    const briefing = mode === "context" ? buildPhoneBriefingContext(await readActiveScenario(id)) : null;
-    if(mode==="prime")await actPrime(id,{action:"start"});
+    const briefing =
+      mode === "context"
+        ? buildPhoneBriefingContext(await readActiveScenario(id))
+        : null;
+    if (mode === "prime") await actPrime(id, { action: "start" });
     if (mode === "context" && !briefing)
-      throw new RequestError("Activate a synthetic scenario before requesting a briefing.", 409);
+      throw new RequestError(
+        "Activate a synthetic scenario before requesting a briefing.",
+        409,
+      );
     // A phone round is a fresh run against the caller's own saved progress.
     const run = await withProgress(id, (data) => {
       data.run = {

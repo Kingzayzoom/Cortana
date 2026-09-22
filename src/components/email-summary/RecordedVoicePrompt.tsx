@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 type Phase = "idle" | "asking" | "listening" | "transcribing";
 
-export function RecordedVoicePrompt({ onMessage }: { onMessage: (message: string) => void }) {
+export function RecordedVoicePrompt({
+  onMessage,
+}: {
+  onMessage: (message: string) => void;
+}) {
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const promptRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -24,7 +28,9 @@ export function RecordedVoicePrompt({ onMessage }: { onMessage: (message: string
 
   useEffect(() => {
     mountedRef.current = true;
-    setAvailable(Boolean(navigator.mediaDevices && typeof MediaRecorder !== "undefined"));
+    setAvailable(
+      Boolean(navigator.mediaDevices && typeof MediaRecorder !== "undefined"),
+    );
     return () => {
       mountedRef.current = false;
       if (promptRef.current) {
@@ -37,7 +43,8 @@ export function RecordedVoicePrompt({ onMessage }: { onMessage: (message: string
         recorderRef.current.ondataavailable = null;
         recorderRef.current.onerror = null;
         recorderRef.current.onstop = null;
-        if (recorderRef.current.state !== "inactive") recorderRef.current.stop();
+        if (recorderRef.current.state !== "inactive")
+          recorderRef.current.stop();
       }
       releaseMicrophone();
     };
@@ -48,15 +55,33 @@ export function RecordedVoicePrompt({ onMessage }: { onMessage: (message: string
     try {
       const form = new FormData();
       form.append("audio", audio, "voice-message");
-      const response = await fetch("/api/email-summary/transcribe", { method: "POST", body: form });
-      const result = await response.json() as { text?: string; error?: string };
-      if (!response.ok) throw new Error(result.error || "Voice transcription failed. Try again or type below.");
+      const response = await fetch("/api/email-summary/transcribe", {
+        method: "POST",
+        body: form,
+      });
+      const result = (await response.json()) as {
+        text?: string;
+        error?: string;
+      };
+      if (!response.ok)
+        throw new Error(
+          result.error ||
+            "Voice transcription failed. Try again or type below.",
+        );
       const message = result.text?.trim();
-      if (!message) throw new Error("I didn't catch that. Try again or type your message below.");
+      if (!message)
+        throw new Error(
+          "I didn't catch that. Try again or type your message below.",
+        );
       if (mountedRef.current) onMessage(message);
       if (mountedRef.current) setError(null);
     } catch (cause) {
-      if (mountedRef.current) setError(cause instanceof Error ? cause.message : "Voice input failed. Type your message below.");
+      if (mountedRef.current)
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Voice input failed. Type your message below.",
+        );
     } finally {
       if (mountedRef.current) setPhase("idle");
     }
@@ -82,16 +107,22 @@ export function RecordedVoicePrompt({ onMessage }: { onMessage: (message: string
         recorderRef.current = null;
         releaseMicrophone();
         setPhase("idle");
-        setError("Microphone recording failed. Try again or type your message below.");
+        setError(
+          "Microphone recording failed. Try again or type your message below.",
+        );
       };
       recorder.onstop = () => {
-        const audio = new Blob(chunks, { type: recorder.mimeType || chunks[0]?.type || "audio/ogg" });
+        const audio = new Blob(chunks, {
+          type: recorder.mimeType || chunks[0]?.type || "audio/ogg",
+        });
         recorderRef.current = null;
         releaseMicrophone();
         if (!mountedRef.current) return;
         if (audio.size < 500) {
           setPhase("idle");
-          setError("I didn't catch that. Try again or type your message below.");
+          setError(
+            "I didn't catch that. Try again or type your message below.",
+          );
           return;
         }
         void transcribe(audio);
@@ -104,15 +135,18 @@ export function RecordedVoicePrompt({ onMessage }: { onMessage: (message: string
     } catch (cause) {
       releaseMicrophone();
       setPhase("idle");
-      setError(cause instanceof DOMException && cause.name === "NotAllowedError"
-        ? "Allow microphone access in Firefox and try again, or type below."
-        : "The microphone could not start. Check its permissions or type below.");
+      setError(
+        cause instanceof DOMException && cause.name === "NotAllowedError"
+          ? "Allow microphone access in Firefox and try again, or type below."
+          : "The microphone could not start. Check its permissions or type below.",
+      );
     }
   }
 
   function speakAndRecord() {
     if (phase === "listening") {
-      if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+      if (recorderRef.current?.state === "recording")
+        recorderRef.current.stop();
       return;
     }
     if (phase !== "idle" || !available) return;
@@ -126,11 +160,16 @@ export function RecordedVoicePrompt({ onMessage }: { onMessage: (message: string
       promptRef.current = null;
       void record();
     };
-    if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") {
+    if (
+      !window.speechSynthesis ||
+      typeof SpeechSynthesisUtterance === "undefined"
+    ) {
       listen();
       return;
     }
-    const prompt = new SpeechSynthesisUtterance("What message would you like me to draft?");
+    const prompt = new SpeechSynthesisUtterance(
+      "What message would you like me to draft?",
+    );
     promptRef.current = prompt;
     prompt.onend = listen;
     prompt.onerror = listen;
@@ -143,26 +182,51 @@ export function RecordedVoicePrompt({ onMessage }: { onMessage: (message: string
     }
   }
 
-  return <div className="email-voice-prompt">
-    <button type="button" className={`email-voice-button email-voice-button--${phase}`}
-      onClick={speakAndRecord} disabled={!available || phase === "asking" || phase === "transcribing"}
-      aria-pressed={phase === "listening"}
-      aria-label={phase === "listening" ? "Stop listening" : "Ask Cortana to draft by voice"}>
-      <span className="email-voice-orb" aria-hidden="true" />
-    </button>
-    <div>
-      <strong>Cortana voice draft</strong>
-      <p aria-live="polite">{phase === "asking" ? "What message would you like me to draft?"
-        : phase === "listening" ? "Listening… tap the icon when you finish."
-          : phase === "transcribing" ? "Transcribing your message…"
-            : "Tap the icon and tell Cortana what to draft."}</p>
-      {available && <p className="email-voice-note">
-        This browser sends a short recording to Gemini for transcription. Cortana does not save the audio or create a Gmail draft.
-      </p>}
-      {available === false && <p className="email-voice-note">
-        Voice input needs a microphone and a secure page (HTTPS or localhost). You can type your request below.
-      </p>}
-      {error && <p className="email-voice-note" role="alert">{error}</p>}
+  return (
+    <div className="email-voice-prompt">
+      <button
+        type="button"
+        className={`email-voice-button email-voice-button--${phase}`}
+        onClick={speakAndRecord}
+        disabled={!available || phase === "asking" || phase === "transcribing"}
+        aria-pressed={phase === "listening"}
+        aria-label={
+          phase === "listening"
+            ? "Stop listening"
+            : "Ask Cortana to draft by voice"
+        }
+      >
+        <span className="email-voice-orb" aria-hidden="true" />
+      </button>
+      <div>
+        <strong>Cortana voice draft</strong>
+        <p aria-live="polite">
+          {phase === "asking"
+            ? "What message would you like me to draft?"
+            : phase === "listening"
+              ? "Listening… tap the icon when you finish."
+              : phase === "transcribing"
+                ? "Transcribing your message…"
+                : "Tap the icon and tell Cortana what to draft."}
+        </p>
+        {available && (
+          <p className="email-voice-note">
+            This browser sends a short recording to Gemini for transcription.
+            Cortana does not save the audio or create a Gmail draft.
+          </p>
+        )}
+        {available === false && (
+          <p className="email-voice-note">
+            Voice input needs a microphone and a secure page (HTTPS or
+            localhost). You can type your request below.
+          </p>
+        )}
+        {error && (
+          <p className="email-voice-note" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
     </div>
-  </div>;
+  );
 }

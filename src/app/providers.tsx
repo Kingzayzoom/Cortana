@@ -9,13 +9,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <LearningProvider>
       <PrimeProvider>
-      <ContextProvider>
-      <VoiceProvider>
-        {children}
-        <EvidenceDrawer />
-        <VoiceConsent />
-      </VoiceProvider>
-      </ContextProvider>
+        <ContextProvider>
+          <VoiceProvider>
+            {children}
+            <EvidenceDrawer />
+            <VoiceConsent />
+          </VoiceProvider>
+        </ContextProvider>
       </PrimeProvider>
     </LearningProvider>
   );

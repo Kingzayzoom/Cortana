@@ -126,7 +126,13 @@ export function Dashboard() {
                 <h1 id="live-round-heading">
                   {liveMode ? "In conversation." : ""}
                 </h1>
-                <span>{liveMode ? voice.briefing ? "Synthetic context briefing" : "Heart failure, beyond diabetes" : ""}</span>
+                <span>
+                  {liveMode
+                    ? voice.briefing
+                      ? "Synthetic context briefing"
+                      : "Heart failure, beyond diabetes"
+                    : ""}
+                </span>
               </div>
 
               <CortanaOrb />
@@ -170,8 +176,6 @@ export function Dashboard() {
           </div>
         </>
       )}
-
-
     </>
   );
 }

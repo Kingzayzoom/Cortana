@@ -298,7 +298,11 @@ describe("account linking on Redis", () => {
 
     // A different serverless instance completes the sign-in.
     const b = await instance();
-    const linked = await b.store.linkAccount(anonymous, "g-1098765432100", account);
+    const linked = await b.store.linkAccount(
+      anonymous,
+      "g-1098765432100",
+      account,
+    );
     expect(linked.xp).toBe(120);
     expect(linked.signedIn).toBe(true);
     expect(linked.storage).toContain("your Google account");
@@ -327,7 +331,11 @@ describe("account linking on Redis", () => {
     });
 
     const b = await instance();
-    const linked = await b.store.linkAccount(anonymous, "g-1098765432100", account);
+    const linked = await b.store.linkAccount(
+      anonymous,
+      "g-1098765432100",
+      account,
+    );
     expect(linked.practiceDays).toEqual(["2026-09-01"]);
     const left = await b.store.withProgress(anonymous, (data) => data);
     expect(left.practiceDays).toEqual(["2026-09-19"]);

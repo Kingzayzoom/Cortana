@@ -41,7 +41,21 @@ const base = {
   evidenceSourceIds: z.array(evidenceSourceId).max(2).optional(),
 };
 export const learningSignalSchema = z.discriminatedUnion("type", [
-  z.object({...base,type:z.enum(["prime_started","prime_question_attempted","prime_question_correct","prime_question_missed","prime_evidence_viewed","prime_completed"]),questionId:z.string().optional(),sourceId:evidenceSourceId.optional()}).strict(),
+  z
+    .object({
+      ...base,
+      type: z.enum([
+        "prime_started",
+        "prime_question_attempted",
+        "prime_question_correct",
+        "prime_question_missed",
+        "prime_evidence_viewed",
+        "prime_completed",
+      ]),
+      questionId: z.string().optional(),
+      sourceId: evidenceSourceId.optional(),
+    })
+    .strict(),
   z
     .object({
       ...base,

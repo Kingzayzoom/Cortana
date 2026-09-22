@@ -169,9 +169,6 @@
   "metadata": {
     "createdAt": "2026-09-19T06:30:00-04:00",
     "source": "demo",
-    "tags": [
-      "synthetic",
-      "cardiology"
-    ]
+    "tags": ["synthetic", "cardiology"]
   }
 }

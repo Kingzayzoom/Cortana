@@ -242,7 +242,8 @@ function Scene({
 
     const targetSpeed =
       0.42 + Math.max(curInRef.current, curOutRef.current) * 0.65;
-    animSpeedRef.current += (targetSpeed - animSpeedRef.current) * (1 - Math.exp(-dt * 5));
+    animSpeedRef.current +=
+      (targetSpeed - animSpeedRef.current) * (1 - Math.exp(-dt * 5));
 
     u.uAnimation.value += reducedMotion
       ? 0

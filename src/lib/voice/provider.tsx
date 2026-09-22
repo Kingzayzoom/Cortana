@@ -34,10 +34,7 @@ import {
   stageTool,
 } from "../validation/contracts";
 import { round, sources } from "../content/round";
-import {
-  DEFAULT_LANGUAGE,
-  type SpokenLanguage,
-} from "./languages";
+import { DEFAULT_LANGUAGE, type SpokenLanguage } from "./languages";
 import { classifyQuestion, isQuestion } from "../learning-signals/adapter";
 type VoiceValue = {
   connection: ConnectionState;
@@ -79,9 +76,9 @@ function VoiceController({ children }: { children: React.ReactNode }) {
   const learning = useLearning();
   const [briefing, setBriefing] = useState(false);
   const briefingRef = useRef(false);
-  const primeRef=useRef(false);
-  const primeSessionRef=useRef<string|null>(null);
-  const [prime,setPrime]=useState(false);
+  const primeRef = useRef(false);
+  const primeSessionRef = useRef<string | null>(null);
+  const [prime, setPrime] = useState(false);
   const [connection, setConnection] = useState<ConnectionState>("idle"),
     [activity, setActivity] = useState<VoiceActivity>("quiet");
   const [language, setLanguage] = useState<SpokenLanguage>(DEFAULT_LANGUAGE);
@@ -108,7 +105,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
   const speakingRef = useRef(false);
   const observedMessages = useRef(new Set<string>());
   const recordQuestions = (rows: Message[]) => {
-    if(primeRef.current)return;
+    if (primeRef.current) return;
     for (const row of rows) {
       if (row.role !== "user" || observedMessages.current.has(row.id)) continue;
       observedMessages.current.add(row.id);
@@ -156,7 +153,9 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           return JSON.stringify({
             error: "Invalid tool parameters or unknown content ID.",
           });
-        const runId = primeRef.current ? primeSessionRef.current : current.current.data?.run?.id;
+        const runId = primeRef.current
+          ? primeSessionRef.current
+          : current.current.data?.run?.id;
         if (!accepting.current || !runId)
           return JSON.stringify({
             error: "The voice session is no longer active.",
@@ -168,24 +167,40 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         }
       };
     return {
-      ...Object.fromEntries(primeToolNames.map(name=>[name,tool<unknown>(primeToolSchemas[name],async params=>{
-        const response=await fetch(`/api/prime/tools/${name}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(params)});
-        const result=await response.json();if(!response.ok)throw Error(result.error);
-        window.dispatchEvent(new Event("prime-updated"));void current.current.refresh();
-        return result;
-      })])),
-      ...Object.fromEntries(contextToolNames.map((name) => [
-        name,
-        tool<unknown>(contextToolSchemas[name], async (params) => {
-          const response = await fetch(`/api/context/tools/${name}`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(params), cache: "no-store",
-          });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.error || "Context lookup failed.");
-          return result;
-        }),
-      ])),
+      ...Object.fromEntries(
+        primeToolNames.map((name) => [
+          name,
+          tool<unknown>(primeToolSchemas[name], async (params) => {
+            const response = await fetch(`/api/prime/tools/${name}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(params),
+            });
+            const result = await response.json();
+            if (!response.ok) throw Error(result.error);
+            window.dispatchEvent(new Event("prime-updated"));
+            void current.current.refresh();
+            return result;
+          }),
+        ]),
+      ),
+      ...Object.fromEntries(
+        contextToolNames.map((name) => [
+          name,
+          tool<unknown>(contextToolSchemas[name], async (params) => {
+            const response = await fetch(`/api/context/tools/${name}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(params),
+              cache: "no-store",
+            });
+            const result = await response.json();
+            if (!response.ok)
+              throw new Error(result.error || "Context lookup failed.");
+            return result;
+          }),
+        ]),
+      ),
       get_round_context: tool(contextTool, () => ({
         conversationMode: briefingRef.current ? "context" : "round",
         round,
@@ -299,7 +314,8 @@ function VoiceController({ children }: { children: React.ReactNode }) {
   };
   const startPreview = async () => {
     if (lock.current) return;
-    primeRef.current=false;setPrime(false);
+    primeRef.current = false;
+    setPrime(false);
     lock.current = true;
     setWorking(true);
     try {
@@ -345,11 +361,26 @@ function VoiceController({ children }: { children: React.ReactNode }) {
     abort.current = requestAbort;
     try {
       let data = learning.data;
-      if(primeRef.current){
-        const response=await fetch("/api/prime",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"start"}),signal:requestAbort.signal});
-        const result=await response.json();if(!response.ok)throw Error(result.error);
-        primeSessionRef.current=result.session.id;
-        data={...learning.data!,run:{id:result.session.id,section:0,stage:"briefing",grade:null,completed:false}};
+      if (primeRef.current) {
+        const response = await fetch("/api/prime", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "start" }),
+          signal: requestAbort.signal,
+        });
+        const result = await response.json();
+        if (!response.ok) throw Error(result.error);
+        primeSessionRef.current = result.session.id;
+        data = {
+          ...learning.data!,
+          run: {
+            id: result.session.id,
+            section: 0,
+            stage: "briefing",
+            grade: null,
+            completed: false,
+          },
+        };
       } else if (!paused || !data?.run || data.run.completed) {
         learning.clearMessages();
         data = await learning.act({ action: "begin", mode: "voice" });
@@ -363,7 +394,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           accessCode: code,
           consent: true,
           runId: data!.run!.id,
-          ...(primeRef.current?{mode:"prime"}:{}),
+          ...(primeRef.current ? { mode: "prime" } : {}),
         }),
         cache: "no-store",
         signal: AbortSignal.any([
@@ -432,7 +463,11 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         connectionType: "webrtc",
         clientTools: sessionTools,
         dynamicVariables: {
-          context_mode: primeRef.current ? "prime" : briefingRef.current ? "context" : "round",
+          context_mode: primeRef.current
+            ? "prime"
+            : briefingRef.current
+              ? "context"
+              : "round",
           round_id: round.id,
           section_id: round.sections[data!.run!.section].id,
           lesson_stage: data!.run!.stage,
@@ -454,11 +489,12 @@ function VoiceController({ children }: { children: React.ReactNode }) {
           setConversationId(connectedId);
           setWorking(false);
           setConnection("connected");
-          if(!primeRef.current) current.current.observe(
-            { type: "round_started", mode: "voice" },
-            undefined,
-            data!.run!.id,
-          );
+          if (!primeRef.current)
+            current.current.observe(
+              { type: "round_started", mode: "voice" },
+              undefined,
+              data!.run!.id,
+            );
           setActivity("quiet");
           // setMuted throws before a conversation exists in this SDK version.
           controlsRef.current.setMuted(false);
@@ -618,7 +654,8 @@ function VoiceController({ children }: { children: React.ReactNode }) {
             conversation.sendUserMessage(text);
             const rows = transcript.current.sent(text, transcriptText);
             if (
-              !primeRef.current && intent === "question" &&
+              !primeRef.current &&
+              intent === "question" &&
               !/^(i am finished|(?:please )?(?:complete|finish|end|stop|continue|start|resume)\b)/i.test(
                 text.trim(),
               )

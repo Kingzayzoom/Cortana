@@ -109,9 +109,18 @@ function daily(data: StoredProgress, now: Date) {
     };
     p.sessions.push(session);
   }
-  if(!session.startedAt){
-    const context=data.contextScenario===undefined?defaultScenario:data.contextScenario;
-    session.selection=buildDailyPrime({...p,sessions:p.sessions.filter(s=>s.id!==session.id)},questions,date,context?.educationTriggers,data.learningSignals);
+  if (!session.startedAt) {
+    const context =
+      data.contextScenario === undefined
+        ? defaultScenario
+        : data.contextScenario;
+    session.selection = buildDailyPrime(
+      { ...p, sessions: p.sessions.filter((s) => s.id !== session.id) },
+      questions,
+      date,
+      context?.educationTriggers,
+      data.learningSignals,
+    );
   }
   return session;
 }
@@ -223,7 +232,8 @@ export async function actPrime(
         const grade = gradePrimeAnswer(q.id, option);
         const reinforced =
           grade.correct &&
-          (q.conceptIds.some((c) => p.reviews[c]?.needsReinforcement) || s.selection[s.cursor].reason==="reinforcement");
+          (q.conceptIds.some((c) => p.reviews[c]?.needsReinforcement) ||
+            s.selection[s.cursor].reason === "reinforcement");
         s.answers[q.id] = { ...grade, reinforced };
         for (const c of q.conceptIds)
           p.reviews[c] = reviewAfter(p.reviews[c], c, grade.correct, now, date);

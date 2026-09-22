@@ -28,22 +28,27 @@ function AccountSection() {
         {account ? (
           <div className="account-row">
             <div>
-              <p className="account-name">{account.name || "Signed in with Google"}</p>
-              {account.email && <p className="account-email">{account.email}</p>}
+              <p className="account-name">
+                {account.name || "Signed in with Google"}
+              </p>
+              {account.email && (
+                <p className="account-email">{account.email}</p>
+              )}
             </div>
             <SignOutButton />
           </div>
         ) : data?.googleConfigured ? (
           <div className="account-row">
             <p className="account-email">
-              Right now this profile lives only in this browser. Clearing cookies loses it.
+              Right now this profile lives only in this browser. Clearing
+              cookies loses it.
             </p>
             <GoogleSignInButton />
           </div>
         ) : (
           <p className="account-email">
-            Google sign-in is not configured on this server. This profile stays in
-            this browser.
+            Google sign-in is not configured on this server. This profile stays
+            in this browser.
           </p>
         )}
       </div>

@@ -28,7 +28,7 @@ export function emptyProgress(): StoredProgress {
     run: null,
     requests: {},
     learningSignals: [],
-    prime: {sessions:[],reviews:{}},
+    prime: { sessions: [], reviews: {} },
   };
 }
 type Operation<T> = (data: StoredProgress) => T | Promise<T>;
@@ -147,7 +147,12 @@ export function snapshot(progress: Progress): Snapshot {
     run: progress.run,
     review: progress.review,
     learningSignals: progress.learningSignals ?? [],
-    xp: progress.completions.reduce((sum, c) => sum + c.xp, 0) + ((progress as StoredProgress).prime?.sessions.reduce((sum,s)=>sum+s.xp,0) ?? 0),
+    xp:
+      progress.completions.reduce((sum, c) => sum + c.xp, 0) +
+      ((progress as StoredProgress).prime?.sessions.reduce(
+        (sum, s) => sum + s.xp,
+        0,
+      ) ?? 0),
     streak: streak(
       progress.practiceDays,
       localDate(new Date(), progress.preferences.timezone),
@@ -163,9 +168,10 @@ export function snapshot(progress: Progress): Snapshot {
 function hasHistory(progress: StoredProgress) {
   return Boolean(
     progress.attempts.length ||
-      progress.completions.length ||
-      progress.practiceDays.length ||
-      progress.run || progress.prime?.sessions.some(s=>s.startedAt),
+    progress.completions.length ||
+    progress.practiceDays.length ||
+    progress.run ||
+    progress.prime?.sessions.some((s) => s.startedAt),
   );
 }
 
@@ -192,7 +198,9 @@ export async function linkAccount(
   // Read without mutating: if the write below fails, nothing has been lost.
   const carried = carryFrom
     ? await withProgress(carryFrom, (data) =>
-        hasHistory(data) || data.contextScenario !== undefined ? structuredClone(data) : null,
+        hasHistory(data) || data.contextScenario !== undefined
+          ? structuredClone(data)
+          : null,
       )
     : null;
 
@@ -209,7 +217,8 @@ export async function linkAccount(
       data.learningSignals = carried.learningSignals ?? [];
       data.prime = carried.prime;
       data.preferences = carried.preferences;
-      if (data.contextScenario === undefined) data.contextScenario = carried.contextScenario;
+      if (data.contextScenario === undefined)
+        data.contextScenario = carried.contextScenario;
     }
     data.account = account;
     if (account.name && data.preferences.name === "Dr. Patel")

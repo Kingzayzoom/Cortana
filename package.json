@@ -14,7 +14,9 @@
     "test:a11y": "node scripts/accessibility-check.mjs",
     "agent:export": "tsx scripts/export-agent.ts",
     "agent:check": "node scripts/check-agent.mjs",
-    "setup:local": "node scripts/prepare-local.mjs"
+    "setup:local": "node scripts/prepare-local.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@elevenlabs/react": "^1.15.2",

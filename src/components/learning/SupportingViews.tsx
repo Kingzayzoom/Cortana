@@ -251,8 +251,8 @@ export function ProfileView() {
         </dl>
       </div>
       <section className="topic-results">
-      <LearningSignalSummary />
-      <PrimeStats />
+        <LearningSignalSummary />
+        <PrimeStats />
         <h2>Your Learning Pulse</h2>
         <div className="topic-result-row">
           <HeartPulse size={25} />

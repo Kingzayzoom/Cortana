@@ -7,12 +7,19 @@ function greeting(recipient: string) {
   return `Hi ${name},`;
 }
 
-export function makeMockEmailDraft(request: string, recipient = ""): EmailDraft {
+export function makeMockEmailDraft(
+  request: string,
+  recipient = "",
+): EmailDraft {
   const message = request.trim().replace(/\s+/g, " ").slice(0, 1600);
-  const hello = greeting(recipient || (/\b(staff|team)\b/i.test(message) ? "team" : ""));
+  const hello = greeting(
+    recipient || (/\b(staff|team)\b/i.test(message) ? "team" : ""),
+  );
 
   if (/\b(late|running behind|behind schedule)\b/i.test(message)) {
-    const duration = message.match(/\b(?:about\s+)?\d+\s*(?:minutes?|mins?|hours?)\b/i)?.[0];
+    const duration = message.match(
+      /\b(?:about\s+)?\d+\s*(?:minutes?|mins?|hours?)\b/i,
+    )?.[0];
     return {
       subject: "Running Late",
       body: `${hello}\n\nI wanted to let you know that I'm running ${duration ? `${duration} ` : ""}late. I'll share an updated arrival time as soon as I can.\n\nThank you for your understanding.`,
@@ -27,9 +34,10 @@ export function makeMockEmailDraft(request: string, recipient = ""): EmailDraft 
     };
   }
 
-  const detail = message.match(/\b(?:that|saying|to say)\s+(.+)$/i)?.[1]
-    ?? message.match(/\b(?:I am|I'm|we are|we're)\b.+$/i)?.[0]
-    ?? message;
+  const detail =
+    message.match(/\b(?:that|saying|to say)\s+(.+)$/i)?.[1] ??
+    message.match(/\b(?:I am|I'm|we are|we're)\b.+$/i)?.[0] ??
+    message;
   const sentence = detail.charAt(0).toUpperCase() + detail.slice(1);
   return {
     subject: "Quick Message",

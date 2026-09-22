@@ -36,11 +36,7 @@
             "description": "The learner's actual final answer. Preserve ambiguity rather than guessing an option."
           }
         },
-        "required": [
-          "sessionId",
-          "questionId",
-          "answer"
-        ],
+        "required": ["sessionId", "questionId", "answer"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -60,9 +56,7 @@
             "description": "The exact session.id UUID returned by get_prime_session."
           }
         },
-        "required": [
-          "sessionId"
-        ],
+        "required": ["sessionId"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -82,9 +76,7 @@
             "description": "The exact session.id UUID returned by get_prime_session."
           }
         },
-        "required": [
-          "sessionId"
-        ],
+        "required": ["sessionId"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -108,10 +100,7 @@
             "description": "The exact current Prime question ID returned by get_prime_session; never the legacy lesson question ID."
           }
         },
-        "required": [
-          "sessionId",
-          "questionId"
-        ],
+        "required": ["sessionId", "questionId"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -205,10 +194,7 @@
             "description": "The requested case section: history, status, vitals, labs, changes, schedule, or review_items."
           }
         },
-        "required": [
-          "caseId",
-          "section"
-        ],
+        "required": ["caseId", "section"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -272,15 +258,11 @@
         "properties": {
           "roundId": {
             "type": "string",
-            "enum": [
-              "dapa-hf-01"
-            ],
+            "enum": ["dapa-hf-01"],
             "description": "The fixed round ID dapa-hf-01."
           }
         },
-        "required": [
-          "roundId"
-        ],
+        "required": ["roundId"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -297,26 +279,16 @@
         "properties": {
           "stageId": {
             "type": "string",
-            "enum": [
-              "briefing",
-              "challenge",
-              "questions"
-            ],
+            "enum": ["briefing", "challenge", "questions"],
             "description": "The next permitted lesson stage: briefing, challenge, or questions."
           },
           "sectionId": {
             "type": "string",
-            "enum": [
-              "population",
-              "finding",
-              "limitation"
-            ],
+            "enum": ["population", "finding", "limitation"],
             "description": "The briefing section to show: population, finding, or limitation. Advance in that order."
           }
         },
-        "required": [
-          "stageId"
-        ],
+        "required": ["stageId"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -333,15 +305,11 @@
         "properties": {
           "caseId": {
             "type": "string",
-            "enum": [
-              "hf-case-01"
-            ],
+            "enum": ["hf-case-01"],
             "description": "The predefined synthetic case ID hf-case-01."
           }
         },
-        "required": [
-          "caseId"
-        ],
+        "required": ["caseId"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -360,18 +328,13 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": [
-                "dapa-hf",
-                "dapa-diabetes"
-              ],
+              "enum": ["dapa-hf", "dapa-diabetes"],
               "description": "Validated parameters for this client tool."
             },
             "description": "One or two source IDs from the current round: dapa-hf or dapa-diabetes."
           }
         },
-        "required": [
-          "sourceIds"
-        ],
+        "required": ["sourceIds"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -388,16 +351,12 @@
         "properties": {
           "roundId": {
             "type": "string",
-            "enum": [
-              "dapa-hf-01"
-            ],
+            "enum": ["dapa-hf-01"],
             "description": "The fixed round ID dapa-hf-01."
           },
           "questionId": {
             "type": "string",
-            "enum": [
-              "diabetes-eligibility"
-            ],
+            "enum": ["diabetes-eligibility"],
             "description": "The fixed question ID diabetes-eligibility."
           },
           "answer": {
@@ -405,11 +364,7 @@
             "description": "The learner's actual final answer. Preserve ambiguity rather than guessing an option."
           }
         },
-        "required": [
-          "roundId",
-          "questionId",
-          "answer"
-        ],
+        "required": ["roundId", "questionId", "answer"],
         "description": "Validated parameters for this client tool."
       }
     }
@@ -426,15 +381,11 @@
         "properties": {
           "roundId": {
             "type": "string",
-            "enum": [
-              "dapa-hf-01"
-            ],
+            "enum": ["dapa-hf-01"],
             "description": "The fixed round ID dapa-hf-01."
           }
         },
-        "required": [
-          "roundId"
-        ],
+        "required": ["roundId"],
         "description": "Validated parameters for this client tool."
       }
     }

@@ -37,7 +37,6 @@ The phone flow requires ELEVENLABS_PHONE_AGENT_ID, ELEVENLABS_PHONE_NUMBER_ID, C
 
 `CORTANA_TEST_URL=http://localhost:3102 npm run test:e2e` covers upload, paste, drop, escaped HTML, activation, reload, clearing, mobile layout, and existing conversation regressions. Real phone delivery requires a configured carrier and explicit consent; simulated provider tests do not ring a phone.
 
-
 ## Bundled library
 
 The library contains six cardiology scenarios, five operations scenarios and four escalation scenarios under `demo-data/context/{cardiology,operations,escalation}/`. Fixtures are deterministic, version-controlled JSON. `src/lib/context/catalog.ts` derives card/search metadata from validated fixtures; it does not duplicate clinical facts. Search covers title, specialty, tags, unit, summary, category and urgency labels. Three favorites appear first: urgent hypotension, morning shift and rapid-response activation.
