@@ -165,7 +165,7 @@ A failed call carries a `termination_reason` that names the cause outright.
 
 ## Limits worth knowing
 
-- 3 calls per profile per 10 minutes, 12 per hour across the server.
+- 8 calls per profile per 10 minutes, 30 per hour across the server. Front desk messages: 3 per 10 minutes.
 - A call session is signed for one profile and one round, and expires after 45 minutes.
 - The learner's phone number is never stored; only the conversation ID is kept, so the page can follow the call.
 - Inbound callers can hear a briefing, ask about it, and have a front desk message sent. They cannot touch anyone's saved progress.

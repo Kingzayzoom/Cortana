@@ -1,48 +1,47 @@
-# ElevenLabs setup
+# Browser voice setup
 
-## Local application
+Connecting the in-page voice round to an ElevenLabs agent. For phone calls, see [phone-setup.md](phone-setup.md).
 
-1. Run `npm ci`.
-2. Copy `.env.example` to `.env.local` only if that file does not already exist. Preserve any teammate's configuration.
-3. Set `ELEVENLABS_API_KEY` to the actual secret beginning with `sk_`, not a key ID. Set `ELEVENLABS_AGENT_ID` to the existing agent ID. Enable **Write access for ElevenAgents / Conversational AI (`convai_write`)** on that key; an agent read can succeed while token creation still fails without this permission.
-4. Run `node scripts/prepare-local.mjs`. This adds a random demo access code and cookie signing secret without changing the provider fields. The code is saved in the ignored `.cortana/demo-access-code.txt` file for the demonstrator. Restart Next after changing configuration.
-5. Run `npm run dev -- --port 3100` and open http://localhost:3100.
-6. Run `node scripts/check-agent.mjs` for a read-only account/configuration check. The API key is never printed. Successful reads back up the existing agent configuration under ignored `.cortana/`.
+## 1. Credentials
 
-## Configure the existing agent
+1. Create an ElevenLabs API key with **ElevenAgents write access** (`convai_write`). A key without it can read an agent but can't mint a conversation token, and that only shows up when someone presses Start.
+2. In `.env.local` (copy `.env.example`; don't overwrite a teammate's):
 
-First verify a base real voice session with `node scripts/verify-live-voice.mjs --headed`. Then run `node scripts/configure-agent.mjs` to review the change and `node scripts/configure-agent.mjs --apply` to attach the prepared tools, learning prompt, dynamic variables and compact knowledge document. The script saves the prior configuration and exact patch under `.cortana/`, remembers created tool IDs for retries, and preserves the existing model and voice. Rehearse the full round after applying; configuration alone does not prove model tool use.
+   ```bash
+   ELEVENLABS_API_KEY=sk_...        # the secret, not the key id
+   ELEVENLABS_AGENT_ID=agent_...
+   ```
 
-Use the existing agent model and voice; no additional language or speech provider is required. Confirm its model can invoke tools. Review the original agent configuration before changing it, and preserve unrelated teammate settings.
+3. `node scripts/prepare-local.mjs` adds the session secret and a demo access code (also saved to `.cortana/demo-access-code.txt`). Restart the dev server after changing configuration.
+4. `node scripts/check-agent.mjs` confirms the key can read the agent. It prints the agent's configuration, never the key.
 
-- Apply `agent-prompt.md` to its clinical learning behavior.
-- Register and attach the seven Client tool definitions in `elevenlabs-tools.json`. Set all tools to wait for a result. Names are case-sensitive.
-- Enable user interruptions in conversation flow. Limit the demonstration session to approximately 5 minutes to allow questions while limiting usage.
-- Configure dynamic variables `round_id`, `section_id`, and `lesson_stage` with defaults `dapa-hf-01`, `population`, `briefing`. The browser passes the actual saved checkpoint at start.
-- Use `docs/round-knowledge.md` as the compact knowledge document. Its generated contents come from the same TypeScript content bundle used by the app. Always keep this small document available to the agent (Prompt usage mode), or index it and verify retrieval if using RAG. Source retrieval is not proof of clinical correctness.
-- Restrict answers to this bundle and retain the unsupported-question response. Do not enable browser-selected prompt, voice, or agent overrides.
-- For a private agent, enable the appropriate authentication policy. The app uses a backend-minted WebRTC conversation token, not a signed WebSocket URL.
-- Check provider retention settings. Samantha stores no raw microphone audio, but this does not imply that ElevenLabs stores none.
+## 2. Configure the agent
 
-## Variables
+```bash
+npm run agent:export                      # regenerate tools and knowledge from the code
+node scripts/configure-agent.mjs          # review the change
+node scripts/configure-agent.mjs --apply  # apply it
+```
 
-All of these stay server-side:
+This sets the prompt from `voice-agents/browser/prompt.md`, attaches the 20 client tools and the knowledge document, and adds the dynamic variables the page passes at start (`round_id`, `section_id`, `lesson_stage`, `context_mode`). The agent's model and voice are left as they are. The previous configuration is backed up under `.cortana/`.
 
-| Variable                    | Purpose                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `ELEVENLABS_API_KEY`        | Secret key that can access the selected agent and mint conversation tokens           |
-| `ELEVENLABS_AGENT_ID`       | Single permitted agent                                                               |
-| `SAMANTHA_DEMO_ACCESS_CODE` | Private code, at least 12 characters, required before a paid voice session           |
-| `SAMANTHA_SESSION_SECRET`   | At least 32 random characters; signs demo-profile cookies                            |
-| `SAMANTHA_DATA_DIR`         | Optional local persistent storage path; default `.cortana/`                          |
-| `SAMANTHA_APP_ORIGIN`       | Optional exact external origin for a reverse proxy, e.g. `https://your-demo.example` |
+Also check, in the ElevenLabs dashboard:
 
-No `NEXT_PUBLIC_` secret variables are used. `POST /api/elevenlabs/token` accepts `{ accessCode, runId, consent: true }` and returns `{ token, conversationId }`. The backend performs the provider GET; the browser never sees the server API key. Success and error responses are non-cacheable. The API validates app-session cookies, request origin, access code, run ID and consent. It limits starts to six per profile per minute and forty globally per hour in this single Node process. Those controls are suitable for a private prototype, not a replacement for deployed user authentication and distributed rate limiting.
+- **Authentication** is on for the agent. The app connects with a server-minted WebRTC token, so a public agent isn't needed.
+- **Overrides** from the client are off. The page never needs to change the prompt, voice or first message.
+- **Data retention** suits your use. Samantha stores no audio; that says nothing about what ElevenLabs keeps.
 
-## Verify a real conversation
+## 3. Verify with a real conversation
 
-Click Start → enter the private demo code → Agree & start voice → allow microphone access. Speak, watch input-driven motion, hear the assistant, and watch output-driven motion. Interrupt with “Who was included in that study?”, then ask to continue. Confirm the checkpoint is preserved. Mute and check that the input is actually disabled while output can still animate. Live Pause is hidden. The text preview can still pause. After a disconnect, Retry requests a fresh token and resumes the saved section. End and confirm the browser microphone indicator clears. Reconnect and test repeated clicks.
+Configuration alone doesn't prove the model uses its tools. With `npm run dev -- --port 3100`:
 
-Do not call the integration verified until the account-side tools/grounding and an actual audio session pass this sequence. Missing or rejected credentials do not turn local preview into a live session.
+1. Start the round, enter the demo code, consent, allow the microphone.
+2. Interrupt the briefing with "Who was included in that study?", then ask it to continue. The checkpoint should hold.
+3. Answer the case; the grade must come from the server (the tool call shows in the transcript).
+4. Mute: input stops, output continues. End: the browser's microphone indicator clears. Start again: a new token, resuming the saved section.
 
-Official references: [React SDK](https://elevenlabs.io/docs/eleven-agents/libraries/react), [WebRTC token](https://elevenlabs.io/docs/eleven-agents/api-reference/conversations/get-webrtc-token), [Conversation flow](https://elevenlabs.io/docs/eleven-agents/customization/conversation-flow), [Knowledge-base RAG](https://elevenlabs.io/docs/eleven-agents/customization/knowledge-base/rag), [API authentication](https://elevenlabs.io/docs/api-reference/authentication).
+`node scripts/verify-live-voice.mjs --headed` drives the same sequence in a real browser.
+
+## How the token works
+
+`POST /api/elevenlabs/token` takes `{ accessCode, runId, consent: true }` and returns `{ token, conversationId }`. The server checks the cookie, origin, access code and that `runId` is the profile's current run, then fetches a single-use token from ElevenLabs. The API key never reaches the browser. Limits: 6 starts per profile per minute and 40 per hour overall.

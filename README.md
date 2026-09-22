@@ -1,90 +1,87 @@
 # Samantha
 
-**A voice assistant that calls clinicians.** Samantha phones a physician with their shift briefing, answers questions about it, and can pass a message to the front desk — hands-free, while they drive between hospitals. She answers when you call her, too.
+**Server-Authoritative Medical Assistant for Navigation, Training, Habit-building, and Assessment.**
 
-Live at [cortana.health](https://cortana.health). Built at VT Hacks 2026.
+A voice assistant that calls clinicians. Samantha phones a physician with their shift briefing, answers questions about it, and can pass a message to the front desk, hands-free, while they drive between hospitals. She answers when you call her too.
 
-> Educational prototype. Every patient, unit and briefing is synthetic. No clinical validation, accredited credit, HIPAA compliance, or patient-outcome claim.
+Built at VT Hacks 2026. Formerly named Cortana.
+
+> Educational prototype. Every patient, unit and briefing is synthetic. No clinical validation, accredited credit, HIPAA compliance or patient-outcome claim.
+
+![Samantha's home screen](docs/assets/samantha-desktop.png)
 
 ## The call
 
 Samantha rings and opens with the one thing worth knowing:
 
-> "Good morning, Dr. Alvarez. It's Samantha with your morning briefing — one thing I'd flag on the step-down unit. Is now a good time?"
+> "Hi, it's Samantha with your morning briefing. Dr. Zaybish, one thing I'd flag on the step-down unit before you get in. Is now a good time?"
 
 From there it is a conversation, not a menu:
 
-- **She leads with what changed.** Which patient, what moved, who asked for review and how soon. About twenty seconds, then she asks what you want next rather than reading the whole chart at you.
-- **She answers from the briefing only.** Ask something it does not contain and she says so. Ask what you should do and she declines to advise, then repeats what the briefing records and who requested the review.
-- **You can interrupt her.** Cut in mid-sentence and she acknowledges it, answers what you asked, then offers back the thread you interrupted.
-- **You can pause her.** Say "hold on" and she goes quiet until you say resume — no filling silence, no asking whether you are still there.
-- **She can message the front desk.** "Tell them I'm running twenty minutes late." She reads it back, waits for a yes, and sends it. The address lives on the server, so she cannot be talked into mailing anyone else.
-- **Call her back.** The number answers with the same briefing for anyone who dials it, without touching a learner's saved record.
+- **She leads with what changed.** Which patient, what moved, who asked for review and how soon. About twenty seconds, then she asks what you want next instead of reading the whole chart.
+- **She answers from the briefing only.** Ask something it doesn't contain and she says so. Ask what you should do and she declines to advise, then repeats what the briefing records.
+- **You can interrupt her.** She acknowledges it, answers, then offers back the thread you cut off.
+- **You can pause her.** Say "hold on" and she stays quiet until you say resume.
+- **She can message the front desk.** "Tell them I'm running twenty minutes late." She reads it back, waits for a yes, and sends it. The address lives on the server, so she can't be talked into mailing anyone else.
+- **Call her back.** The number answers anyone who dials it with the same briefing, without touching a learner's saved record.
 
-Everything she says about a patient comes from a briefing this server handed her. She has no freedom to invent a value, and the prompt treats that briefing as data rather than instructions.
-
-## Watching the call
-
-One person holds the phone; everyone else watches the web app. The call page streams the conversation as it is transcribed, labelled speaker by speaker, with a line whenever Samantha acts — loading the briefing, sending the message, asking the server to grade something.
+While one person holds the phone, everyone else can watch the call page: it streams the transcript as it happens, with a line whenever Samantha acts.
 
 ## Also in the app
 
-The same voice, in the browser, teaches a two-minute evidence round: three short sections on one real trial (DAPA-HF, NEJM 2019, and its JAMA diabetes subgroup), then a synthetic case to apply it to. **The answer key never leaves the server.** The agent submits what you said and reads back the verdict it is given; an unclear answer returns a request to clarify rather than a guess.
-
-Practice history, review scheduling and progress ride along behind that, and a call updates the same profile the browser does.
+- **Evidence round.** A two-minute voice lesson on one real trial (DAPA-HF, NEJM 2019, and its JAMA diabetes subgroup), then a synthetic case to apply it to.
+- **Context Feed.** Load a shift scenario, from 15 bundled or your own JSON, and get briefed on it by voice or phone.
+- **Prime.** Three questions a day with spaced review.
+- **Email briefing.** Optional: a read-only Gmail connection summarised each morning.
 
 ## The rule behind the architecture
 
-The model speaks. It never decides.
+**The model speaks. It never decides.**
 
-Grading, scheduling and anything written to a profile are computed on this server from stored state. Scenario text, uploaded briefings and source excerpts are labelled as data that cannot change behaviour or authorise a tool. Phone tool calls must present a shared secret **and** a signed session naming one profile and one round.
+Grades, rewards, review dates and anything written to a profile are computed on this server from stored state. The agents call tools and read back the results. Content given to the model is labelled as data that can't change its behaviour. Phone tool calls need a shared secret **and** a signed session naming one profile and one round.
 
-[docs/architecture.md](docs/architecture.md) has the request path for each surface.
+- [Architecture](docs/architecture.md): layers, request flows, invariants
+- [Source map](src/README.md): what lives where
+- [Security model](docs/security.md): callers, trust boundaries, known gaps
+- [Engineering decisions](docs/decisions.md): the choices a reviewer will ask about
 
 ## Running it
 
+Node 22 or later.
+
 ```bash
 npm ci
+npm run setup:local        # generates local secrets into .env.local
 npm run dev -- --port 3100
 ```
 
-With no credentials at all, the round runs in a clearly labelled text preview: no microphone, no network calls, no pretence of a live connection.
+With no ElevenLabs credentials the round runs as a labelled text preview: no microphone, no network calls.
 
-To make it call a phone, follow **[docs/phone-setup.md](docs/phone-setup.md)** — ElevenLabs, a carrier, the two agents, the environment variables, and every failure we hit with its fix.
+- Browser voice: [docs/elevenlabs-setup.md](docs/elevenlabs-setup.md)
+- Phone calls: [docs/phone-setup.md](docs/phone-setup.md), covering the carrier, the agents, the variables, and every failure we hit with its fix
+- All settings: [.env.example](.env.example)
 
 ## Checks
 
 ```bash
 npm run typecheck && npm run lint && npm run format:check
-npm test          # 229 unit tests
-npm run test:e2e  # 7 Playwright suites, expects a dev server on 3100
-npm run test:a11y # WCAG scan of every view
+npm test            # Vitest: domain, routes, storage, voice controller
+npm run test:e2e    # Playwright, against a dev server on 3100
+npm run test:a11y   # axe WCAG 2.1 AA scan of every view
+npm run check:secrets  # after a build: no server secret in the client bundle
 ```
 
-CI runs all of these on every push and pull request.
+CI runs typecheck, lint, format, unit tests and a build on pushes to `main` and on pull requests.
 
-## Layout
+## Repository
 
 ```
-src/app/api/phone/   placing calls, agent tools, live call status
-src/app/api/learning/  the round: stages, grading, completion
-src/lib/server/      session, storage, phone, email, auth — the authority
-src/lib/content/     briefing library, the round, spoken number forms
-src/components/      views, the WebGL orb, voice controls
-docs/                setup guides, agent prompts, tool contracts
-scripts/             agent configuration and verification tooling
-tests/               unit tests, Playwright suites, fixtures
+src/            the app (see src/README.md)
+voice-agents/   prompts and tool definitions for the three ElevenLabs agents
+scripts/        agent configuration, setup and verification tooling
+docs/           architecture, security, setup guides, feature notes
+demo-data/      the bundled Context Feed scenarios
+supabase/       the email briefing schema
+tests/          Vitest suites, Playwright suites in tests/e2e
+vendor/         the ElevenLabs UI orb, with its licence
 ```
-
-Storage is Upstash Redis in production and local files in development, behind one `withProgress` function that serialises each profile's writes with a distributed lock.
-
-## Documentation
-
-- **[Connecting a phone](docs/phone-setup.md)** — the full replication guide
-- [Architecture](docs/architecture.md) · [tool contracts](docs/tool-contracts.md)
-- [Phone agent prompt](docs/phone-agent-prompt.md) · [browser agent prompt](docs/agent-prompt.md)
-- [ElevenLabs setup](docs/elevenlabs-setup.md) · [verification record](docs/verification.md)
-
-## Name
-
-"Samantha" is a Microsoft trademark for an AI assistant. A rename is planned before any non-demonstration use.

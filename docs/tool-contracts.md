@@ -1,27 +1,41 @@
-# Agent tools and server authority
+# Agent tools
 
-Register all seven tools as **Client** tools. Set **Wait for response / expects_response = true** for every tool and a 20-second timeout. The names and parameter schemas must exactly match `src/lib/validation/contracts.ts`. The JSON file `docs/elevenlabs-tools.json` contains the corresponding provider tool configurations.
+Every tool an agent can call, and what the server does with it. The Zod schemas in `src/lib` are the source of truth; the ElevenLabs definitions in `voice-agents/` are generated from them (`npm run agent:export`). ElevenLabs accepts only a subset of JSON Schema (no `additionalProperties`, no length or format limits), so the exported definitions are looser than what the server enforces.
 
-| Name                | Parameters                                                                                           | Result and authority                                                        |
-| ------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `get_round_context` | `roundId: "dapa-hf-01"`                                                                              | Curated content, citations and checkpoint                                   |
-| `show_stage`        | `stageId`: briefing, challenge or questions; optional `sectionId`: population, finding or limitation | Server validates ordered transitions and saves the checkpoint               |
-| `show_case`         | `caseId: "hf-case-01"`                                                                               | Opens the stored synthetic case after the final briefing                    |
-| `show_evidence`     | `sourceIds`: one or two of dapa-hf and dapa-diabetes                                                 | Opens stored evidence; accepts no arbitrary content                         |
-| `submit_answer`     | Fixed roundId and questionId; actual answer (the app supplies the UUID)                              | Server grades and persists                                                  |
-| `complete_round`    | Fixed roundId (the app supplies the UUID)                                                            | Server requires an answered case and questions stage; only server awards XP |
-| `get_next_review`   | Empty object                                                                                         | Actual saved review date and reason                                         |
+All tools wait for a response, with a 20-second timeout.
 
-The provider export includes the names, fields, requiredness and accepted ID enums. ElevenLabs requires parameter descriptions and does not accept `additionalProperties`, string length/format or item-count constraints in the same form as Zod's full JSON schema. The runtime uses the original strict Zod schemas for all of those checks.
+## Evidence round
 
-The four operations concerning lesson/progress do not trust the model to supply grades, XP, user IDs, or answer keys. Client tools are the transport bridge into the authenticated application backend. These are not direct anonymous provider webhooks. The signed HttpOnly app cookie identifies the demo profile; neither profile IDs nor scores can be chosen in a tool payload.
+Browser: client tools, relayed to `POST /api/learning` with the page's cookie. Phone: webhooks to `/api/phone/tools/:tool`.
 
-Transitions: `ready → briefing(population → finding → limitation) → challenge → feedback → questions → completed`. Repeating the current stage is allowed; skipping ahead or rewinding through late events is rejected. Interruptions leave the current section checkpoint unchanged. Live Pause is hidden; reconnect starts the saved section again. Text preview retains checkpoint pause.
+| Tool                | Arguments                                      | Server behaviour                                                        |
+| ------------------- | ---------------------------------------------- | ----------------------------------------------------------------------- |
+| `get_round_context` | `roundId`                                      | Sections, the synthetic case, sources and the saved checkpoint          |
+| `show_stage`        | `stageId`, optional `sectionId` (browser only) | Moves the checkpoint forward one step; skipping or rewinding is refused |
+| `show_case`         | `caseId` (browser only)                        | Opens the case after the final section                                  |
+| `show_evidence`     | one or two `sourceIds` (browser only)          | Opens stored sources; accepts no free content                           |
+| `submit_answer`     | the learner's words as `answer`                | Grades against the stored key; "clarify" if no single option is named   |
+| `complete_round`    | `roundId`                                      | Requires a graded answer; awards XP once and schedules the review       |
+| `get_next_review`   | none (browser only)                            | The saved review date and reason                                        |
 
-Strict Zod schemas reject extra fields and unknown content IDs. The backend checks run IDs to reject stale events, stores request fingerprints to reject reuse with different payloads, returns the existing grade for a duplicate answer within a run, and grants completion XP once per content round. First completion earns 100 XP; a correct first graded attempt adds 20 XP. Later reviews add practice history without additional completion rewards.
+The model never supplies a request id, profile id, grade or XP. For browser tools the voice controller attaches a request id and reuses it on retry.
 
-Configure the agent's client events for user transcripts, agent responses/corrections, audio, interruption, VAD, and tool events. The installed SDK delivers final message-level `onMessage` records separately from internal tentative output; only the former populate the transcript. The model must invoke submit_answer for spoken grading. Browser buttons and text input reach the same backend function.
+Stage order: `briefing (population → finding → limitation) → challenge → feedback → questions → completed`. Repeating the current stage is allowed, so a reconnect can replay it.
 
-References: [Client tools](https://elevenlabs.io/docs/eleven-agents/customization/tools/client-tools), [Create tool API](https://elevenlabs.io/docs/eleven-agents/api-reference/tools/create), [React SDK](https://elevenlabs.io/docs/eleven-agents/libraries/react).
+## Phone only
 
-The model never generates idempotency UUIDs. The voice controller creates and reuses a UUID for each run, operation and validated semantic payload, then sends it to the strict server API. This fixes observed invalid model-generated UUIDs while preserving authoritative grading and duplicate-reward protection.
+| Tool                 | Arguments                                                     | Server behaviour                                                           |
+| -------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `get_shift_briefing` | none                                                          | One briefing from the library, fixed for the call, with numbers pre-spoken |
+| `get_topics`         | none                                                          | Which topics have a round; the agent offers only those                     |
+| `email_front_desk`   | `reason`, `message`, optional `etaMinutes`, `confirmed: true` | Sends one email to the configured address; 3 per 10 minutes                |
+
+These three are the only tools an inbound (guest) call can use.
+
+## Context Feed
+
+`get_context_summary`, `get_shift_context`, `get_primary_case`, `get_recent_changes`, `get_case_section`, `get_scheduled_events`, `get_hospital_timeline`, `get_education_triggers`. Read-only queries against the profile's active scenario (`lib/context/tools.ts`). Optional `caseId`; `get_case_section` also takes a `section`. Missing facts return a fixed sentence rather than an empty result.
+
+## Prime
+
+`get_prime_session`, `submit_prime_answer`, `get_prime_feedback`, `advance_prime`, `complete_prime` (`lib/prime/tools.ts`). Every call after the first names the `sessionId`, and a call for a session other than today's is refused. See [features/prime.md](features/prime.md).
