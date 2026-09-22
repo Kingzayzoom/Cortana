@@ -99,7 +99,13 @@ if (apply) {
     // Preserve existing tools. Reuse a matching attached tool only after checking its contract.
     let found = saved.tools[name];
     // These IDs were created by this integration, so update their exported contracts.
-    if (found) await api(`tools/${found}`, "PATCH", definition);
+    if (found)
+      // A tool deleted in the ElevenLabs dashboard is recreated below.
+      await api(`tools/${found}`, "PATCH", definition).catch((error) => {
+        if (!String(error.message).includes("(404)")) throw error;
+        ids.delete(found);
+        found = undefined;
+      });
     if (!found) {
       for (const id of existingPrompt.tool_ids ?? []) {
         const attached = await api(`tools/${id}`);
@@ -124,6 +130,16 @@ if (apply) {
     ids.add(found);
     await save();
   }
+  if (
+    saved.knowledge &&
+    !(await api(
+      `knowledge-base/${encodeURIComponent(saved.knowledge.id)}`,
+    ).then(
+      () => true,
+      (error) => !String(error.message).includes("(404)"),
+    ))
+  )
+    saved.knowledge = null;
   if (!saved.knowledge) {
     saved.knowledge = await api("knowledge-base/text", "POST", {
       name: plan.knowledge,
@@ -131,7 +147,17 @@ if (apply) {
     });
     await save();
   }
-  const knowledge = existingPrompt.knowledge_base ?? [];
+  // Documents deleted in the dashboard stay listed on the agent, and ElevenLabs
+  // then rejects the whole update, so only documents that still exist are kept.
+  const knowledge = [];
+  for (const item of existingPrompt.knowledge_base ?? [])
+    if (
+      await api(`knowledge-base/${encodeURIComponent(item.id)}`).then(
+        () => true,
+        (error) => !String(error.message).includes("(404)"),
+      )
+    )
+      knowledge.push(item);
   const patch = {
     conversation_config: {
       agent: {
