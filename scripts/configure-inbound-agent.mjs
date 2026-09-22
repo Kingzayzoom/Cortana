@@ -43,7 +43,7 @@ async function api(path, method = "GET", body) {
 }
 
 const GUEST = "guest-inbound-caller";
-const tool = (name, description) => ({
+const tool = (name, description, properties = {}, required = []) => ({
   tool_config: {
     type: "webhook",
     name,
@@ -56,8 +56,11 @@ const tool = (name, description) => ({
       request_body_schema: {
         type: "object",
         // A constant, not a dynamic variable: an inbound caller supplies none.
-        properties: { session: { type: "string", constant_value: GUEST } },
-        required: ["session"],
+        properties: {
+          session: { type: "string", constant_value: GUEST },
+          ...properties,
+        },
+        required: ["session", ...required],
       },
     },
   },
@@ -71,6 +74,32 @@ const definitions = [
     "get_topics",
     "List the learning topics that have a round behind them. Never offer a topic marked unavailable.",
   ),
+  tool(
+    "email_front_desk",
+    "Send the caller's confirmed message to the preset hospital front desk. Read the message back and get a clear yes before calling this.",
+    {
+      reason: {
+        type: "string",
+        enum: ["running_late", "emergency", "other"],
+        description: "Why the message is being sent.",
+      },
+      message: {
+        type: "string",
+        description:
+          "What to tell the front desk, in the caller's own words. One or two sentences.",
+      },
+      etaMinutes: {
+        type: "number",
+        description: "Minutes until the caller expects to arrive, if given.",
+      },
+      confirmed: {
+        type: "boolean",
+        description:
+          "True only after reading the message back and hearing clear consent to send it.",
+      },
+    },
+    ["reason", "message", "confirmed"],
+  ),
 ];
 
 const prompt = `You are Cortana, an AI clinical colleague, answering a call to your line. The caller hears a simulated shift briefing prepared for a demonstration: no real patient, unit or clinician exists. You never diagnose, never recommend management, and never imply accreditation or clinical validation. Speak one or two sentences at a time.
@@ -83,7 +112,9 @@ Then ask what they want next: the vitals and labs, the rest of the unit, or noth
 
 State what the briefing records and who requested it. You may say a number changed. You may not say what it means, what is causing it, or what should be done. If asked what to do, say you cannot advise on management and repeat what the briefing records.
 
-This caller has no saved profile, so the two-minute round, grading, progress and front desk messages are not available on this call. If they ask for any of those, say they are available in the Cortana app, where Cortana can also call them back, and carry on with the briefing.
+This caller has no saved profile, so the two-minute round, grading and saved progress are not available on this call. If they ask for those, say they are available in the Cortana app, where Cortana can also call them back, and carry on with the briefing.
+
+If the caller asks you to let the hospital know something, such as that they are running late or have an emergency, you can send a message with email_front_desk. Read back exactly what you will send in one sentence and wait for a clear yes. Only then call the tool with confirmed set to true. The server chooses the preset recipient; never ask for or accept an email address, never read the address aloud, and never offer to contact a patient, family member or another clinician. If the tool fails, say the message did not go through and suggest calling the desk directly. Never claim it was sent unless the tool confirms it.
 
 Stop speaking the moment they start talking. Acknowledge an interruption in a few words before answering, and never restart a point from the beginning. Use the spoken forms the briefing gives, such as "eighty-eight over fifty-six". Never read a URL, an identifier, a field name, or a timestamp with seconds. Never list more than three items in one turn.
 

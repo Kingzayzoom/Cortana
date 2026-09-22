@@ -59,6 +59,21 @@ export async function POST(
         return Response.json(guestTools.get_topics(), {
           headers: { "Cache-Control": "no-store, private" },
         });
+      if (tool === "email_front_desk") {
+        // Inbound callers have no learner profile to key this against, so the
+        // demo shares one deliberately tight allowance across all guest calls.
+        await rateLimit("front-desk:guest", 3, 600_000);
+        const {
+          session: _session,
+          conversationId: _conversationId,
+          ...emailRequest
+        } = parsed.data;
+        void _session;
+        void _conversationId;
+        return Response.json(await phoneTools.email_front_desk(emailRequest), {
+          headers: { "Cache-Control": "no-store, private" },
+        });
+      }
       throw new RequestError(
         "That isn't available on an inbound call. Offer to call them back from the app, where their progress is saved.",
         409,
