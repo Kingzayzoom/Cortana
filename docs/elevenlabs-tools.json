@@ -3,7 +3,7 @@
     "tool_config": {
       "type": "client",
       "name": "get_prime_session",
-      "description": "Cortana Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
+      "description": "Samantha Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
       "expects_response": true,
       "response_timeout_secs": 20,
       "parameters": {
@@ -17,7 +17,7 @@
     "tool_config": {
       "type": "client",
       "name": "submit_prime_answer",
-      "description": "Cortana Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
+      "description": "Samantha Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
       "expects_response": true,
       "response_timeout_secs": 20,
       "parameters": {
@@ -45,7 +45,7 @@
     "tool_config": {
       "type": "client",
       "name": "get_prime_feedback",
-      "description": "Cortana Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
+      "description": "Samantha Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
       "expects_response": true,
       "response_timeout_secs": 20,
       "parameters": {
@@ -65,7 +65,7 @@
     "tool_config": {
       "type": "client",
       "name": "complete_prime",
-      "description": "Cortana Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
+      "description": "Samantha Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
       "expects_response": true,
       "response_timeout_secs": 20,
       "parameters": {
@@ -85,7 +85,7 @@
     "tool_config": {
       "type": "client",
       "name": "advance_prime",
-      "description": "Cortana Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
+      "description": "Samantha Prime: get the authoritative session, submit the actual answer for server grading, retrieve feedback, advance after feedback, or complete all three answered questions. Never infer correctness.",
       "expects_response": true,
       "response_timeout_secs": 20,
       "parameters": {

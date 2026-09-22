@@ -78,7 +78,7 @@ const plan = {
   preservedModel: existingPrompt.llm,
   preservedVoice: Boolean(agent.conversation_config.tts.voice_id),
   tools: definitions.map((definition) => definition.tool_config.name),
-  knowledge: "Cortana DAPA-HF 2026-09-19.1",
+  knowledge: "Samantha DAPA-HF 2026-09-19.1",
   backupPath,
 };
 console.log(JSON.stringify(plan, null, 2));
@@ -136,7 +136,7 @@ if (apply) {
     conversation_config: {
       agent: {
         first_message:
-          "Hello, I’m Cortana, your AI learning companion. Let’s take a moment with your briefing.",
+          "Hello, I’m Samantha, your AI learning companion. Let’s take a moment with your briefing.",
         disable_first_message_interruptions: false,
         dynamic_variables: {
           dynamic_variable_placeholders: {

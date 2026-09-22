@@ -11,7 +11,7 @@ export function voiceErrorMessage(message: string, context?: unknown) {
   if (/notreadable|trackstart|device.*use|could not start audio/.test(text))
     return "The microphone is unavailable or in use. Check your audio device, then Retry.";
   if (/notsupported|not supported/.test(text))
-    return "Microphone capture is not supported in this browser environment. Open Cortana in a browser with an available microphone, then Retry.";
+    return "Microphone capture is not supported in this browser environment. Open Samantha in a browser with an available microphone, then Retry.";
   if (/expired|expiry|token.*invalid|invalid.*token/.test(text))
     return "The voice session credential expired. Retry to get a new session token.";
   if (/401|403|unauthori|forbidden|authentication/.test(text))

@@ -22,6 +22,7 @@ import { readActiveScenario } from "@/lib/context/store";
 import { buildPhoneBriefingContext } from "@/lib/context/selectors";
 import { clinician } from "@/lib/content/briefing";
 import { actPrime } from "@/lib/prime/server";
+import { setting } from "@/lib/server/env";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
           "Check the phone number, the demo code and both confirmations.",
       );
     const { accessCode, phoneNumber, mode } = parsed.data;
-    if (!safeEqual(accessCode, process.env.CORTANA_DEMO_ACCESS_CODE!))
+    if (!safeEqual(accessCode, setting("DEMO_ACCESS_CODE")!))
       throw new RequestError("That demo access code is incorrect.", 403);
     const briefing =
       mode === "context"

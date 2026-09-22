@@ -35,8 +35,11 @@ export function config() {
 // Derive a separate AES key from the existing server secret. Rotating the
 // Supabase service key requires users to reconnect Gmail.
 export function tokenKey() {
-  return createHash("sha256")
-    .update("cortana-email-summary-token-v1:")
-    .update(config().serviceKey)
-    .digest();
+  return (
+    createHash("sha256")
+      // Predates the rename; it salts the key for stored tokens, so it must not change.
+      .update("cortana-email-summary-token-v1:")
+      .update(config().serviceKey)
+      .digest()
+  );
 }

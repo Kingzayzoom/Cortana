@@ -10,7 +10,7 @@ import { selectLearningSummary } from "../learning-signals/selectors";
 export const learningSignalPayloadSchema = z
   .object({
     schemaVersion: z.literal("1.0"),
-    source: z.literal("cortana"),
+    source: z.literal("samantha"),
     eventType: z.literal("hcp_learning_signal"),
     timestamp: z.string().datetime(),
     round: z
@@ -52,7 +52,7 @@ export function buildLearningSignalPayload(
   if (!summary.signals.length) return null;
   return learningSignalPayloadSchema.parse({
     schemaVersion: "1.0",
-    source: "cortana",
+    source: "samantha",
     eventType: "hcp_learning_signal",
     timestamp: summary.signals.at(-1)!.timestamp,
     round: {

@@ -4,8 +4,8 @@ import nextEnv from "@next/env";
 nextEnv.loadEnvConfig(process.cwd());
 const names = [
   "ELEVENLABS_API_KEY",
-  "CORTANA_SESSION_SECRET",
-  "CORTANA_DEMO_ACCESS_CODE",
+  "SAMANTHA_SESSION_SECRET",
+  "SAMANTHA_DEMO_ACCESS_CODE",
 ];
 const secrets = names
   .map((name) => [name, process.env[name]])

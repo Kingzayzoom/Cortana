@@ -29,8 +29,8 @@ export function TranscriptPanel() {
               {message.role === "user"
                 ? "User"
                 : message.preview
-                  ? "Cortana · local preview"
-                  : "Cortana"}
+                  ? "Samantha · local preview"
+                  : "Samantha"}
             </span>
             <p>{message.text}</p>
           </div>

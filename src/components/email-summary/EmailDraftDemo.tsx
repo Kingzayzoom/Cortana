@@ -15,7 +15,7 @@ export function EmailDraftDemo() {
   function makeDraft(message = request) {
     if (message.trim().length < 8) {
       setError(
-        "Tell Cortana a little more about the message you want to draft.",
+        "Tell Samantha a little more about the message you want to draft.",
       );
       return;
     }
@@ -44,9 +44,9 @@ export function EmailDraftDemo() {
     <section className="email-draft-panel" aria-labelledby="email-draft-title">
       <div>
         <p className="eyebrow">VOICE DRAFT DEMO</p>
-        <h2 id="email-draft-title">Ask Cortana to draft a message</h2>
+        <h2 id="email-draft-title">Ask Samantha to draft a message</h2>
         <p>
-          Speak or type what you want to say. Cortana prepares an editable
+          Speak or type what you want to say. Samantha prepares an editable
           sample draft on this page. Nothing is sent or saved to Gmail.
         </p>
       </div>

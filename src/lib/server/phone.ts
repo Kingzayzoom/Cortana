@@ -21,6 +21,7 @@ import { briefingFor, clinician, notInBriefing } from "../content/briefings";
 import { topics } from "../content/topics";
 import { frontDeskRequest, notifyFrontDesk } from "./email";
 import type { Run } from "../learning/types";
+import { setting } from "./env";
 
 // A phone round runs the same lesson as the browser, but ElevenLabs reaches this
 // server directly: a phone has no browser to host client tools. Each call carries
@@ -30,7 +31,7 @@ const SESSION_TTL_MS = 45 * 60 * 1000;
 // Plivo, SignalWire, …) arrives as a SIP trunk. Same request, different path.
 const callEndpoint = () =>
   `https://api.elevenlabs.io/v1/convai/${
-    process.env.CORTANA_PHONE_PROVIDER === "sip" ? "sip-trunk" : "twilio"
+    setting("PHONE_PROVIDER") === "sip" ? "sip-trunk" : "twilio"
   }/outbound-call`;
 
 export function phoneConfigured() {
@@ -38,9 +39,9 @@ export function phoneConfigured() {
     process.env.ELEVENLABS_API_KEY &&
     process.env.ELEVENLABS_PHONE_AGENT_ID &&
     process.env.ELEVENLABS_PHONE_NUMBER_ID &&
-    (process.env.CORTANA_PHONE_TOOL_SECRET?.length ?? 0) >= 32 &&
-    (process.env.CORTANA_DEMO_ACCESS_CODE?.length ?? 0) >= 12 &&
-    (process.env.CORTANA_SESSION_SECRET?.length ?? 0) >= 32,
+    (setting("PHONE_TOOL_SECRET")?.length ?? 0) >= 32 &&
+    (setting("DEMO_ACCESS_CODE")?.length ?? 0) >= 12 &&
+    (setting("SESSION_SECRET")?.length ?? 0) >= 32,
   );
 }
 
@@ -87,7 +88,7 @@ export async function readPhoneSession(token: string) {
 
 // Proves a tool request came from the configured agent, not the open internet.
 export function assertToolSecret(request: Request) {
-  const secret = process.env.CORTANA_PHONE_TOOL_SECRET;
+  const secret = setting("PHONE_TOOL_SECRET");
   if (
     !secret ||
     !safeEqual(request.headers.get("authorization") ?? "", `Bearer ${secret}`)

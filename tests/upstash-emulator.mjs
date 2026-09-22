@@ -1,5 +1,5 @@
 // Minimal local stand-in for the Upstash Redis REST API, covering only the
-// commands Cortana uses. For tests and local runs; never for real data.
+// commands Samantha uses. For tests and local runs; never for real data.
 //   node tests/upstash-emulator.mjs [port]   (defaults to 8079)
 import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";

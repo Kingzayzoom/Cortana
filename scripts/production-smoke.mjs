@@ -13,7 +13,7 @@ await page.locator("canvas").waitFor();
 await page.waitForTimeout(1200);
 await mkdir("docs/assets", { recursive: true });
 await page.screenshot({
-  path: "docs/assets/cortana-desktop.png",
+  path: "docs/assets/samantha-desktop.png",
   fullPage: true,
 });
 await page.getByRole("button", { name: "Explore in text mode" }).click();
@@ -33,7 +33,7 @@ await mobile.goto("http://localhost:3101");
 await mobile.locator("canvas").waitFor();
 await mobile.waitForTimeout(800);
 await mobile.screenshot({
-  path: "docs/assets/cortana-mobile.png",
+  path: "docs/assets/samantha-mobile.png",
   fullPage: true,
 });
 console.log(

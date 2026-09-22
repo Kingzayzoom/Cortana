@@ -51,7 +51,7 @@ describe("mock draft voice prompt", () => {
     render(<VoiceDraftPrompt onMessage={onMessage} />);
     act(() =>
       fireEvent.click(
-        screen.getByRole("button", { name: "Ask Cortana to draft by voice" }),
+        screen.getByRole("button", { name: "Ask Samantha to draft by voice" }),
       ),
     );
     expect(speak).toHaveBeenCalledWith(
@@ -78,7 +78,7 @@ describe("mock draft voice prompt", () => {
     expect(
       (
         screen.getByRole("button", {
-          name: "Ask Cortana to draft by voice",
+          name: "Ask Samantha to draft by voice",
         }) as HTMLButtonElement
       ).disabled,
     ).toBe(true);
@@ -129,7 +129,7 @@ describe("mock draft voice prompt", () => {
     render(<VoiceDraftPrompt onMessage={onMessage} />);
     expect(await screen.findByText(/short recording to Gemini/)).toBeTruthy();
     fireEvent.click(
-      screen.getByRole("button", { name: "Ask Cortana to draft by voice" }),
+      screen.getByRole("button", { name: "Ask Samantha to draft by voice" }),
     );
     fireEvent.click(
       await screen.findByRole("button", { name: "Stop listening" }),

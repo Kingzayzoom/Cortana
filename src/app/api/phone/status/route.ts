@@ -63,14 +63,14 @@ export async function GET(request: Request) {
       }[];
     } | null;
     // The room watches the call on screen while one person holds the phone,
-    // so the page gets the words plus a note when Cortana acts on a request.
+    // so the page gets the words plus a note when Samantha acts on a request.
     const transcript = (body?.transcript ?? []).flatMap((line, index) => {
       const rows = [];
       const text = line.message?.trim();
       if (text)
         rows.push({
           id: `${index}-said`,
-          role: line.role === "agent" ? "cortana" : "caller",
+          role: line.role === "agent" ? "samantha" : "caller",
           text,
         });
       for (const call of line.tool_calls ?? [])

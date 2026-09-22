@@ -8,7 +8,7 @@ import { RequestError } from "./errors";
 const AUTHORIZE = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN = "https://oauth2.googleapis.com/token";
 const ISSUERS = ["https://accounts.google.com", "accounts.google.com"];
-const OAUTH_COOKIE = "cortana_oauth";
+const OAUTH_COOKIE = "samantha_oauth";
 const googleVerifier = new OAuth2Client();
 
 export function googleConfigured() {

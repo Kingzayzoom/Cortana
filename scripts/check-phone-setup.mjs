@@ -2,14 +2,15 @@
 //   node scripts/check-phone-setup.mjs --url=https://your-app.vercel.app
 // Nothing is created or changed; secrets are never printed.
 import nextEnv from "@next/env";
+import { setting } from "./settings.mjs";
 nextEnv.loadEnvConfig(process.cwd());
 const url = (
   process.argv.find((a) => a.startsWith("--url="))?.slice(6) ||
-  process.env.CORTANA_PUBLIC_URL ||
+  setting("PUBLIC_URL") ||
   ""
 ).replace(/\/$/, "");
 const apiKey = process.env.ELEVENLABS_API_KEY;
-const toolSecret = process.env.CORTANA_PHONE_TOOL_SECRET;
+const toolSecret = setting("PHONE_TOOL_SECRET");
 const lines = [];
 const report = (ok, label, hint = "") =>
   lines.push(
@@ -19,7 +20,7 @@ const report = (ok, label, hint = "") =>
 report(Boolean(apiKey), "ELEVENLABS_API_KEY is set locally");
 report(
   Boolean(toolSecret && toolSecret.length >= 32),
-  "CORTANA_PHONE_TOOL_SECRET is set locally",
+  "SAMANTHA_PHONE_TOOL_SECRET is set locally",
   toolSecret ? "" : "Run: node scripts/prepare-local.mjs",
 );
 
@@ -44,7 +45,7 @@ if (apiKey) {
       : "ElevenLabs dashboard -> Phone Numbers -> Import from Twilio",
   );
   const agents = (await api("agents?page_size=30"))?.agents ?? [];
-  const phoneAgent = agents.find((a) => a.name === "Cortana Phone");
+  const phoneAgent = agents.find((a) => a.name === "Samantha Phone");
   report(
     Boolean(phoneAgent),
     "Phone agent exists in ElevenLabs",
@@ -62,8 +63,8 @@ if (!url) {
   );
 } else {
   const headers = { "content-type": "application/json" };
-  if (process.env.CORTANA_VERCEL_BYPASS)
-    headers["x-vercel-protection-bypass"] = process.env.CORTANA_VERCEL_BYPASS;
+  if (setting("VERCEL_BYPASS"))
+    headers["x-vercel-protection-bypass"] = setting("VERCEL_BYPASS");
   const probe = async (secret) =>
     fetch(`${url}/api/phone/tools/get_round_context`, {
       method: "POST",
@@ -87,7 +88,7 @@ if (!url) {
     !blocked,
     "ElevenLabs can reach the site without a login",
     blocked
-      ? "Vercel -> Settings -> Deployment Protection: allow production, or set CORTANA_VERCEL_BYPASS to an Automation Bypass secret"
+      ? "Vercel -> Settings -> Deployment Protection: allow production, or set SAMANTHA_VERCEL_BYPASS to an Automation Bypass secret"
       : "",
   );
   if (!blocked) {
@@ -101,9 +102,9 @@ if (!url) {
       report(
         authorised.status === 401 &&
           /not recognized|expired/i.test(authorised.text),
-        "The deployed CORTANA_PHONE_TOOL_SECRET matches this machine's",
+        "The deployed SAMANTHA_PHONE_TOOL_SECRET matches this machine's",
         /not authorized/i.test(authorised.text)
-          ? "Set the same CORTANA_PHONE_TOOL_SECRET in Vercel and redeploy."
+          ? "Set the same SAMANTHA_PHONE_TOOL_SECRET in Vercel and redeploy."
           : "",
       );
     }

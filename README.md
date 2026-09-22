@@ -1,6 +1,6 @@
-# Cortana
+# Samantha
 
-**A voice assistant that calls clinicians.** Cortana phones a physician with their shift briefing, answers questions about it, and can pass a message to the front desk — hands-free, while they drive between hospitals. She answers when you call her, too.
+**A voice assistant that calls clinicians.** Samantha phones a physician with their shift briefing, answers questions about it, and can pass a message to the front desk — hands-free, while they drive between hospitals. She answers when you call her, too.
 
 Live at [cortana.health](https://cortana.health). Built at VT Hacks 2026.
 
@@ -8,9 +8,9 @@ Live at [cortana.health](https://cortana.health). Built at VT Hacks 2026.
 
 ## The call
 
-Cortana rings and opens with the one thing worth knowing:
+Samantha rings and opens with the one thing worth knowing:
 
-> "Good morning, Dr. Alvarez. It's Cortana with your morning briefing — one thing I'd flag on the step-down unit. Is now a good time?"
+> "Good morning, Dr. Alvarez. It's Samantha with your morning briefing — one thing I'd flag on the step-down unit. Is now a good time?"
 
 From there it is a conversation, not a menu:
 
@@ -25,7 +25,7 @@ Everything she says about a patient comes from a briefing this server handed her
 
 ## Watching the call
 
-One person holds the phone; everyone else watches the web app. The call page streams the conversation as it is transcribed, labelled speaker by speaker, with a line whenever Cortana acts — loading the briefing, sending the message, asking the server to grade something.
+One person holds the phone; everyone else watches the web app. The call page streams the conversation as it is transcribed, labelled speaker by speaker, with a line whenever Samantha acts — loading the briefing, sending the message, asking the server to grade something.
 
 ## Also in the app
 
@@ -87,4 +87,4 @@ Storage is Upstash Redis in production and local files in development, behind on
 
 ## Name
 
-"Cortana" is a Microsoft trademark for an AI assistant. A rename is planned before any non-demonstration use.
+"Samantha" is a Microsoft trademark for an AI assistant. A rename is planned before any non-demonstration use.

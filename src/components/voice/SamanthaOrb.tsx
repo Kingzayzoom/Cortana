@@ -109,7 +109,7 @@ export function OrbVisual({
       className="orb-stage"
       ref={wrapper}
       data-testid="orb"
-      aria-label="Cortana voice visualization"
+      aria-label="Samantha voice visualization"
       role="img"
       data-motion-speed={motionSpeed.toFixed(2)}
     >
@@ -139,7 +139,7 @@ export function OrbVisual({
     </div>
   );
 }
-export function CortanaOrb() {
+export function SamanthaOrb() {
   const voice = useVoice(),
     { data } = useLearning();
   const [systemReduced, setSystemReduced] = useState(false);

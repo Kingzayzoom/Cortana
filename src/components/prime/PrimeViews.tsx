@@ -91,7 +91,7 @@ export function PrimeHome() {
   return (
     <div className="prime-home">
       <header className="prime-hero">
-        <p className="eyebrow">CORTANA PRIME</p>
+        <p className="eyebrow">SAMANTHA PRIME</p>
         <h1>
           2 minutes
           <br />
@@ -169,18 +169,18 @@ export function PrimeHome() {
               }
               onClick={() => void start(true)}
             >
-              Start with Cortana
+              Start with Samantha
             </Button>
           )}
         </div>
         {!s?.completedAt && <LanguagePicker />}
         <p className="small muted">
-          Educational practice grounded in Cortana&apos;s DAPA-HF sources.
+          Educational practice grounded in Samantha&apos;s DAPA-HF sources.
         </p>
       </section>
       <div className="prime-bottom-line">
         <span>
-          <strong>{prime.data?.streak ?? 0}</strong> day Cortana streak
+          <strong>{prime.data?.streak ?? 0}</strong> day Samantha streak
         </span>
         <span>
           <strong>{prime.data?.stats.questions ?? 0}</strong> questions
@@ -300,7 +300,7 @@ export function PrimeSessionView() {
           }}
           className="brand"
         >
-          cortana<span className="brand-period">.</span>
+          samantha<span className="brand-period">.</span>
         </Link>
         <span className="eyebrow">PRIME</span>
         <button
@@ -363,7 +363,7 @@ export function PrimeSessionView() {
             ))}
           </div>
           <div className="prime-bottom-line">
-            <span>{prime.data!.streak} day Cortana streak</span>
+            <span>{prime.data!.streak} day Samantha streak</span>
             <span>+{s.xp} XP saved</span>
           </div>
           <Button onClick={leave}>
@@ -517,11 +517,11 @@ export function PrimeSessionView() {
         (voice.connection === "connected" || voice.working || voice.error) && (
           <aside
             className="prime-voice"
-            aria-label="Cortana Prime conversation"
+            aria-label="Samantha Prime conversation"
           >
             <div>
               <strong>
-                {voice.working ? "Connecting to Cortana…" : "Cortana Prime"}
+                {voice.working ? "Connecting to Samantha…" : "Samantha Prime"}
               </strong>
               <button className="text-button" onClick={voice.mute}>
                 {voice.muted ? "Unmute" : "Mute"}
@@ -534,7 +534,7 @@ export function PrimeSessionView() {
             <div role="log" aria-label="Prime voice transcript">
               {voice.messages.slice(-4).map((m) => (
                 <p key={m.id}>
-                  <strong>{m.role === "user" ? "You" : "Cortana"}</strong>{" "}
+                  <strong>{m.role === "user" ? "You" : "Samantha"}</strong>{" "}
                   {m.text}
                 </p>
               ))}
@@ -553,7 +553,7 @@ export function PrimeSessionView() {
               <input
                 name="message"
                 className="input"
-                aria-label="Message Cortana Prime"
+                aria-label="Message Samantha Prime"
                 placeholder="Speak, or type your answer…"
                 disabled={voice.connection !== "connected"}
               />

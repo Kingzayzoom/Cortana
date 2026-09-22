@@ -1,5 +1,6 @@
 import { Redis } from "@upstash/redis";
 import { RequestError } from "./errors";
+import { setting } from "./env";
 
 // Shared storage for serverless hosting (Vercel). Each Vercel function instance
 // has its own memory and a read-only file system, so progress, locks and rate
@@ -46,7 +47,12 @@ export function redis(): Redis | null {
 
 // Lets preview and production deployments share one database without mixing data.
 export const redisKey = (...parts: string[]) =>
-  [process.env.CORTANA_REDIS_PREFIX || "cortana", ...parts].join(":");
+  [
+    // The storage namespace predates the rename. Changing it would make every
+    // saved profile unreachable, so it stays unless a deployment sets its own.
+    setting("REDIS_PREFIX") || "cortana",
+    ...parts,
+  ].join(":");
 
 export const onVercel = () => Boolean(process.env.VERCEL);
 
@@ -55,7 +61,7 @@ export async function database<T>(call: () => Promise<T>): Promise<T> {
   try {
     return await call();
   } catch (error) {
-    console.error("[cortana] Redis request failed", error);
+    console.error("[samantha] Redis request failed", error);
     throw new RequestError(
       "Progress storage is unavailable. Please retry in a moment.",
       503,

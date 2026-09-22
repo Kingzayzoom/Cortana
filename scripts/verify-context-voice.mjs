@@ -1,6 +1,7 @@
 import { chromium, expect } from "@playwright/test";
 import nextEnv from "@next/env";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { setting } from "./settings.mjs";
 nextEnv.loadEnvConfig(process.cwd());
 const browser = await chromium.launch({
   args: [
@@ -28,14 +29,14 @@ page.on("response", async (response) => {
 });
 try {
   await page.goto(
-    (process.env.CORTANA_TEST_URL || "http://localhost:3102") + "/context",
+    (setting("TEST_URL") || "http://localhost:3102") + "/context",
   );
   await page
     .getByRole("button", { name: "Start briefing", exact: true })
     .click();
   await page
     .getByLabel("Demo access code", { exact: true })
-    .fill(process.env.CORTANA_DEMO_ACCESS_CODE);
+    .fill(setting("DEMO_ACCESS_CODE"));
   await page.getByRole("button", { name: "Agree & start voice" }).click();
   await page.locator(".status-live").waitFor({ timeout: 40000 });
   console.log("Connected to ElevenLabs; checking live context tools.");
@@ -56,13 +57,13 @@ try {
     )
     .toBe(true);
   await expect(
-    page.getByRole("log", { name: "Conversation between you and Cortana" }),
+    page.getByRole("log", { name: "Conversation between you and Samantha" }),
   ).toContainText(/Zabish|synthetic/i, { timeout: 45000 });
   const input = page.getByRole("textbox", {
     name: "Question about this round",
   });
   const answers = page.locator(".conversation-turn").filter({
-    has: page.locator(".conversation-speaker", { hasText: /^Cortana$/ }),
+    has: page.locator(".conversation-speaker", { hasText: /^Samantha$/ }),
   });
   const sequence = [];
   for (const step of [
@@ -123,7 +124,7 @@ try {
     .getByRole("button", { name: "Send question", exact: true })
     .click();
   await expect(
-    page.getByRole("log", { name: "Conversation between you and Cortana" }),
+    page.getByRole("log", { name: "Conversation between you and Samantha" }),
   ).toContainText("The supplied scenario does not include that information.", {
     timeout: 45000,
   });

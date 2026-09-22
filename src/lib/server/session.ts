@@ -9,17 +9,20 @@ import path from "node:path";
 import { cookies } from "next/headers";
 import { RequestError } from "./errors";
 import { database, onVercel, redis, redisKey } from "./redis";
+import { setting } from "./env";
 export { RequestError };
+// Local state from before the rename lives here, including the IDs of live
+// ElevenLabs agents, so the folder keeps its name rather than being orphaned.
 export const dataDirectory = () =>
-  process.env.CORTANA_DATA_DIR || path.join(process.cwd(), ".cortana");
+  setting("DATA_DIR") || path.join(process.cwd(), ".cortana");
 let secretPromise: Promise<string> | undefined;
 async function secret() {
-  if (process.env.CORTANA_SESSION_SECRET)
-    return process.env.CORTANA_SESSION_SECRET;
+  const configured = setting("SESSION_SECRET");
+  if (configured) return configured;
   // Serverless instances can't share a generated key file.
   if (onVercel())
     throw new RequestError(
-      "CORTANA_SESSION_SECRET is not set on this deployment.",
+      "SAMANTHA_SESSION_SECRET is not set on this deployment.",
       503,
     );
   secretPromise ??= (async () => {
@@ -58,6 +61,11 @@ export async function hmac(value: string) {
 const PROFILE_ID = /^(?:[0-9a-f-]{36}|g-\d{1,64})$/;
 export const isAccount = (id: string) => id.startsWith("g-");
 
+const SESSION_COOKIE = "samantha_session";
+// Issued before the rename. Still accepted until it expires, so nobody is
+// signed out and no saved profile is orphaned by the new name.
+const LEGACY_SESSION_COOKIE = "cortana_session";
+
 const sessionCookie = {
   httpOnly: true,
   // Lax rather than strict: Google's callback arrives as a cross-site GET and
@@ -71,7 +79,7 @@ const sessionCookie = {
 export async function setProfileSession(id: string) {
   if (!PROFILE_ID.test(id)) throw new RequestError("Invalid profile.", 400);
   (await cookies()).set(
-    "cortana_session",
+    SESSION_COOKIE,
     `${id}.${await sign(id)}`,
     sessionCookie,
   );
@@ -79,12 +87,15 @@ export async function setProfileSession(id: string) {
 }
 
 export async function clearProfileSession() {
-  (await cookies()).delete({ name: "cortana_session", path: "/" });
+  const jar = await cookies();
+  jar.delete({ name: SESSION_COOKIE, path: "/" });
+  jar.delete({ name: LEGACY_SESSION_COOKIE, path: "/" });
 }
 
 export async function profileSession(create = false): Promise<string | null> {
   const jar = await cookies();
-  const value = jar.get("cortana_session")?.value;
+  const value =
+    jar.get(SESSION_COOKIE)?.value ?? jar.get(LEGACY_SESSION_COOKIE)?.value;
   if (value) {
     const [id, signature] = value.split(".");
     if (
@@ -96,7 +107,7 @@ export async function profileSession(create = false): Promise<string | null> {
   }
   if (!create) return null;
   const id = randomUUID();
-  jar.set("cortana_session", `${id}.${await sign(id)}`, sessionCookie);
+  jar.set(SESSION_COOKIE, `${id}.${await sign(id)}`, sessionCookie);
   return id;
 }
 // Next can construct request.url with the 0.0.0.0 bind address. The browser's
@@ -106,12 +117,11 @@ function expectedOrigins(request: Request) {
   const protocol =
     request.headers.get("x-forwarded-proto")?.split(",")[0].trim() ||
     new URL(request.url).protocol.replace(":", "");
-  return process.env.CORTANA_APP_ORIGIN
+  const configured = setting("APP_ORIGIN");
+  return configured
     ? // A browser's Origin header never has a trailing slash, but a pasted URL
       // usually does; tolerate it rather than rejecting every request.
-      process.env.CORTANA_APP_ORIGIN.split(",").map((o) =>
-        o.trim().replace(/\/+$/, ""),
-      )
+      configured.split(",").map((o) => o.trim().replace(/\/+$/, ""))
     : [`${protocol}://${request.headers.get("host")}`];
 }
 
@@ -128,7 +138,7 @@ export function assertOrigin(request: Request) {
   const expected = expectedOrigins(request);
   if (!origin || !expected.includes(origin))
     throw new RequestError(
-      "This request must come from the Cortana workspace.",
+      "This request must come from the Samantha workspace.",
       403,
     );
 }
@@ -171,11 +181,11 @@ export async function readBody(request: Request) {
 }
 export function safeError(error: unknown) {
   if (error instanceof RequestError) {
-    if (error.status >= 500) console.error("[cortana]", error.message);
+    if (error.status >= 500) console.error("[samantha]", error.message);
     return Response.json({ error: error.message }, { status: error.status });
   }
   // The response stays generic; the server log keeps the detail for debugging.
-  console.error("[cortana] unexpected server error", error);
+  console.error("[samantha] unexpected server error", error);
   return Response.json(
     { error: "The request could not be completed. Please try again." },
     { status: 500 },
@@ -185,7 +195,7 @@ export function voiceConfigured() {
   return Boolean(
     process.env.ELEVENLABS_API_KEY &&
     process.env.ELEVENLABS_AGENT_ID &&
-    (process.env.CORTANA_DEMO_ACCESS_CODE?.length ?? 0) >= 12 &&
-    (process.env.CORTANA_SESSION_SECRET?.length ?? 0) >= 32,
+    (setting("DEMO_ACCESS_CODE")?.length ?? 0) >= 12 &&
+    (setting("SESSION_SECRET")?.length ?? 0) >= 32,
   );
 }

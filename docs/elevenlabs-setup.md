@@ -22,20 +22,20 @@ Use the existing agent model and voice; no additional language or speech provide
 - Use `docs/round-knowledge.md` as the compact knowledge document. Its generated contents come from the same TypeScript content bundle used by the app. Always keep this small document available to the agent (Prompt usage mode), or index it and verify retrieval if using RAG. Source retrieval is not proof of clinical correctness.
 - Restrict answers to this bundle and retain the unsupported-question response. Do not enable browser-selected prompt, voice, or agent overrides.
 - For a private agent, enable the appropriate authentication policy. The app uses a backend-minted WebRTC conversation token, not a signed WebSocket URL.
-- Check provider retention settings. Cortana stores no raw microphone audio, but this does not imply that ElevenLabs stores none.
+- Check provider retention settings. Samantha stores no raw microphone audio, but this does not imply that ElevenLabs stores none.
 
 ## Variables
 
 All of these stay server-side:
 
-| Variable                   | Purpose                                                                              |
-| -------------------------- | ------------------------------------------------------------------------------------ |
-| `ELEVENLABS_API_KEY`       | Secret key that can access the selected agent and mint conversation tokens           |
-| `ELEVENLABS_AGENT_ID`      | Single permitted agent                                                               |
-| `CORTANA_DEMO_ACCESS_CODE` | Private code, at least 12 characters, required before a paid voice session           |
-| `CORTANA_SESSION_SECRET`   | At least 32 random characters; signs demo-profile cookies                            |
-| `CORTANA_DATA_DIR`         | Optional local persistent storage path; default `.cortana/`                          |
-| `CORTANA_APP_ORIGIN`       | Optional exact external origin for a reverse proxy, e.g. `https://your-demo.example` |
+| Variable                    | Purpose                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `ELEVENLABS_API_KEY`        | Secret key that can access the selected agent and mint conversation tokens           |
+| `ELEVENLABS_AGENT_ID`       | Single permitted agent                                                               |
+| `SAMANTHA_DEMO_ACCESS_CODE` | Private code, at least 12 characters, required before a paid voice session           |
+| `SAMANTHA_SESSION_SECRET`   | At least 32 random characters; signs demo-profile cookies                            |
+| `SAMANTHA_DATA_DIR`         | Optional local persistent storage path; default `.cortana/`                          |
+| `SAMANTHA_APP_ORIGIN`       | Optional exact external origin for a reverse proxy, e.g. `https://your-demo.example` |
 
 No `NEXT_PUBLIC_` secret variables are used. `POST /api/elevenlabs/token` accepts `{ accessCode, runId, consent: true }` and returns `{ token, conversationId }`. The backend performs the provider GET; the browser never sees the server API key. Success and error responses are non-cacheable. The API validates app-session cookies, request origin, access code, run ID and consent. It limits starts to six per profile per minute and forty globally per hour in this single Node process. Those controls are suitable for a private prototype, not a replacement for deployed user authentication and distributed rate limiting.
 

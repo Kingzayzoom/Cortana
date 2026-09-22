@@ -45,6 +45,6 @@ This rehearsal used typed controls in a real voice session. The SDK interruption
 
 ElevenLabs voice, audio-reactive orb, server grading, evidence drawer, event persistence, learning metrics, reinforcement rules and local supported-round recommendation are working.
 
-Impiricus is a proposed integration: factual public product roles, actual Cortana activity visualization and a locally downloaded schema 1.0 payload. There is no production Impiricus connection, private data, agreed external contract or partnership claim.
+Impiricus is a proposed integration: factual public product roles, actual Samantha activity visualization and a locally downloaded schema 1.0 payload. There is no production Impiricus connection, private data, agreed external contract or partnership claim.
 
-Snapshots: docs/assets/cortana-desktop.png, docs/assets/cortana-mobile.png, docs/assets/learning-signal-bridge-desktop.png and docs/assets/learning-signal-bridge-mobile.png. The bridge screenshots contain actual automated preview interactions, not inserted sample metrics; their short duration reflects the speed of that test.
+Snapshots: docs/assets/samantha-desktop.png, docs/assets/samantha-mobile.png, docs/assets/learning-signal-bridge-desktop.png and docs/assets/learning-signal-bridge-mobile.png. The bridge screenshots contain actual automated preview interactions, not inserted sample metrics; their short duration reflects the speed of that test.

@@ -45,7 +45,7 @@ afterEach(cleanup);
 
 it("renders actual turns and applies a correction without adding a duplicate", () => {
   const view = render(<LiveConversationPanel active />);
-  expect(screen.getAllByText("Cortana")).toHaveLength(1);
+  expect(screen.getAllByText("Samantha")).toHaveLength(1);
   state.voice.messages = [
     { id: "first", role: "assistant", text: "The trial included adults." },
   ];

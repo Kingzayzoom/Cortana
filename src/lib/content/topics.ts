@@ -1,4 +1,4 @@
-// What Cortana may quiz on. A topic without a round has no questions, so the
+// What Samantha may quiz on. A topic without a round has no questions, so the
 // agent offers only the available ones instead of inventing content.
 import { ROUND_ID, round } from "./round";
 

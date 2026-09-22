@@ -1,6 +1,7 @@
 import { chromium, expect } from "@playwright/test";
 import env from "@next/env";
 import { mkdir, writeFile } from "node:fs/promises";
+import { setting } from "./settings.mjs";
 env.loadEnvConfig(process.cwd());
 const browser = await chromium.launch({
   args: [
@@ -10,7 +11,7 @@ const browser = await chromium.launch({
 });
 const context = await browser.newContext({
   permissions: ["microphone"],
-  baseURL: process.env.CORTANA_TEST_URL || "http://localhost:3102",
+  baseURL: setting("TEST_URL") || "http://localhost:3102",
 });
 const page = await context.newPage();
 page.setDefaultTimeout(15000);
@@ -22,21 +23,19 @@ page.on("response", (r) => {
     calls.push({ tool: r.url().split("/").at(-1), status: r.status() });
 });
 const send = async (text) => {
-  await page.getByLabel("Message Cortana Prime").fill(text);
+  await page.getByLabel("Message Samantha Prime").fill(text);
   await page.getByRole("button", { name: "Send", exact: true }).click();
 };
 try {
-  await page.goto(
-    (process.env.CORTANA_TEST_URL || "http://localhost:3102") + "/prime",
-  );
+  await page.goto((setting("TEST_URL") || "http://localhost:3102") + "/prime");
   await page
-    .getByRole("button", { name: "Start with Cortana", exact: true })
+    .getByRole("button", { name: "Start with Samantha", exact: true })
     .click();
   await page
     .getByLabel("Demo access code", { exact: true })
-    .fill(process.env.CORTANA_DEMO_ACCESS_CODE);
+    .fill(setting("DEMO_ACCESS_CODE"));
   await page.getByRole("button", { name: "Agree & start voice" }).click();
-  await expect(page.getByLabel("Message Cortana Prime")).toBeEnabled({
+  await expect(page.getByLabel("Message Samantha Prime")).toBeEnabled({
     timeout: 40000,
   });
   await page.getByRole("button", { name: "Mute", exact: true }).click();

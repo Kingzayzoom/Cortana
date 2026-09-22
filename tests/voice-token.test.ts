@@ -22,8 +22,8 @@ vi.mock("../src/lib/server/store", () => ({
 beforeEach(() => {
   vi.stubEnv("ELEVENLABS_API_KEY", "sk_test_secret_never_return");
   vi.stubEnv("ELEVENLABS_AGENT_ID", "agent_private_config");
-  vi.stubEnv("CORTANA_DEMO_ACCESS_CODE", "private-demo-code");
-  vi.stubEnv("CORTANA_SESSION_SECRET", "s".repeat(48));
+  vi.stubEnv("SAMANTHA_DEMO_ACCESS_CODE", "private-demo-code");
+  vi.stubEnv("SAMANTHA_SESSION_SECRET", "s".repeat(48));
   vi.stubGlobal("fetch", vi.fn());
   state.session = "profile-1";
 });

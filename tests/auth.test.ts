@@ -70,12 +70,12 @@ const tokenResponds = (body: unknown, ok = true) =>
 
 beforeEach(async () => {
   jar.store.clear();
-  vi.stubEnv("CORTANA_SESSION_SECRET", "s".repeat(48));
+  vi.stubEnv("SAMANTHA_SESSION_SECRET", "s".repeat(48));
   vi.stubEnv("GOOGLE_CLIENT_ID", CLIENT_ID);
   vi.stubEnv("GOOGLE_CLIENT_SECRET", "google-client-secret-never-returned");
   vi.stubEnv(
-    "CORTANA_DATA_DIR",
-    await mkdtemp(path.join(tmpdir(), "cortana-auth-")),
+    "SAMANTHA_DATA_DIR",
+    await mkdtemp(path.join(tmpdir(), "samantha-auth-")),
   );
   googleAuth.verifyIdToken.mockReset();
   googleAuth.verifyIdToken.mockImplementation(
@@ -222,7 +222,7 @@ describe("profile linking", () => {
     picture: null,
   };
   const file = (id: string) =>
-    path.join(process.env.CORTANA_DATA_DIR!, `${id}.json`);
+    path.join(process.env.SAMANTHA_DATA_DIR!, `${id}.json`);
 
   it("carries anonymous progress into the account on first sign-in", async () => {
     const anonymous = "11111111-1111-4111-8111-111111111111";
@@ -276,7 +276,7 @@ describe("profile linking", () => {
   it("signs the account cookie so a profile id cannot be forged", async () => {
     await setProfileSession(accountId(account.subject));
     expect(await profileSession()).toBe("g-1098765432100");
-    jar.store.set("cortana_session", "g-999999.deadbeef");
+    jar.store.set("samantha_session", "g-999999.deadbeef");
     expect(await profileSession()).toBeNull();
   });
 });

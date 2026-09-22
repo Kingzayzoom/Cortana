@@ -338,7 +338,7 @@ test("orb harness: silence, real adapter inputs, mute, reduced motion and teardo
     const active = new Set<number>();
     const request = window.requestAnimationFrame.bind(window);
     const cancel = window.cancelAnimationFrame.bind(window);
-    Object.assign(window, { cortanaTestFrames: active });
+    Object.assign(window, { samanthaTestFrames: active });
     window.requestAnimationFrame = (callback) => {
       const id = request((time) => {
         active.delete(id);
@@ -394,8 +394,8 @@ test("orb harness: silence, real adapter inputs, mute, reduced motion and teardo
     .poll(() =>
       page.evaluate(
         () =>
-          (window as unknown as { cortanaTestFrames: Set<number> })
-            .cortanaTestFrames.size,
+          (window as unknown as { samanthaTestFrames: Set<number> })
+            .samanthaTestFrames.size,
       ),
     )
     .toBe(0);

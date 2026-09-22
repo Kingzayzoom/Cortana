@@ -1,6 +1,6 @@
-# Cortana learning signals
+# Samantha learning signals
 
-Cortana adds observable educational activity after engagement: concepts explored, question categories, evidence opened, deterministic practice outcomes and transparent reinforcement. It does not measure competency, mastery, intelligence, clinical proficiency or patient outcomes.
+Samantha adds observable educational activity after engagement: concepts explored, question categories, evidence opened, deterministic practice outcomes and transparent reinforcement. It does not measure competency, mastery, intelligence, clinical proficiency or patient outcomes.
 
 ## Implementation
 
@@ -43,7 +43,7 @@ Next-round order: priority at least 5, unresolved misses, seven-day overdue prac
 
 ## Proposed Impiricus bridge
 
-/impiricus separates illustrative engagement signals from actual current-session Cortana events. Product descriptions cite [Impiricus's public product page](https://impiricus.com/our-products), checked September 19, 2026. ION supplies intelligence for next actions; Pulse provides personalized resources via an opted-in SMS network; Spark triggers engagement journeys; Ascend connects HCPs to representatives and resources. Cortana supplements those roles.
+/impiricus separates illustrative engagement signals from actual current-session Samantha events. Product descriptions cite [Impiricus's public product page](https://impiricus.com/our-products), checked September 19, 2026. ION supplies intelligence for next actions; Pulse provides personalized resources via an opted-in SMS network; Spark triggers engagement journeys; Ascend connects HCPs to representatives and resources. Samantha supplements those roles.
 
 The export contains schemaVersion, source, eventType, timestamp, round metadata, known concept IDs, categorized question counts, source IDs, attempted/correct practice counts and reinforcement topics. It excludes names, session/provider identifiers, cookies, credentials, raw answers and transcripts. The proposed schema is not an agreed Impiricus contract. Download is local; no Impiricus API, private data, partnership or endorsement is claimed.
 

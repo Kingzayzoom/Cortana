@@ -1,28 +1,29 @@
 import { readFile, appendFile, mkdir, writeFile } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import nextEnv from "@next/env";
+import { setting } from "./settings.mjs";
 await mkdir(".cortana", { recursive: true });
 nextEnv.loadEnvConfig(process.cwd());
 let additions = "";
-if (!process.env.CORTANA_SESSION_SECRET) {
+if (!setting("SESSION_SECRET")) {
   let secret;
   try {
     secret = await readFile(".cortana/.session-key", "utf8");
   } catch {
     secret = randomBytes(48).toString("hex");
   }
-  additions += `\nCORTANA_SESSION_SECRET=${secret}\n`;
+  additions += `\nSAMANTHA_SESSION_SECRET=${secret}\n`;
 }
-if (!process.env.CORTANA_DEMO_ACCESS_CODE) {
+if (!setting("DEMO_ACCESS_CODE")) {
   const code = randomBytes(12).toString("hex");
-  additions += `CORTANA_DEMO_ACCESS_CODE=${code}\n`;
+  additions += `SAMANTHA_DEMO_ACCESS_CODE=${code}\n`;
   await writeFile(".cortana/demo-access-code.txt", code + "\n", {
     mode: 0o600,
   });
 }
-if (!process.env.CORTANA_PHONE_TOOL_SECRET) {
+if (!setting("PHONE_TOOL_SECRET")) {
   // Shared secret the ElevenLabs phone agent sends back to this server's tools.
-  additions += `CORTANA_PHONE_TOOL_SECRET=${randomBytes(24).toString("hex")}\n`;
+  additions += `SAMANTHA_PHONE_TOOL_SECRET=${randomBytes(24).toString("hex")}\n`;
 }
 if (additions) await appendFile(".env.local", additions, { mode: 0o600 });
 console.log(

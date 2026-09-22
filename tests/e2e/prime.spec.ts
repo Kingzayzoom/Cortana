@@ -34,7 +34,7 @@ test("three-question Prime saves grades, evidence, rewards, profile and focused 
       .click();
   }
   await expect(page.getByText("PRIME COMPLETE", { exact: true })).toBeVisible();
-  await expect(page.getByText("1 day Cortana streak")).toBeVisible();
+  await expect(page.getByText("1 day Samantha streak")).toBeVisible();
   const before = await page.request.get("/api/bootstrap").then((r) => r.json());
   await page.reload();
   const after = await page.request.get("/api/bootstrap").then((r) => r.json());

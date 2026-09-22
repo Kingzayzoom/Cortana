@@ -40,8 +40,8 @@ export function VoiceStatus() {
     state = "live";
     if (voice.activity === "assistant-speaking")
       text = voice.muted
-        ? "Cortana is speaking · microphone off"
-        : "Cortana is speaking";
+        ? "Samantha is speaking · microphone off"
+        : "Samantha is speaking";
     else if (voice.muted) text = "Microphone off.";
     else if (voice.activity === "awaiting-response")
       text = "Working on your response…";
@@ -222,7 +222,7 @@ export function VoiceConsent() {
       onOpenChange={(open) => {
         if (!open && !voice.working) voice.closeConsent();
       }}
-      title="A conversation with Cortana"
+      title="A conversation with Samantha"
       description="A little space to listen, think, and ask."
     >
       <div className="consent-symbol">
@@ -235,7 +235,7 @@ export function VoiceConsent() {
       </p>
       <p className="small muted">
         <ShieldCheck size={16} className="inline-icon" />
-        Cortana does not save raw audio. Provider retention depends on your
+        Samantha does not save raw audio. Provider retention depends on your
         ElevenLabs account settings.
       </p>
       {!data?.voiceConfigured ? (

@@ -1,5 +1,6 @@
 import { chromium } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { setting } from "./settings.mjs";
 const browser = await chromium.launch();
 const context = await browser.newContext({
   viewport: { width: 1440, height: 900 },
@@ -15,9 +16,7 @@ for (const route of [
   "/settings",
   "/impiricus",
 ]) {
-  await page.goto(
-    `${process.env.CORTANA_TEST_URL || "http://localhost:3100"}${route}`,
-  );
+  await page.goto(`${setting("TEST_URL") || "http://localhost:3100"}${route}`);
   await page.locator(".header-greeting").waitFor();
   const report = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa"])

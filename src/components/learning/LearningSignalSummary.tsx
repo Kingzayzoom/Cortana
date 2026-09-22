@@ -34,7 +34,7 @@ export function LearningSignalSummary({
     );
     const link = document.createElement("a");
     link.href = url;
-    link.download = "cortana-learning-signal.json";
+    link.download = "samantha-learning-signal.json";
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };

@@ -4,7 +4,7 @@
 export { clinician, notInBriefing } from "./briefings";
 
 export const facility = {
-  name: "Cortana Medical Center",
+  name: "Riverside Medical Center",
   unit: "Cardiac Step-Down",
   location: "North Tower, Level 4",
 } as const;

@@ -51,11 +51,11 @@ export function ImpiricusSignalBridge({
         <span className="tag">PROPOSED INTEGRATION</span>
         <h1>Go beyond engagement.</h1>
         <p>
-          Cortana turns educational interactions into structured learning
+          Samantha turns educational interactions into structured learning
           signals.
         </p>
         <div className="integration-disclosure">
-          Working Cortana activity. Conceptual Impiricus connection. No
+          Working Samantha activity. Conceptual Impiricus connection. No
           production integration, private Impiricus data, or endorsement.
         </div>
       </header>
@@ -120,7 +120,7 @@ export function ImpiricusSignalBridge({
             reinforce.
           </p>
           <small>
-            Derived from this browser profile’s actual Cortana activity.
+            Derived from this browser profile’s actual Samantha activity.
           </small>
         </div>
       </section>
@@ -138,7 +138,7 @@ export function ImpiricusSignalBridge({
           </li>
           <li>
             <span className="bridge-dot" />
-            <strong>Cortana</strong>
+            <strong>Samantha</strong>
             <p>Listen · ask · practice</p>
             <small>Working experience</small>
           </li>
@@ -162,7 +162,7 @@ export function ImpiricusSignalBridge({
           </li>
         </ol>
         <p className="bridge-caption">
-          Cortana adds educational context to a potential future feedback loop.
+          Samantha adds educational context to a potential future feedback loop.
           The current app recommends only its supported DAPA-HF round.
         </p>
       </section>
@@ -248,7 +248,7 @@ export function ImpiricusSignalBridge({
           </div>
         </dl>
         <p>
-          These are proposed uses, not measured commercial outcomes. Cortana
+          These are proposed uses, not measured commercial outcomes. Samantha
           supports learning activity; it does not assess competency or recommend
           care for a patient.
         </p>

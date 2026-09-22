@@ -22,7 +22,7 @@ import {
 import { MAX_CONTEXT_BYTES } from "../src/lib/context/schema";
 beforeEach(async () => {
   vi.stubEnv(
-    "CORTANA_DATA_DIR",
+    "SAMANTHA_DATA_DIR",
     await mkdtemp(path.join(tmpdir(), "context-")),
   );
 });

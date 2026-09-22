@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useState } from "react";
-import { OrbVisual } from "./CortanaOrb";
+import { OrbVisual } from "./SamanthaOrb";
 import Link from "next/link";
 const signals = {
   Silence: [0, 0],
@@ -19,7 +19,7 @@ export function OrbHarness() {
   return (
     <main className="orb-harness">
       <Link href="/" className="text-button">
-        ← Return to Cortana
+        ← Return to Samantha
       </Link>
       <h1>Orb development harness</h1>
       <p>

@@ -1,6 +1,7 @@
 import { chromium, expect } from "@playwright/test";
 import nextEnv from "@next/env";
 import { mkdir, writeFile } from "node:fs/promises";
+import { setting } from "./settings.mjs";
 nextEnv.loadEnvConfig(process.cwd());
 const fixtureAudio = process.argv.includes("--fixture-audio");
 const headed = process.argv.includes("--headed");
@@ -78,11 +79,9 @@ page.on("request", (request) => {
   }
 });
 try {
-  await page.goto(process.env.CORTANA_TEST_URL || "http://localhost:3100");
+  await page.goto(setting("TEST_URL") || "http://localhost:3100");
   await page.getByRole("button", { name: "Start today’s round" }).click();
-  await page
-    .getByLabel("Demo access code")
-    .fill(process.env.CORTANA_DEMO_ACCESS_CODE);
+  await page.getByLabel("Demo access code").fill(setting("DEMO_ACCESS_CODE"));
   await page.getByRole("button", { name: "Agree & start voice" }).click();
   await page.locator(".status-live, .status-error").waitFor({ timeout: 35000 });
   if (!(await page.locator(".status-live").count()))
@@ -345,9 +344,7 @@ try {
     ).length,
   }));
   await page.getByRole("button", { name: "Start today’s round" }).click();
-  await page
-    .getByLabel("Demo access code")
-    .fill(process.env.CORTANA_DEMO_ACCESS_CODE);
+  await page.getByLabel("Demo access code").fill(setting("DEMO_ACCESS_CODE"));
   await page.getByRole("button", { name: "Agree & start voice" }).click();
   await page.locator(".status-live").waitFor({ timeout: 35000 });
   report.reconnect = {

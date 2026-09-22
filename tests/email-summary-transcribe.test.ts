@@ -8,7 +8,7 @@ afterEach(() => {
 
 describe("Firefox voice transcription route", () => {
   it("sends a short audio clip to Gemini and returns only the transcript", async () => {
-    vi.stubEnv("CORTANA_APP_ORIGIN", "http://localhost:3000");
+    vi.stubEnv("SAMANTHA_APP_ORIGIN", "http://localhost:3000");
     vi.stubEnv("GEMINI_API_KEY", "test-key");
     const gemini = vi.fn(async () =>
       Response.json({

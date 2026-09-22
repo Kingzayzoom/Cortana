@@ -3,19 +3,20 @@
 // The browser agent is never modified; its model and voice are copied.
 import nextEnv from "@next/env";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { setting } from "./settings.mjs";
 nextEnv.loadEnvConfig(process.cwd());
 const apiKey = process.env.ELEVENLABS_API_KEY;
-const toolSecret = process.env.CORTANA_PHONE_TOOL_SECRET;
+const toolSecret = setting("PHONE_TOOL_SECRET");
 const publicUrl = (
   process.argv.find((a) => a.startsWith("--url="))?.slice(6) ||
-  process.env.CORTANA_PUBLIC_URL ||
+  setting("PUBLIC_URL") ||
   ""
 ).replace(/\/$/, "");
 const apply = process.argv.includes("--apply");
 if (!apiKey) throw new Error("ELEVENLABS_API_KEY is not set.");
 if (!toolSecret || toolSecret.length < 32)
   throw new Error(
-    "CORTANA_PHONE_TOOL_SECRET is missing or too short. Run: node scripts/prepare-local.mjs",
+    "SAMANTHA_PHONE_TOOL_SECRET is missing or too short. Run: node scripts/prepare-local.mjs",
   );
 if (!/^https:\/\/[^/]+$/.test(publicUrl))
   throw new Error(
@@ -59,7 +60,7 @@ const definitions = JSON.parse(
 );
 // Optional: lets the tools through Vercel's deployment protection when the
 // project keeps it switched on (Settings -> Deployment Protection -> Automation Bypass).
-const bypass = process.env.CORTANA_VERCEL_BYPASS;
+const bypass = setting("VERCEL_BYPASS");
 if (bypass)
   for (const definition of definitions)
     definition.tool_config.api_schema.request_headers[
@@ -147,13 +148,13 @@ for (const definition of definitions) {
 }
 
 const config = {
-  name: "Cortana Phone",
+  name: "Samantha Phone",
   conversation_config: {
     agent: {
       // No dynamic variable here: an inbound caller supplies none, and
       // ElevenLabs refuses the conversation if the first message needs one.
       // The agent greets by name in its next breath, once the briefing loads.
-      first_message: "Hi, it's Cortana here with your morning briefing.",
+      first_message: "Hi, it's Samantha here with your morning briefing.",
       language: existingAgent?.conversation_config.agent.language ?? "en",
       prompt: {
         prompt,
@@ -233,7 +234,7 @@ console.log(
       next: [
         `Set ELEVENLABS_PHONE_AGENT_ID=${saved.agentId} on the server and in Vercel.`,
         "Set ELEVENLABS_PHONE_NUMBER_ID to an imported Twilio number id listed above.",
-        "Set CORTANA_PHONE_TOOL_SECRET in Vercel to the same value used here.",
+        "Set SAMANTHA_PHONE_TOOL_SECRET in Vercel to the same value used here.",
       ],
     },
     null,

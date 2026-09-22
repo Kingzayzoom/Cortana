@@ -124,11 +124,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <Link
           href="/"
           className="brand"
-          aria-label="Cortana home"
+          aria-label="Samantha home"
           onClick={() => setMenu(false)}
         >
           <span className="brand-mark" />
-          cortana<span className="brand-period">.</span>
+          samantha<span className="brand-period">.</span>
         </Link>
         <p className="brand-description">
           Clinical learning

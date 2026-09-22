@@ -19,7 +19,7 @@ import { snapshot, withProgress } from "../src/lib/server/store";
 import { defaultScenario } from "../src/lib/context/demo";
 const now = new Date("2026-09-19T16:00:00Z");
 beforeEach(async () => {
-  vi.stubEnv("CORTANA_DATA_DIR", await mkdtemp(path.join(tmpdir(), "prime-")));
+  vi.stubEnv("SAMANTHA_DATA_DIR", await mkdtemp(path.join(tmpdir(), "prime-")));
 });
 afterEach(() => vi.unstubAllEnvs());
 const empty = () => ({ sessions: [], reviews: {} });

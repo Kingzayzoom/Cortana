@@ -29,13 +29,13 @@ Missing facts return exactly: **The supplied scenario does not include that info
 
 Run `npm run agent:export` to regenerate client and phone context definitions without removing existing lesson or phone tools. Apply the browser prompt/tools with `node scripts/configure-agent.mjs --apply`. Configure the separate phone agent with `node scripts/configure-phone-agent.mjs --url=<public origin> --apply`; its webhook origin must reach this application.
 
-The phone flow requires ELEVENLABS_PHONE_AGENT_ID, ELEVENLABS_PHONE_NUMBER_ID, CORTANA_PHONE_TOOL_SECRET, plus the existing API key, session secret, and demo access code. Secrets stay server-side. Configuration scripts preserve attached tools, model, voice, and unrelated agent settings and save local backups.
+The phone flow requires ELEVENLABS_PHONE_AGENT_ID, ELEVENLABS_PHONE_NUMBER_ID, SAMANTHA_PHONE_TOOL_SECRET, plus the existing API key, session secret, and demo access code. Secrets stay server-side. Configuration scripts preserve attached tools, model, voice, and unrelated agent settings and save local backups.
 
 ## Verification
 
 `npm test` covers strict validation, normalization, missing facts, profile isolation, activation/clearing, phone payloads, signed web/phone parity, stale sessions, and SDK context tools with language overrides.
 
-`CORTANA_TEST_URL=http://localhost:3102 npm run test:e2e` covers upload, paste, drop, escaped HTML, activation, reload, clearing, mobile layout, and existing conversation regressions. Real phone delivery requires a configured carrier and explicit consent; simulated provider tests do not ring a phone.
+`SAMANTHA_TEST_URL=http://localhost:3102 npm run test:e2e` covers upload, paste, drop, escaped HTML, activation, reload, clearing, mobile layout, and existing conversation regressions. Real phone delivery requires a configured carrier and explicit consent; simulated provider tests do not ring a phone.
 
 ## Bundled library
 

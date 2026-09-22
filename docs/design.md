@@ -1,6 +1,6 @@
-# Cortana visual system
+# Samantha visual system
 
-The primary reference is the supplied `Cortana visualization.png`. A healthcare professional uses the product for a brief learning pause at a laptop in a bright clinical workspace. The surface is white, with pale blue separation and restrained navy typography. The orb carries the luminous, expressive color.
+The primary reference is the supplied `Samantha visualization.png`. A healthcare professional uses the product for a brief learning pause at a laptop in a bright clinical workspace. The surface is white, with pale blue separation and restrained navy typography. The orb carries the luminous, expressive color.
 
 ## Palette
 

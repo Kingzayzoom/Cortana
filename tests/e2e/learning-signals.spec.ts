@@ -60,7 +60,7 @@ test("actual preview events, replay safety, privacy, persistence and export", as
   });
   expect(unclear.data.grade.verdict).toBe("clarify");
   const profileId = (await page.context().cookies())
-    .find((cookie) => cookie.name === "cortana_session")!
+    .find((cookie) => cookie.name === "samantha_session")!
     .value.split(".")[0];
   expect(profileId).toMatch(/^[0-9a-f-]{36}$/);
   const persisted = await readFile(
@@ -116,7 +116,7 @@ test("actual preview events, replay safety, privacy, persistence and export", as
   const payload = JSON.parse(Buffer.concat(chunks).toString());
   expect(payload).toMatchObject({
     schemaVersion: "1.0",
-    source: "cortana",
+    source: "samantha",
     learning: {
       practice: { attempted: 1, correct: 1 },
       reinforcementTopics: [],

@@ -102,7 +102,7 @@ export function PhoneRoundView({
         eyebrow={
           prime ? "Phone Prime" : briefing ? "Phone briefing" : "Phone round"
         }
-        title="Cortana can call you."
+        title="Samantha can call you."
         description={
           briefing
             ? "Changes, schedule, and review items from your active demo scenario."
@@ -220,7 +220,7 @@ export function PhoneRoundView({
           </h2>
           <p>
             {call.step === "calling"
-              ? "Answer the phone and say hello. Cortana runs the same round you would get here, and your answer is graded by this server."
+              ? "Answer the phone and say hello. Samantha runs the same round you would get here, and your answer is graded by this server."
               : "Your progress from the call is saved below and on Today."}
           </p>
           <p className="small muted">
@@ -245,7 +245,7 @@ export function PhoneRoundView({
                 ) : (
                   <p key={line.id} className={`call-line call-${line.role}`}>
                     <strong>
-                      {line.role === "cortana" ? "Cortana" : "You"}
+                      {line.role === "samantha" ? "Samantha" : "You"}
                     </strong>
                     <span>{line.text}</span>
                   </p>
@@ -269,7 +269,7 @@ export function PhoneRoundView({
       )}
       <p className="small muted">
         <ShieldCheck size={16} className="inline-icon" />
-        Cortana does not store the phone number or the call audio. Provider
+        Samantha does not store the phone number or the call audio. Provider
         retention follows your ElevenLabs and Twilio account settings. Synthetic
         cases only; this is not medical advice.
       </p>

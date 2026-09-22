@@ -8,7 +8,7 @@ import "./context.css";
 import "./prime.css";
 import { Providers } from "./providers";
 export const metadata: Metadata = {
-  title: "Cortana — Your daily clinical conversation",
+  title: "Samantha — Your daily clinical conversation",
   description:
     "A moment to listen, think, and learn. A voice-first cardiology learning prototype with synthetic cases and visible evidence.",
 };

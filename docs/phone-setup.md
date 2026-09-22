@@ -1,11 +1,11 @@
-# Connecting a phone to Cortana
+# Connecting a phone to Samantha
 
-How to make Cortana call a phone, and answer one. Everything here was done end to end on a live line; the troubleshooting table is the list of failures we actually hit, with the fix for each.
+How to make Samantha call a phone, and answer one. Everything here was done end to end on a live line; the troubleshooting table is the list of failures we actually hit, with the fix for each.
 
 ## What you are connecting
 
 ```
-   Cortana (this app)              ElevenLabs                     A carrier
+   Samantha (this app)              ElevenLabs                     A carrier
    ──────────────────              ──────────                     ─────────
    places the call        ──────►  runs the conversation  ──────► rings the phone
    answers tool calls     ◄──────  asks for facts and grades
@@ -21,8 +21,8 @@ Three accounts, each doing one job:
 
 Two ElevenLabs agents get created, and the reason is not arbitrary:
 
-- **Cortana Phone** handles calls _you place_. Its tools receive a signed session naming the learner, so progress is saved.
-- **Cortana Inbound** answers calls _to your number_. A caller has no profile to sign for, and ElevenLabs refuses a conversation whose tools reference a dynamic variable nobody supplied — so this agent's tools carry a constant guest value instead.
+- **Samantha Phone** handles calls _you place_. Its tools receive a signed session naming the learner, so progress is saved.
+- **Samantha Inbound** answers calls _to your number_. A caller has no profile to sign for, and ElevenLabs refuses a conversation whose tools reference a dynamic variable nobody supplied — so this agent's tools carry a constant guest value instead.
 
 ## Step 1 — ElevenLabs
 
@@ -40,7 +40,7 @@ Two ElevenLabs agents get created, and the reason is not arbitrary:
    node scripts/prepare-local.mjs
    ```
 
-   This writes `CORTANA_SESSION_SECRET`, `CORTANA_DEMO_ACCESS_CODE` and `CORTANA_PHONE_TOOL_SECRET` without touching values you already set.
+   This writes `SAMANTHA_SESSION_SECRET`, `SAMANTHA_DEMO_ACCESS_CODE` and `SAMANTHA_PHONE_TOOL_SECRET` without touching values you already set.
 
 ## Step 2 — Get a phone number
 
@@ -85,7 +85,7 @@ For a **SIP trunk**:
 | Outbound authentication | The username and password from step 2                          |
 | Inbound authentication  | Leave empty. Telnyx does not use digest auth on inbound trunks |
 
-**The username is case sensitive.** `Cortana` and `cortana` are different users, and the mismatch surfaces as `SIP 403 Forbidden` with no further explanation. We lost an hour to exactly this.
+**The username is case sensitive.** `Samantha` and `samantha` are different users, and the mismatch surfaces as `SIP 403 Forbidden` with no further explanation. We lost an hour to exactly this.
 
 ## Step 4 — Create the agents
 
@@ -110,10 +110,10 @@ Each script copies the voice and model from your existing agent, writes the tool
 | `ELEVENLABS_API_KEY`         | Mints call tokens and configures agents        |
 | `ELEVENLABS_PHONE_AGENT_ID`  | Printed by `configure-phone-agent`             |
 | `ELEVENLABS_PHONE_NUMBER_ID` | Printed after the number is imported           |
-| `CORTANA_PHONE_TOOL_SECRET`  | Shared secret the agent presents to your tools |
-| `CORTANA_SESSION_SECRET`     | Signs the per-call session                     |
-| `CORTANA_DEMO_ACCESS_CODE`   | Required before any call is placed             |
-| `CORTANA_PHONE_PROVIDER`     | `twilio` (default) or `sip`                    |
+| `SAMANTHA_PHONE_TOOL_SECRET` | Shared secret the agent presents to your tools |
+| `SAMANTHA_SESSION_SECRET`    | Signs the per-call session                     |
+| `SAMANTHA_DEMO_ACCESS_CODE`  | Required before any call is placed             |
+| `SAMANTHA_PHONE_PROVIDER`    | `twilio` (default) or `sip`                    |
 | `RESEND_API_KEY`             | Optional: the front desk email                 |
 
 On Vercel, add them under **Settings → Environment Variables** for **Production**, then **redeploy**. Variables only reach new deployments — adding one to a running project changes nothing, which is a failure that looks exactly like a missing key.
@@ -157,7 +157,7 @@ A failed call carries a `termination_reason` that names the cause outright.
 | `SIP 403` with credentials correct                                     | No outbound voice profile on the connection, or the carrier is still in pretrial | Attach a profile; finish the free account upgrade                     |
 | `Missing required dynamic variables in first message`                  | The greeting references `{{variable}}` and nobody supplied it                    | Use a greeting with no variables; personalise in the next sentence    |
 | `Missing required dynamic variables in tools`                          | A tool references a dynamic variable an inbound caller cannot supply             | Use the inbound agent, whose tools carry a constant instead           |
-| Call connects, then Cortana says she cannot load the briefing          | Your tools are unreachable or the secret does not match                          | Run the check script; confirm the deployment is public and redeployed |
+| Call connects, then Samantha says she cannot load the briefing         | Your tools are unreachable or the secret does not match                          | Run the check script; confirm the deployment is public and redeployed |
 | "Phone rounds are not configured on this server"                       | One of the phone variables is missing in the deployed environment                | Add it and redeploy                                                   |
 | "The carrier account is on a trial and can only call verified numbers" | Exactly that                                                                     | Verify the number, or add funds                                       |
 | Voice sounds choppy                                                    | Jitter buffer disabled on the SIP connection                                     | Enable it; consider offering only PCMU to avoid transcoding           |

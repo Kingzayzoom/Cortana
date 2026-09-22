@@ -491,7 +491,7 @@ export function ContextFeedView() {
   const validated = (scenario: ContextScenario) => {
     setDraft(scenario);
     setIssues([]);
-    setNotice("Valid Cortana context scenario");
+    setNotice("Valid Samantha context scenario");
   };
   const file = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -510,7 +510,7 @@ export function ContextFeedView() {
       <PageHeading
         eyebrow="Demo context feed"
         title="A little context. A clearer conversation."
-        description="Drop in a synthetic scenario. Review the changes, then let Cortana brief you."
+        description="Drop in a synthetic scenario. Review the changes, then let Samantha brief you."
       />
       <p className="context-notice">{SYNTHETIC_NOTICE}</p>
       <section className="context-active-bar" aria-label="Active context">
@@ -539,7 +539,7 @@ export function ContextFeedView() {
         <div>
           <h2 id="drop-in-title">Context Drop-In</h2>
           <p className="muted">
-            One active scenario, shared by web and phone Cortana.
+            One active scenario, shared by web and phone Samantha.
           </p>
         </div>
         <div

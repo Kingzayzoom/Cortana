@@ -1,4 +1,4 @@
-# Cortana round knowledge
+# Samantha round knowledge
 
 Round dapa-hf-01 · Version 2026-09-19.1
 

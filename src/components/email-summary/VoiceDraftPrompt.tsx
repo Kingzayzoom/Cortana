@@ -91,7 +91,7 @@ export function VoiceDraftPrompt({
       retryWithoutPrompt.current = event.error === "not-allowed";
       setError(
         event.error === "not-allowed"
-          ? "Microphone access was blocked. Allow access and tap Cortana again, or type below."
+          ? "Microphone access was blocked. Allow access and tap Samantha again, or type below."
           : event.error === "no-speech"
             ? "I didn't catch that. Try again or type your message below."
             : "Voice input could not start. Type your message below instead.",
@@ -152,19 +152,19 @@ export function VoiceDraftPrompt({
         aria-label={
           phase === "listening"
             ? "Stop listening"
-            : "Ask Cortana to draft by voice"
+            : "Ask Samantha to draft by voice"
         }
       >
         <span className="email-voice-orb" aria-hidden="true" />
       </button>
       <div>
-        <strong>Cortana voice draft</strong>
+        <strong>Samantha voice draft</strong>
         <p aria-live="polite">
           {phase === "asking"
             ? "What message would you like me to draft?"
             : phase === "listening"
               ? "Listening… tap the icon to stop."
-              : "Tap the icon and tell Cortana what to draft."}
+              : "Tap the icon and tell Samantha what to draft."}
         </p>
         {error && (
           <p className="email-voice-note" role="alert">

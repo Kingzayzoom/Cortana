@@ -131,7 +131,7 @@ async function withRedisProgress<T>(id: string, operation: Operation<T>) {
     try {
       if ((await db.get<string>(lock)) === token) await db.del(lock);
     } catch (error) {
-      console.error("[cortana] could not release progress lock", error);
+      console.error("[samantha] could not release progress lock", error);
     }
   }
 }

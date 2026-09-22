@@ -1,6 +1,6 @@
-# Cortana Prime
+# Samantha Prime
 
-Open /prime for the daily three-question set. Start Prime opens a focused session without the sidebar. Start with Cortana uses the same saved questions and server grades through the existing ElevenLabs consent and language flow.
+Open /prime for the daily three-question set. Start Prime opens a focused session without the sidebar. Start with Samantha uses the same saved questions and server grades through the existing ElevenLabs consent and language flow.
 
 The versioned source scope is the existing DAPA-HF / diabetes-subgroup bundle. Twelve authored questions cover trial population, primary endpoint and evidence limitations; every explanation has source IDs. No additional medical topic, patient-specific recommendation, accreditation or competence measurement is implied. Sources: [NEJM trial](https://www.nejm.org/doi/full/10.1056/NEJMoa1911303) and [JAMA subgroup analysis](https://jamanetwork.com/journals/jama/fullarticle/2763950). Content has been checked against the existing source bundle; independent clinician editorial review is still appropriate before expanding beyond this educational demo.
 
@@ -11,7 +11,7 @@ The versioned source scope is the existing DAPA-HF / diabetes-subgroup bundle. T
 - An unstarted set reflects current contextual education triggers; a started set stays stable.
 - Selection ranks reinforcement, due review, new supported concepts, then continued practice. It prefers distinct concepts and avoids recent identical questions when alternatives exist.
 - Review intervals after successive correct practice are 2, 5 and 10 calendar days. A miss schedules next-session reinforcement with an alternative question. With this small three-concept catalog, continued practice may appear before the next due date; it is labeled accordingly.
-- Completion awards 50 XP, plus 10 per correct first answer and 10 per concept reinforcement. Rewards are assigned once at completion. Prime uses the same practiceDays streak and total XP as Cortana.
+- Completion awards 50 XP, plus 10 per correct first answer and 10 per concept reinforcement. Rewards are assigned once at completion. Prime uses the same practiceDays streak and total XP as Samantha.
 - Crossing midnight retains the started session; completing it counts for the completion day and does not open a second rewarded set that day.
 - Profile settings reset clears Prime history too. Anonymous started Prime activity follows the existing first-sign-in account migration.
 

@@ -39,11 +39,11 @@ beforeAll(async () => {
 afterAll(() => emulator.close());
 beforeEach(async () => {
   emulator.data.clear();
-  dataDir = path.join(await mkdtemp(path.join(tmpdir(), "cortana-")), "data");
+  dataDir = path.join(await mkdtemp(path.join(tmpdir(), "samantha-")), "data");
   vi.stubEnv("KV_REST_API_URL", emulator.url);
   vi.stubEnv("KV_REST_API_TOKEN", emulator.token);
-  vi.stubEnv("CORTANA_DATA_DIR", dataDir);
-  vi.stubEnv("CORTANA_SESSION_SECRET", "s".repeat(48));
+  vi.stubEnv("SAMANTHA_DATA_DIR", dataDir);
+  vi.stubEnv("SAMANTHA_SESSION_SECRET", "s".repeat(48));
   vi.stubEnv("VERCEL", "1");
 });
 afterEach(() => {
@@ -232,10 +232,10 @@ describe("Serverless configuration", () => {
     await expect(store.withProgress(profile, () => null)).rejects.toMatchObject(
       { status: 503, message: /Upstash Redis/ },
     );
-    vi.stubEnv("CORTANA_SESSION_SECRET", "");
+    vi.stubEnv("SAMANTHA_SESSION_SECRET", "");
     await expect(session.profileSession(true)).rejects.toMatchObject({
       status: 503,
-      message: /CORTANA_SESSION_SECRET/,
+      message: /SAMANTHA_SESSION_SECRET/,
     });
     await expect(stat(dataDir)).rejects.toMatchObject({ code: "ENOENT" });
   });
@@ -258,7 +258,7 @@ describe("Serverless configuration", () => {
       ),
     ).toThrow("must come from");
     vi.stubEnv(
-      "CORTANA_APP_ORIGIN",
+      "SAMANTHA_APP_ORIGIN",
       "https://cortex.vercel.app, https://demo.example",
     );
     expect(() =>
@@ -266,7 +266,7 @@ describe("Serverless configuration", () => {
     ).not.toThrow();
     // A trailing slash is easy to paste into a dashboard and would otherwise
     // reject every request.
-    vi.stubEnv("CORTANA_APP_ORIGIN", "https://demo.example/");
+    vi.stubEnv("SAMANTHA_APP_ORIGIN", "https://demo.example/");
     expect(() =>
       session.assertOrigin(request("https://demo.example")),
     ).not.toThrow();

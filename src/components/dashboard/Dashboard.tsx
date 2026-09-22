@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { CortanaOrb } from "@/components/voice/CortanaOrb";
+import { SamanthaOrb } from "@/components/voice/SamanthaOrb";
 import { LiveConversationPanel } from "@/components/voice/LiveConversationPanel";
 import { TranscriptPanel } from "@/components/voice/TranscriptPanel";
 import { VoiceControls } from "@/components/voice/VoiceControls";
@@ -78,7 +78,7 @@ export function Dashboard() {
             <h1 id="completion-heading">Your learning summary.</h1>
             <p>
               The conversation has ended. Review the signal that was saved and
-              when Cortana suggests returning to it.
+              when Samantha suggests returning to it.
             </p>
           </div>
           <LessonPanel />
@@ -135,7 +135,7 @@ export function Dashboard() {
                 </span>
               </div>
 
-              <CortanaOrb />
+              <SamanthaOrb />
 
               <p className="orb-learning-caption" aria-hidden={liveMode}>
                 2-minute round · Cardiology

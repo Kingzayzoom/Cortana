@@ -1,5 +1,6 @@
 import { chromium } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
+import { setting } from "./settings.mjs";
 await mkdir("test-results", { recursive: true });
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -8,9 +9,7 @@ page.on("pageerror", (error) => errors.push(error.message));
 for (const width of [1440, 768, 390, 320]) {
   await page.setViewportSize({ width, height: 900 });
   for (const route of ["/", "/impiricus"]) {
-    await page.goto(
-      (process.env.CORTANA_TEST_URL || "http://localhost:3102") + route,
-    );
+    await page.goto((setting("TEST_URL") || "http://localhost:3102") + route);
     await page.locator(".header-greeting").waitFor();
     await page.waitForTimeout(1200);
     const overflow = await page.evaluate(() =>

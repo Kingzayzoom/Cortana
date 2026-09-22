@@ -80,10 +80,10 @@ beforeEach(async () => {
   vi.stubEnv("ELEVENLABS_API_KEY", "sk_test_secret_never_returned");
   vi.stubEnv("ELEVENLABS_PHONE_AGENT_ID", "agent_phone_test");
   vi.stubEnv("ELEVENLABS_PHONE_NUMBER_ID", "phnum_test");
-  vi.stubEnv("CORTANA_PHONE_TOOL_SECRET", TOOL_SECRET);
-  vi.stubEnv("CORTANA_DEMO_ACCESS_CODE", "private-demo-code");
-  vi.stubEnv("CORTANA_SESSION_SECRET", "s".repeat(48));
-  vi.stubEnv("CORTANA_DATA_DIR", await mkdtemp(path.join(tmpdir(), "phone-")));
+  vi.stubEnv("SAMANTHA_PHONE_TOOL_SECRET", TOOL_SECRET);
+  vi.stubEnv("SAMANTHA_DEMO_ACCESS_CODE", "private-demo-code");
+  vi.stubEnv("SAMANTHA_SESSION_SECRET", "s".repeat(48));
+  vi.stubEnv("SAMANTHA_DATA_DIR", await mkdtemp(path.join(tmpdir(), "phone-")));
   vi.stubGlobal("fetch", vi.fn(accepted));
   state.profile = `phone-${Math.random().toString(16).slice(2)}`;
 });
@@ -256,7 +256,7 @@ describe("Placing a phone round", () => {
   });
 
   it("uses the SIP trunk endpoint for non-Twilio carriers", async () => {
-    vi.stubEnv("CORTANA_PHONE_PROVIDER", "sip");
+    vi.stubEnv("SAMANTHA_PHONE_PROVIDER", "sip");
     vi.mocked(fetch).mockResolvedValue(
       Response.json({
         success: true,
@@ -568,7 +568,9 @@ describe("Phone agent tools", () => {
     expect(sent.to).toEqual(["kingzayzoom@gmail.com"]);
     expect(sent.subject).toBe("Dr. Zaybish — running late (Cardiac Step-Down)");
     // Reads as a note: greeting, the message, the ETA, one quiet footer.
-    expect(sent.text).toMatch(/^Hi — Cortana here, on behalf of Dr. Zaybish\./);
+    expect(sent.text).toMatch(
+      /^Hi — Samantha here, on behalf of Dr. Zaybish\./,
+    );
     expect(sent.text).toContain(
       "Held up in traffic, about twenty minutes out.",
     );

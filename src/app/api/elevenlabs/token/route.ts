@@ -11,6 +11,7 @@ import {
 } from "@/lib/server/session";
 import { withProgress } from "@/lib/server/store";
 import { createConversationToken } from "@/lib/server/elevenlabs";
+import { setting } from "@/lib/server/env";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
@@ -41,9 +42,7 @@ export async function POST(request: Request) {
       throw new RequestError(
         "Confirm voice consent and enter your demo access code.",
       );
-    if (
-      !safeEqual(parsed.data.accessCode, process.env.CORTANA_DEMO_ACCESS_CODE!)
-    )
+    if (!safeEqual(parsed.data.accessCode, setting("DEMO_ACCESS_CODE")!))
       throw new RequestError("That demo access code is incorrect.", 403);
     await withProgress(id, (data) => {
       if (parsed.data.mode === "prime") {

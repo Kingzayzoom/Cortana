@@ -1,7 +1,7 @@
 "use client";
 
 // Adapted from ElevenLabs UI (MIT). See vendor/elevenlabs-ui-LICENSE.md.
-// Cortana: local noise texture, manual audio, time-based smoothing, a spherical
+// Samantha: local noise texture, manual audio, time-based smoothing, a spherical
 // material finish, reduced motion and hidden-tab rendering controls.
 
 /* eslint-disable react-hooks/immutability, react-hooks/refs, react-hooks/preserve-manual-memoization -- Three.js uniforms and texture objects are deliberately mutable renderer resources, not React state. */

@@ -32,7 +32,7 @@ test("select, preview, activate, reload and clear a shared scenario", async ({
     .getByRole("button", { name: "Preview", exact: true })
     .click();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("status")).toContainText("Valid Cortana");
+  await expect(page.getByRole("status")).toContainText("Valid Samantha");
   await page.getByRole("button", { name: "Preview briefing" }).click();
   await expect(page.getByRole("dialog")).toContainText("Synthetic Patient 031");
   await page.keyboard.press("Escape");
@@ -85,7 +85,7 @@ test("paste errors and upload HTML remain plain data", async ({ page }) => {
     mimeType: "application/json",
     buffer: Buffer.from(JSON.stringify(upload)),
   });
-  await expect(page.getByRole("status")).toContainText("Valid Cortana");
+  await expect(page.getByRole("status")).toContainText("Valid Samantha");
   await expect(
     page.getByText(upload.description, { exact: true }),
   ).toBeVisible();
@@ -102,7 +102,7 @@ test("paste errors and upload HTML remain plain data", async ({ page }) => {
     .getByLabel("Scenario JSON", { exact: true })
     .fill(JSON.stringify(morning));
   await page.getByRole("button", { name: "Validate JSON" }).click();
-  await expect(page.getByRole("status")).toContainText("Valid Cortana");
+  await expect(page.getByRole("status")).toContainText("Valid Samantha");
 });
 test("drop JSON on mobile and start briefing without losing language selection", async ({
   page,
@@ -119,7 +119,7 @@ test("drop JSON on mobile and start briefing without losing language selection",
   await page
     .locator(".context-dropzone")
     .dispatchEvent("drop", { dataTransfer: transfer });
-  await expect(page.getByRole("status")).toContainText("Valid Cortana");
+  await expect(page.getByRole("status")).toContainText("Valid Samantha");
   await page.getByRole("button", { name: "Activate scenario" }).click();
   await expect(page.getByRole("status")).toContainText("activated");
   expect(

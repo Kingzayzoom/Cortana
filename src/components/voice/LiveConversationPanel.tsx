@@ -226,7 +226,7 @@ export function LiveConversationPanel({ active }: { active: boolean }) {
         role="log"
         aria-live="polite"
         aria-relevant="additions text"
-        aria-label="Conversation between you and Cortana"
+        aria-label="Conversation between you and Samantha"
         onWheel={(event) => {
           if (event.deltaY < 0) following.current = false;
         }}
@@ -247,7 +247,7 @@ export function LiveConversationPanel({ active }: { active: boolean }) {
       >
         {messages.length === 0 && !caseVisible && (
           <p className="conversation-empty">
-            Your conversation will appear here as you and Cortana speak.
+            Your conversation will appear here as you and Samantha speak.
           </p>
         )}
         {caseVisible && anchorIndex === -1 && challenge}
@@ -257,7 +257,7 @@ export function LiveConversationPanel({ active }: { active: boolean }) {
               className={`conversation-turn${index === messages.length - 1 && message.role === "assistant" && voice.activity === "assistant-speaking" ? " is-speaking" : ""}`}
             >
               <span className="conversation-speaker">
-                {message.role === "user" ? "You" : "Cortana"}
+                {message.role === "user" ? "You" : "Samantha"}
               </span>
               <p>{message.text}</p>
             </article>

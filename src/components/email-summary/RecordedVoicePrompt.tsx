@@ -193,13 +193,13 @@ export function RecordedVoicePrompt({
         aria-label={
           phase === "listening"
             ? "Stop listening"
-            : "Ask Cortana to draft by voice"
+            : "Ask Samantha to draft by voice"
         }
       >
         <span className="email-voice-orb" aria-hidden="true" />
       </button>
       <div>
-        <strong>Cortana voice draft</strong>
+        <strong>Samantha voice draft</strong>
         <p aria-live="polite">
           {phase === "asking"
             ? "What message would you like me to draft?"
@@ -207,12 +207,12 @@ export function RecordedVoicePrompt({
               ? "Listening… tap the icon when you finish."
               : phase === "transcribing"
                 ? "Transcribing your message…"
-                : "Tap the icon and tell Cortana what to draft."}
+                : "Tap the icon and tell Samantha what to draft."}
         </p>
         {available && (
           <p className="email-voice-note">
             This browser sends a short recording to Gemini for transcription.
-            Cortana does not save the audio or create a Gmail draft.
+            Samantha does not save the audio or create a Gmail draft.
           </p>
         )}
         {available === false && (

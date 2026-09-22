@@ -2,7 +2,7 @@
 
 This optional feature is available only on `/email-summary`. The morning
 briefing requests only `https://www.googleapis.com/auth/gmail.readonly`.
-Cortana never sends, modifies, labels, archives, moves, or deletes Gmail messages.
+Samantha never sends, modifies, labels, archives, moves, or deletes Gmail messages.
 
 ## Setup
 
@@ -42,7 +42,7 @@ For local OAuth testing, Google needs a separate localhost redirect URI and
 The drafting panel asks for a message with browser speech synthesis. Browsers
 with built-in speech recognition transcribe directly. Firefox records up to 20
 seconds and sends that clip to Gemini for transcription using the existing
-`GEMINI_API_KEY`; Cortana does not store the audio. The page states this before
+`GEMINI_API_KEY`; Samantha does not store the audio. The page states this before
 recording. A typing fallback remains available if microphone access is denied
 or unavailable. A small local template creates an editable sample subject and
 body from the request. Draft generation does not read Gmail, create a Gmail

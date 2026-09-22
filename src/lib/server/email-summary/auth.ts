@@ -11,8 +11,8 @@ import { config, GMAIL_SCOPE } from "./config";
 import { connectionById, deleteConnection, saveConnection } from "./store";
 import { gmailGet } from "./gmail";
 
-const OAUTH_COOKIE = "cortana_gmail_oauth";
-const SESSION_COOKIE = "cortana_gmail_session";
+const OAUTH_COOKIE = "samantha_gmail_oauth";
+const SESSION_COOKIE = "samantha_gmail_session";
 const SESSION_AGE_SECONDS = 60 * 60 * 24 * 90;
 export type GmailOAuthErrorCode =
   | "google_unreachable"

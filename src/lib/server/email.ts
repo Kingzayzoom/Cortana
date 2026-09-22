@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { RequestError } from "./errors";
 import { clinician, facility } from "../content/briefing";
+import { setting } from "./env";
 
-// Cortana can pass a message to the front desk during a call. The agent never
+// Samantha can pass a message to the front desk during a call. The agent never
 // chooses the recipient: this server holds one configured address, composes the
 // message, and marks every send as demo traffic. The model only supplies words.
 const ENDPOINT = "https://api.resend.com/emails";
@@ -22,7 +23,7 @@ export type FrontDeskRequest = z.infer<typeof frontDeskRequest>;
 // One preset recipient for the demo. The agent can never address a message
 // anywhere else, whatever it is asked to do on a call.
 export const frontDeskAddress = () =>
-  process.env.CORTANA_FRONT_DESK_EMAIL || "kingzayzoom@gmail.com";
+  setting("FRONT_DESK_EMAIL") || "kingzayzoom@gmail.com";
 
 export function emailConfigured() {
   return Boolean(process.env.RESEND_API_KEY && frontDeskAddress());
@@ -53,14 +54,14 @@ export async function notifyFrontDesk(request: FrontDeskRequest) {
   // Reads like a note from a colleague, not a form. One quiet line at the end
   // keeps it honest about where it came from.
   const text = [
-    `Hi — Cortana here, on behalf of ${clinician.displayName}.`,
+    `Hi — Samantha here, on behalf of ${clinician.displayName}.`,
     "",
     message,
     ...(request.etaMinutes
       ? [`Expected in about ${request.etaMinutes} minutes.`]
       : []),
     "",
-    "Sent from a Cortana voice call · demonstration message",
+    "Sent from a Samantha voice call · demonstration message",
   ].join("\n");
 
   let response: Response;
@@ -74,8 +75,7 @@ export async function notifyFrontDesk(request: FrontDeskRequest) {
       cache: "no-store",
       signal: AbortSignal.timeout(15_000),
       body: JSON.stringify({
-        from:
-          process.env.CORTANA_EMAIL_FROM || "Cortana <onboarding@resend.dev>",
+        from: setting("EMAIL_FROM") || "Samantha <onboarding@resend.dev>",
         to: [to],
         subject,
         text,
@@ -96,7 +96,7 @@ export async function notifyFrontDesk(request: FrontDeskRequest) {
     // Never forward the provider's body; choose one of our own messages.
     const detail = JSON.stringify(await response.json().catch(() => ({})));
     console.error(
-      "[cortana] front desk email failed",
+      "[samantha] front desk email failed",
       response.status,
       detail.slice(0, 200),
     );
