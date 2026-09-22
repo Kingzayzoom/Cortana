@@ -1,12 +1,16 @@
+// Profile storage. `withProgress` is the only way a profile is read or written:
+// Redis in production, a JSON file per profile in development.
 import { randomUUID, createHash } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { dataDirectory, isAccount, voiceConfigured } from "./session";
+import { dataDirectory, isAccount } from "./session";
+import { voiceConfigured } from "./elevenlabs";
 import { RequestError } from "./errors";
 import { database, onVercel, redis, redisKey } from "./redis";
 import type { Account, Progress, Snapshot } from "../learning/types";
 import { googleConfigured } from "./auth";
 import { localDate, streak } from "../learning/rules";
+/** A profile as stored: progress plus Prime, the Context Feed and replay records. */
 export type StoredProgress = Progress & {
   prime?: import("../prime/types").PrimeState;
   contextScenario?: import("../context/types").ContextScenario | null;
@@ -32,6 +36,10 @@ export function emptyProgress(): StoredProgress {
   };
 }
 type Operation<T> = (data: StoredProgress) => T | Promise<T>;
+
+// Older profiles stored each answer request's raw body as its fingerprint,
+// which could include what the learner said. Hash it on read: retries still
+// match, and the text is gone from storage after the next write.
 function migrateReplayFingerprints(progress: StoredProgress) {
   for (const saved of Object.values(progress.requests)) {
     if (!/^[a-f0-9]{64}$/.test(saved.fingerprint))
@@ -135,6 +143,7 @@ async function withRedisProgress<T>(id: string, operation: Operation<T>) {
     }
   }
 }
+/** What the page receives: the profile plus derived totals and server capabilities. */
 export function snapshot(progress: Progress): Snapshot {
   return {
     account: progress.account ?? null,

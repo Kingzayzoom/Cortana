@@ -1,3 +1,5 @@
+// Supabase persistence for the email briefing: connections with encrypted
+// tokens, and the latest summary per connection.
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 import { z } from "zod";
 import type { EmailSummary, SourceMessage } from "@/lib/email-summary/types";
@@ -23,7 +25,7 @@ function dbUrl(
   return url;
 }
 
-export async function dbRequest(
+async function dbRequest(
   table: "email_connections" | "email_summaries",
   method: "GET" | "POST" | "PATCH" | "DELETE",
   query?: Record<string, string>,
@@ -190,7 +192,7 @@ export async function listConnections() {
   }
 }
 
-export function encryptToken(value: string) {
+function encryptToken(value: string) {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", tokenKey(), iv);
   const encrypted = Buffer.concat([

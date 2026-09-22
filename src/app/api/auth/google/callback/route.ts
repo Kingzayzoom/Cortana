@@ -1,17 +1,18 @@
+// GET /api/auth/google/callback — finishes Google sign-in, links the account
+// to a profile (carrying anonymous progress over on first sign-in) and swaps
+// the session cookie. Failures redirect home with a short error code.
 import {
   accountId,
   completeGoogleAuth,
   consumeOAuthCookie,
 } from "@/lib/server/auth";
-import {
-  appOrigin,
-  profileSession,
-  RequestError,
-  setProfileSession,
-} from "@/lib/server/session";
+import { appOrigin } from "@/lib/server/http";
+import { RequestError } from "@/lib/server/errors";
+import { profileSession, setProfileSession } from "@/lib/server/session";
 import { linkAccount } from "@/lib/server/store";
 export const runtime = "nodejs";
 
+// Status → the code the page turns into a sentence (see AccountControls).
 const CODES: Record<number, string> = {
   401: "expired",
   403: "denied",

@@ -7,22 +7,20 @@ const state = vi.hoisted(() => ({ profile: "phone-profile-1" }));
 vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({ get: () => undefined, set: vi.fn() })),
 }));
-vi.mock("../src/lib/server/session", async (original) => {
-  const actual = await original<typeof import("../src/lib/server/session")>();
-  return {
-    ...actual,
-    profileSession: vi.fn(async () => state.profile),
-    rateLimit: vi.fn(),
-  };
-});
+vi.mock("../src/lib/server/session", async (original) => ({
+  ...(await original<typeof import("../src/lib/server/session")>()),
+  profileSession: vi.fn(async () => state.profile),
+}));
+vi.mock("../src/lib/server/http", async (original) => ({
+  ...(await original<typeof import("../src/lib/server/http")>()),
+  rateLimit: vi.fn(),
+}));
 
 import { POST as call } from "../src/app/api/phone/call/route";
 import { POST as tool } from "../src/app/api/phone/tools/[tool]/route";
-import {
-  createPhoneSession,
-  maskNumber,
-  spokenOption,
-} from "../src/lib/server/phone";
+import { createPhoneSession } from "../src/lib/server/phone/session";
+import { maskNumber } from "../src/lib/server/phone/outbound";
+import { spokenOption } from "../src/lib/server/phone/spoken-option";
 import { withProgress } from "../src/lib/server/store";
 import { setActiveScenario } from "../src/lib/context/store";
 import { demoScenarios } from "../src/lib/context/demo";

@@ -1,5 +1,18 @@
+// Browser voice: mints the short-lived WebRTC token the page hands to the
+// ElevenLabs SDK, so the API key never leaves the server.
 import { z } from "zod";
-import { RequestError } from "./session";
+import { RequestError } from "./errors";
+import { setting } from "./env";
+
+/** Whether the browser voice round can run, or should fall back to text preview. */
+export function voiceConfigured() {
+  return Boolean(
+    process.env.ELEVENLABS_API_KEY &&
+    process.env.ELEVENLABS_AGENT_ID &&
+    (setting("DEMO_ACCESS_CODE")?.length ?? 0) >= 12 &&
+    (setting("SESSION_SECRET")?.length ?? 0) >= 32,
+  );
+}
 
 // Never forward a provider body: it can contain credentials, internal IDs or URLs.
 export async function createConversationToken() {

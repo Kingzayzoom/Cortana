@@ -1,3 +1,6 @@
+// The evidence round: two published sources, three briefing sections and one
+// synthetic case. Shared with the page, so it holds no answer key (that is in
+// learning/rules.ts).
 export const ROUND_ID = "dapa-hf-01";
 export const CONTENT_VERSION = "2026-09-19.1";
 export const sources = [
@@ -38,7 +41,7 @@ export const sources = [
       "A subgroup analysis of the same trial, not independent replication. Composite outcomes should not be interpreted as identical effects on every component.",
   },
 ] as const;
-export type SourceId = (typeof sources)[number]["id"];
+type SourceId = (typeof sources)[number]["id"];
 export const round = {
   id: ROUND_ID,
   version: CONTENT_VERSION,
@@ -86,6 +89,51 @@ export const round = {
 };
 export const unsupportedAnswer =
   "The sources in this round do not establish that. I can show you what they do cover.";
+
+// Typed questions in the text preview. Only these exact phrasings get an
+// answer, each quoted from a source; anything else gets unsupportedAnswer.
+// The live voice agent answers from the same sources through its prompt.
+const curatedAnswers: {
+  pattern: RegExp;
+  answer: string;
+  sourceId: SourceId;
+}[] = [
+  {
+    pattern:
+      /^(who was (included|studied)|who was included in (that|the) study|what was the (study )?population)$/,
+    answer: round.sections[0].text,
+    sourceId: "dapa-hf",
+  },
+  {
+    pattern:
+      /^(did (participants|patients) need diabetes|was diabetes required|what about (people )?without diabetes)$/,
+    answer: sources[1].summary,
+    sourceId: "dapa-diabetes",
+  },
+  {
+    pattern:
+      /^(what (did the study find|was the result|were the results)|what was the primary (outcome|endpoint))$/,
+    answer: sources[0].summary,
+    sourceId: "dapa-hf",
+  },
+  {
+    pattern:
+      /^(what (is|was|are|were) (the |an? )?(important )?limitations?|what does(n’t| not) it establish)$/,
+    answer: sources[1].scope,
+    sourceId: "dapa-diabetes",
+  },
+];
+
+export function answerFromSources(question: string) {
+  const q = question
+    .toLowerCase()
+    .trim()
+    .replace(/[?!.]+$/, "");
+  const match = curatedAnswers.find(({ pattern }) => pattern.test(q));
+  return match
+    ? { answer: match.answer, sourceIds: [match.sourceId], supported: true }
+    : { answer: unsupportedAnswer, sourceIds: [], supported: false };
+}
 export function sourceById(id: string) {
   return sources.find((source) => source.id === id);
 }

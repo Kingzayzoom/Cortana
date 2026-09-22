@@ -1,12 +1,15 @@
+// GET /api/phone/status?conversationId= — polled by the call page to show the
+// live transcript to the room while one person holds the phone.
 import {
   assertOrigin,
-  profileSession,
+  errorResponse,
+  json,
   rateLimit,
-  RequestError,
-  safeError,
-} from "@/lib/server/session";
+  requireProfile,
+} from "@/lib/server/http";
+import { RequestError } from "@/lib/server/errors";
 import { withProgress } from "@/lib/server/store";
-import { phoneConfigured } from "@/lib/server/phone";
+import { phoneConfigured } from "@/lib/server/phone/outbound";
 export const runtime = "nodejs";
 // Tool calls worth showing the room. Anything else stays behind the scenes.
 const ACTIONS: Record<string, string> = {
@@ -21,13 +24,11 @@ const ACTIONS: Record<string, string> = {
   submit_prime_answer: "Graded a practice answer on the server",
   complete_prime: "Saved today's practice",
 };
-// Lets the page follow its own call. A profile can only ask about the
-// conversation stored on its current run.
+// A profile can only follow the conversation stored on its own current run.
 export async function GET(request: Request) {
   try {
     assertOrigin(request);
-    const id = await profileSession();
-    if (!id) throw new RequestError("Refresh the workspace.", 401);
+    const id = await requireProfile("Refresh the workspace.");
     await rateLimit(`phone-status:${id}`, 120);
     const conversationId = new URL(request.url).searchParams.get(
       "conversationId",
@@ -82,13 +83,8 @@ export async function GET(request: Request) {
           });
       return rows;
     });
-    return Response.json(
-      { status: body?.status ?? "unknown", transcript },
-      { headers: { "Cache-Control": "no-store, private" } },
-    );
+    return json({ status: body?.status ?? "unknown", transcript });
   } catch (error) {
-    const response = safeError(error);
-    response.headers.set("Cache-Control", "no-store, private");
-    return response;
+    return errorResponse(error);
   }
 }

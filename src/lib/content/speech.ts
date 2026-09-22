@@ -35,7 +35,7 @@ const tens = [
   "ninety",
 ];
 
-export function words(value: number): string {
+function words(value: number): string {
   if (value < 20) return ones[value];
   if (value < 100) {
     const rest = value % 10;

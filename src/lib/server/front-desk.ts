@@ -1,11 +1,12 @@
+// Samantha can pass a message to the front desk during a call ("tell them I'm
+// running twenty minutes late"). The agent never chooses the recipient: this
+// server holds one configured address, composes the email, and marks it as demo
+// traffic. The model supplies only the words, after reading them back.
 import { z } from "zod";
 import { RequestError } from "./errors";
-import { clinician, facility } from "../content/briefing";
+import { clinician, facility } from "../content/briefings";
 import { setting } from "./env";
 
-// Samantha can pass a message to the front desk during a call. The agent never
-// chooses the recipient: this server holds one configured address, composes the
-// message, and marks every send as demo traffic. The model only supplies words.
 const ENDPOINT = "https://api.resend.com/emails";
 
 export const frontDeskRequest = z
@@ -18,16 +19,18 @@ export const frontDeskRequest = z
   })
   .strict();
 
-export type FrontDeskRequest = z.infer<typeof frontDeskRequest>;
+type FrontDeskRequest = z.infer<typeof frontDeskRequest>;
 
 // One preset recipient for the demo. The agent can never address a message
 // anywhere else, whatever it is asked to do on a call.
-export const frontDeskAddress = () =>
+const frontDeskAddress = () =>
   setting("FRONT_DESK_EMAIL") || "kingzayzoom@gmail.com";
 
-export function emailConfigured() {
+function emailConfigured() {
   return Boolean(process.env.RESEND_API_KEY && frontDeskAddress());
 }
+
+const surname = (name: string) => name.split(" ").at(-1)!;
 
 const headline: Record<FrontDeskRequest["reason"], string> = {
   running_late: "running late",
@@ -36,7 +39,7 @@ const headline: Record<FrontDeskRequest["reason"], string> = {
 };
 
 /** Masks the address so a transcript or log never carries it in full. */
-export const maskEmail = (address: string) => {
+const maskEmail = (address: string) => {
   const [name, domain] = address.split("@");
   return `${name.slice(0, 2)}${"•".repeat(Math.max(name.length - 2, 1))}@${domain ?? ""}`;
 };
@@ -48,8 +51,11 @@ export async function notifyFrontDesk(request: FrontDeskRequest) {
       503,
     );
   const to = frontDeskAddress();
-  // The voice says "Zabish"; anything written uses the real spelling.
-  const message = request.message.replace(/Zabish/g, "Zaybish");
+  // The agent writes the name the way it says it; the email uses the real spelling.
+  const message = request.message.replaceAll(
+    surname(clinician.spokenName),
+    surname(clinician.displayName),
+  );
   const subject = `${clinician.displayName} — ${headline[request.reason]} (${facility.unit})`;
   // Reads like a note from a colleague, not a form. One quiet line at the end
   // keeps it honest about where it came from.

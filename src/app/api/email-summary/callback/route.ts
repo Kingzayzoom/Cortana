@@ -1,3 +1,6 @@
+// GET /api/email-summary/callback — Google redirects here after the Gmail
+// consent screen. Stores the encrypted tokens, then returns to /email-summary
+// with either email_connected=1 or an email_error code.
 import {
   completeGmailOAuth,
   GmailOAuthError,

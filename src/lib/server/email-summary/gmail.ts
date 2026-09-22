@@ -1,3 +1,5 @@
+// Gmail API access: token refresh, and the recent-inbox query that keeps only
+// sender, subject, snippet and date.
 import { z } from "zod";
 import type { SourceMessage } from "@/lib/email-summary/types";
 import { RequestError } from "../errors";

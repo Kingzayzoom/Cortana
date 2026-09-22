@@ -19,5 +19,3 @@ export const topics = [
     available: false,
   },
 ] as const;
-
-export const availableTopics = () => topics.filter((topic) => topic.available);

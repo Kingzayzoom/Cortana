@@ -1,33 +1,37 @@
+// POST /api/context/tools/:tool — the browser voice agent's context tools.
+// Read-only queries against the caller's active scenario; the phone agent
+// reaches the same queryContext through /api/phone/tools.
 import { z } from "zod";
 import {
   assertOrigin,
-  profileSession,
-  readBody,
+  errorResponse,
+  json,
   rateLimit,
-  RequestError,
-  safeError,
-} from "@/lib/server/session";
+  readBody,
+  requireProfile,
+} from "@/lib/server/http";
+import { RequestError } from "@/lib/server/errors";
 import { readActiveScenario } from "@/lib/context/store";
 import { queryContext, isContextTool } from "@/lib/context/tools";
 export const runtime = "nodejs";
+
 export async function POST(
   request: Request,
   context: { params: Promise<{ tool: string }> },
 ) {
   try {
     assertOrigin(request);
-    const id = await profileSession();
-    if (!id) throw new RequestError("No active profile.", 401);
+    const id = await requireProfile("No active profile.");
     await rateLimit("context-tool:" + id, 90);
     const { tool } = await context.params;
     if (!isContextTool(tool))
       throw new RequestError("Unknown context tool.", 404);
-    return Response.json(
+    return json(
       queryContext(await readActiveScenario(id), tool, await readBody(request)),
-      { headers: { "Cache-Control": "no-store, private" } },
     );
   } catch (error) {
-    return safeError(
+    // The model reads this, so say which parameter was wrong.
+    return errorResponse(
       error instanceof z.ZodError
         ? new RequestError(
             "Invalid context tool parameters: " +

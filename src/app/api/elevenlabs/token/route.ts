@@ -1,27 +1,30 @@
+// POST /api/elevenlabs/token — mints a single-use WebRTC token for the browser
+// voice round. Gated by the demo access code and an active run, so the voice
+// minutes this costs can't be spent by anyone who merely finds the page.
 import { z } from "zod";
 import {
   assertOrigin,
-  profileSession,
+  errorResponse,
+  json,
   rateLimit,
   readBody,
-  RequestError,
-  safeEqual,
-  safeError,
-  voiceConfigured,
-} from "@/lib/server/session";
+  requireProfile,
+} from "@/lib/server/http";
+import { RequestError } from "@/lib/server/errors";
+import { safeEqual } from "@/lib/server/session";
 import { withProgress } from "@/lib/server/store";
-import { createConversationToken } from "@/lib/server/elevenlabs";
+import {
+  createConversationToken,
+  voiceConfigured,
+} from "@/lib/server/elevenlabs";
 import { setting } from "@/lib/server/env";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     assertOrigin(request);
-    const id = await profileSession();
-    if (!id)
-      throw new RequestError(
-        "Refresh the workspace before starting voice.",
-        401,
-      );
+    const id = await requireProfile(
+      "Refresh the workspace before starting voice.",
+    );
     await rateLimit("voice:global", 40, 3_600_000);
     await rateLimit(`voice:${id}`, 6);
     if (!voiceConfigured())
@@ -57,12 +60,8 @@ export async function POST(request: Request) {
       if (data.run?.id !== parsed.data.runId || data.run.completed)
         throw new RequestError("Start or resume a current round first.", 409);
     });
-    return Response.json(await createConversationToken(), {
-      headers: { "Cache-Control": "no-store, private" },
-    });
+    return json(await createConversationToken());
   } catch (error) {
-    const response = safeError(error);
-    response.headers.set("Cache-Control", "no-store, private");
-    return response;
+    return errorResponse(error);
   }
 }

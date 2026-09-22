@@ -1,3 +1,5 @@
+// Upstash Redis client for serverless hosting, where instances share no memory
+// or disk. Finds credentials under any of the names Vercel's integration uses.
 import { Redis } from "@upstash/redis";
 import { RequestError } from "./errors";
 import { setting } from "./env";

@@ -1,3 +1,5 @@
+// Prime's authority: starting the day's set, first-answer grading, spaced
+// review, rewards and signals, all inside one profile transaction.
 import { randomUUID } from "node:crypto";
 import { withProgress, type StoredProgress } from "../server/store";
 import { RequestError } from "../server/errors";
@@ -14,8 +16,17 @@ import {
   type Review,
 } from "./types";
 import { defaultScenario } from "../context/demo";
-import { phoneConfigured } from "../server/phone";
+import { phoneConfigured } from "../server/phone/outbound";
 import { primeToolSchemas } from "./tools";
+// The voice agent's Prime tools, for the browser and phone alike. Each maps to
+// one Prime action; the result carries a standing instruction because the model
+// otherwise tends to reveal the answer before the learner has committed.
+const TOOL_ACTIONS = {
+  submit_prime_answer: "answer",
+  advance_prime: "next",
+  complete_prime: "complete",
+} as const;
+
 export async function runPrimeTool(
   profile: string,
   tool: keyof typeof primeToolSchemas,
@@ -27,15 +38,8 @@ export async function runPrimeTool(
       ? await actPrime(profile, { action: "start" })
       : tool === "get_prime_feedback"
         ? await readPrime(profile)
-        : await actPrime(profile, {
-            ...args,
-            action:
-              tool === "submit_prime_answer"
-                ? "answer"
-                : tool === "advance_prime"
-                  ? "next"
-                  : "complete",
-          });
+        : await actPrime(profile, { ...args, action: TOOL_ACTIONS[tool] });
+  // A tool call from yesterday's session must not act on today's.
   if ("sessionId" in args && args.sessionId !== result.session?.id)
     throw new RequestError("Prime session does not match.", 409);
   return {
@@ -44,6 +48,7 @@ export async function runPrimeTool(
       "Ask only the current question. Wait for submit_prime_answer before correctness or explanation. After feedback and learner confirmation call advance_prime. After three graded questions call complete_prime. No clinical advice.",
   };
 }
+
 export function reviewAfter(
   previous: Review | undefined,
   conceptId: ConceptId,

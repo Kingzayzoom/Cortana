@@ -1,3 +1,5 @@
+// Prime question, session and action schemas. The public view omits the
+// correct option until a question is answered.
 import { z } from "zod";
 import { conceptId, evidenceSourceId } from "../learning-signals/types";
 export const primeQuestionSchema = z

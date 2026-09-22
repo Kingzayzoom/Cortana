@@ -1,8 +1,10 @@
+// The email briefing's use cases: status, a manual refresh, and the daily run
+// the cron triggers.
 import type { EmailSummaryStatus } from "@/lib/email-summary/types";
-import { RequestError } from "./errors";
-import { connectedAccount } from "./email-summary/auth";
-import { generateSummary } from "./email-summary/gemini";
-import { latestSummary, listConnections } from "./email-summary/store";
+import { RequestError } from "../errors";
+import { connectedAccount } from "./auth";
+import { generateSummary } from "./gemini";
+import { latestSummary, listConnections } from "./store";
 
 const schedule = "Daily morning Eastern";
 

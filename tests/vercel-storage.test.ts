@@ -19,15 +19,21 @@ vi.mock("next/headers", () => ({
 
 type Store = typeof import("../src/lib/server/store");
 type Session = typeof import("../src/lib/server/session");
+type Http = typeof import("../src/lib/server/http");
 type Emulator = Awaited<ReturnType<typeof startUpstashEmulator>>;
 let emulator: Emulator;
 let dataDir: string;
 // Each call returns fresh module state, like a separate serverless instance.
-async function instance(): Promise<{ store: Store; session: Session }> {
+async function instance(): Promise<{
+  store: Store;
+  session: Session;
+  http: Http;
+}> {
   vi.resetModules();
   return {
     store: await import("../src/lib/server/store"),
     session: await import("../src/lib/server/session"),
+    http: await import("../src/lib/server/http"),
   };
 }
 const profile = "3f8e2a8e-5d33-4c55-9a4f-1d2f0b6c7e90";
@@ -213,15 +219,15 @@ describe("Serverless configuration", () => {
   it("shares rate limits across instances until the window ends", async () => {
     const a = await instance(),
       b = await instance();
-    await a.session.rateLimit("voice:test", 3, 300);
-    await b.session.rateLimit("voice:test", 3, 300);
-    await a.session.rateLimit("voice:test", 3, 300);
-    await expect(
-      b.session.rateLimit("voice:test", 3, 300),
-    ).rejects.toMatchObject({ status: 429 });
+    await a.http.rateLimit("voice:test", 3, 300);
+    await b.http.rateLimit("voice:test", 3, 300);
+    await a.http.rateLimit("voice:test", 3, 300);
+    await expect(b.http.rateLimit("voice:test", 3, 300)).rejects.toMatchObject({
+      status: 429,
+    });
     await wait(350);
     await expect(
-      a.session.rateLimit("voice:test", 3, 300),
+      a.http.rateLimit("voice:test", 3, 300),
     ).resolves.toBeUndefined();
   });
 
@@ -241,19 +247,19 @@ describe("Serverless configuration", () => {
   });
 
   it("accepts HTTPS origins forwarded by the host and configured alternatives", async () => {
-    const { session } = await instance();
+    const { http } = await instance();
     const request = (origin: string, headers: Record<string, string> = {}) =>
       new Request("http://0.0.0.0:3000/api/learning", {
         method: "POST",
         headers: { origin, host: "cortex.vercel.app", ...headers },
       });
     expect(() =>
-      session.assertOrigin(
+      http.assertOrigin(
         request("https://cortex.vercel.app", { "x-forwarded-proto": "https" }),
       ),
     ).not.toThrow();
     expect(() =>
-      session.assertOrigin(
+      http.assertOrigin(
         request("https://evil.example", { "x-forwarded-proto": "https" }),
       ),
     ).toThrow("must come from");
@@ -262,13 +268,13 @@ describe("Serverless configuration", () => {
       "https://cortex.vercel.app, https://demo.example",
     );
     expect(() =>
-      session.assertOrigin(request("https://demo.example")),
+      http.assertOrigin(request("https://demo.example")),
     ).not.toThrow();
     // A trailing slash is easy to paste into a dashboard and would otherwise
     // reject every request.
     vi.stubEnv("SAMANTHA_APP_ORIGIN", "https://demo.example/");
     expect(() =>
-      session.assertOrigin(request("https://demo.example")),
+      http.assertOrigin(request("https://demo.example")),
     ).not.toThrow();
   });
 });

@@ -1,3 +1,4 @@
+// Argument schemas for the agents' Prime tools. Safe to import in the browser.
 import { z } from "zod";
 export const primeToolSchemas = {
   get_prime_session: z.object({}).strict(),

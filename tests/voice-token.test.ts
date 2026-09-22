@@ -6,14 +6,14 @@ const state = vi.hoisted(() => ({
   run: "ba5f7f6a-6e89-4db2-9582-c349348e84c1",
 }));
 vi.mock("next/headers", () => ({ cookies: vi.fn() }));
-vi.mock("../src/lib/server/session", async (original) => {
-  const actual = await original<typeof import("../src/lib/server/session")>();
-  return {
-    ...actual,
-    profileSession: vi.fn(() => state.session),
-    rateLimit: vi.fn(),
-  };
-});
+vi.mock("../src/lib/server/session", async (original) => ({
+  ...(await original<typeof import("../src/lib/server/session")>()),
+  profileSession: vi.fn(() => state.session),
+}));
+vi.mock("../src/lib/server/http", async (original) => ({
+  ...(await original<typeof import("../src/lib/server/http")>()),
+  rateLimit: vi.fn(),
+}));
 vi.mock("../src/lib/server/store", () => ({
   withProgress: vi.fn((_id, operation) =>
     operation({ run: { id: state.run, completed: false } }),

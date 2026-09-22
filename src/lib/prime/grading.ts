@@ -1,3 +1,5 @@
+// Server-only. Normalises a spoken or typed Prime answer to one option and
+// grades it against the bank.
 import { questions } from "./questions/bank";
 import type { PrimeQuestion } from "./types";
 import { RequestError } from "../server/errors";

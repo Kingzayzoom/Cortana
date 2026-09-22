@@ -1,38 +1,39 @@
+// POST /api/phone/call — "call me" from the web app. Starts a fresh run on the
+// caller's profile, signs a phone session for it, and asks ElevenLabs to dial.
+// The phone number is used once and never stored.
 import { randomUUID } from "node:crypto";
 import {
   assertOrigin,
-  profileSession,
+  errorResponse,
+  json,
   rateLimit,
   readBody,
-  RequestError,
-  safeEqual,
-  safeError,
-} from "@/lib/server/session";
+  requireProfile,
+} from "@/lib/server/http";
+import { RequestError } from "@/lib/server/errors";
+import { safeEqual } from "@/lib/server/session";
 import { withProgress } from "@/lib/server/store";
+import { createPhoneSession } from "@/lib/server/phone/session";
 import {
-  createPhoneSession,
   maskNumber,
   phoneCallRequest,
   phoneConfigured,
   startOutboundCall,
-} from "@/lib/server/phone";
+} from "@/lib/server/phone/outbound";
 import { localDate, streak } from "@/lib/learning/rules";
 import { ROUND_ID } from "@/lib/content/round";
 import { readActiveScenario } from "@/lib/context/store";
 import { buildPhoneBriefingContext } from "@/lib/context/selectors";
-import { clinician } from "@/lib/content/briefing";
+import { clinician } from "@/lib/content/briefings";
 import { actPrime } from "@/lib/prime/server";
 import { setting } from "@/lib/server/env";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   try {
     assertOrigin(request);
-    const id = await profileSession();
-    if (!id)
-      throw new RequestError(
-        "Refresh the workspace before requesting a call.",
-        401,
-      );
+    const id = await requireProfile(
+      "Refresh the workspace before requesting a call.",
+    );
     // Calls cost money and ring a real phone: keep both limits tight.
     await rateLimit(
       "phone:global",
@@ -60,6 +61,8 @@ export async function POST(request: Request) {
     const { accessCode, phoneNumber, mode } = parsed.data;
     if (!safeEqual(accessCode, setting("DEMO_ACCESS_CODE")!))
       throw new RequestError("That demo access code is incorrect.", 403);
+    // "context" calls brief from the scenario active in the Context Feed;
+    // "prime" calls run today's practice set; "round" uses the built-in library.
     const briefing =
       mode === "context"
         ? buildPhoneBriefingContext(await readActiveScenario(id))
@@ -106,13 +109,8 @@ export async function POST(request: Request) {
         if (data.run?.id === run.id)
           data.run.phone = { conversationId, at: new Date().toISOString() };
       });
-    return Response.json(
-      { conversationId, calling: maskNumber(phoneNumber) },
-      { headers: { "Cache-Control": "no-store, private" } },
-    );
+    return json({ conversationId, calling: maskNumber(phoneNumber) });
   } catch (error) {
-    const response = safeError(error);
-    response.headers.set("Cache-Control", "no-store, private");
-    return response;
+    return errorResponse(error);
   }
 }

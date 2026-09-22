@@ -1,3 +1,5 @@
+// Configuration for the email briefing, checked on use so the rest of the app
+// runs without it.
 import { createHash } from "node:crypto";
 import { RequestError } from "../errors";
 

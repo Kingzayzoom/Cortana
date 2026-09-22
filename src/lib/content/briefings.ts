@@ -4,7 +4,13 @@
 // discloses once, at the start, that the data is simulated.
 import { sayDecimal, sayPercent, sayPressure, sayRate } from "./speech";
 
-export const BRIEFING_LIBRARY_VERSION = "2026-09-20.2";
+const BRIEFING_LIBRARY_VERSION = "2026-09-20.2";
+
+export const facility = {
+  name: "Riverside Medical Center",
+  unit: "Cardiac Step-Down",
+  location: "North Tower, Level 4",
+} as const;
 
 export const clinician = {
   displayName: "Dr. Zaybish",
@@ -608,6 +614,5 @@ export function briefingFor(seed: string) {
   };
 }
 
-export const scenarioCount = scenarios.length;
 export const notInBriefing =
   "That isn't in this briefing. I can tell you what it does cover.";

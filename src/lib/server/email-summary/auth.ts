@@ -1,3 +1,5 @@
+// Gmail OAuth for the email briefing (read-only scope), and the signed cookie
+// that remembers which connection belongs to this browser.
 import {
   createHash,
   createHmac,
@@ -14,7 +16,7 @@ import { gmailGet } from "./gmail";
 const OAUTH_COOKIE = "samantha_gmail_oauth";
 const SESSION_COOKIE = "samantha_gmail_session";
 const SESSION_AGE_SECONDS = 60 * 60 * 24 * 90;
-export type GmailOAuthErrorCode =
+type GmailOAuthErrorCode =
   | "google_unreachable"
   | "google_rejected"
   | "google_response"

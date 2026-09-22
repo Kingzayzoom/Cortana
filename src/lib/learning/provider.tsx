@@ -1,4 +1,6 @@
 "use client";
+// Client copy of the profile snapshot. `act` sends one learning request and
+// replaces the snapshot with the server's answer; the text preview lives here too.
 import {
   createContext,
   useCallback,
@@ -37,6 +39,8 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
   const [busyCount, setBusyCount] = useState(0),
     [evidence, setEvidence] = useState<string | null>(null),
     [messages, setMessages] = useState<Message[]>([]);
+  // Requests are sent one at a time, in order, so a stage change can't overtake
+  // the answer before it. Only the newest response replaces the snapshot.
   const requestSeq = useRef(0);
   const saveQueue = useRef<Promise<unknown>>(Promise.resolve());
   const dataRef = useRef(data);
@@ -104,6 +108,8 @@ export function LearningProvider({ children }: { children: React.ReactNode }) {
     },
     [],
   );
+  // Fire-and-forget activity reports. A failure costs one signal, never the
+  // round, so it is not shown to the learner.
   const observe = useCallback(
     (
       observation: Observation,

@@ -1,16 +1,13 @@
-import { emailSummaryStatus } from "@/lib/server/email-summary";
-import { safeError } from "@/lib/server/session";
+// GET /api/email-summary — whether Gmail is connected, and the latest briefing.
+import { errorResponse, json } from "@/lib/server/http";
+import { emailSummaryStatus } from "@/lib/server/email-summary/service";
 
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    return Response.json(await emailSummaryStatus(), {
-      headers: { "Cache-Control": "no-store, private" },
-    });
+    return json(await emailSummaryStatus());
   } catch (error) {
-    const response = safeError(error);
-    response.headers.set("Cache-Control", "no-store, private");
-    return response;
+    return errorResponse(error);
   }
 }

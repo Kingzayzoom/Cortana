@@ -1,8 +1,11 @@
+// Google sign-in: authorization code with PKCE, and ID token verification
+// against Google's keys. A signed-in profile is stored as `g-<subject>`.
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { OAuth2Client } from "google-auth-library";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { appOrigin, hmac, safeEqual } from "./session";
+import { hmac, safeEqual } from "./session";
+import { appOrigin } from "./http";
 import { RequestError } from "./errors";
 
 const AUTHORIZE = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -18,7 +21,7 @@ export function googleConfigured() {
 }
 
 /** Google subjects are numeric strings. Constrain them: this value names a file. */
-export const googleSubject = z.string().regex(/^\d{1,64}$/);
+const googleSubject = z.string().regex(/^\d{1,64}$/);
 
 /** Storage id for a signed-in account. Anonymous ids stay plain UUIDs. */
 export const accountId = (subject: string) => `g-${subject}`;

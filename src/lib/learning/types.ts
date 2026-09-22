@@ -1,3 +1,4 @@
+// Profile, run and grade shapes shared by the server and the page.
 export type LessonStage =
   "ready" | "briefing" | "challenge" | "feedback" | "questions" | "completed";
 export type ConnectionState =

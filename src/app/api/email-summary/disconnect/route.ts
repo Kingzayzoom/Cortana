@@ -1,5 +1,7 @@
+// DELETE /api/email-summary/disconnect — revokes the Gmail grant and deletes
+// the stored tokens and briefing.
+import { assertOrigin, errorResponse, json } from "@/lib/server/http";
 import { disconnectGmail } from "@/lib/server/email-summary/auth";
-import { assertOrigin, safeError } from "@/lib/server/session";
 
 export const runtime = "nodejs";
 
@@ -7,15 +9,8 @@ export async function DELETE(request: Request) {
   try {
     assertOrigin(request);
     await disconnectGmail();
-    return Response.json(
-      { connected: false },
-      {
-        headers: { "Cache-Control": "no-store, private" },
-      },
-    );
+    return json({ connected: false });
   } catch (error) {
-    const response = safeError(error);
-    response.headers.set("Cache-Control", "no-store, private");
-    return response;
+    return errorResponse(error);
   }
 }
