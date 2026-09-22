@@ -7,5 +7,5 @@ test-results/
 playwright-report/
 *.tsbuildinfo
 *.log
-artifacts/live-*.json
-artifacts/cortana-live.png
+.cortana/live-*.json
+.cortana/cortana-live.png
