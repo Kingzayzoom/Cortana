@@ -33,8 +33,18 @@ export async function POST(request: Request) {
         401,
       );
     // Calls cost money and ring a real phone: keep both limits tight.
-    await rateLimit("phone:global", 12, 3_600_000);
-    await rateLimit(`phone:${id}`, 3, 600_000);
+    await rateLimit(
+      "phone:global",
+      30,
+      3_600_000,
+      "This demo has placed a lot of calls in the last hour. Try again shortly.",
+    );
+    await rateLimit(
+      `phone:${id}`,
+      8,
+      600_000,
+      "That is eight calls from this browser in ten minutes. Wait a few minutes and try again.",
+    );
     if (!phoneConfigured())
       throw new RequestError(
         "Phone rounds are not configured on this server.",

@@ -135,7 +135,12 @@ export function assertOrigin(request: Request) {
 const windows = new Map<string, { count: number; until: number }>();
 // Fixed-window limit. With Redis the count is shared by every serverless
 // instance; without it, it applies to this process only.
-export async function rateLimit(key: string, max: number, duration = 60_000) {
+export async function rateLimit(
+  key: string,
+  max: number,
+  duration = 60_000,
+  message = "Too many requests. Please wait a minute and try again.",
+) {
   const db = redis();
   if (db) {
     const bucket = redisKey("rate", key);
@@ -144,11 +149,7 @@ export async function rateLimit(key: string, max: number, duration = 60_000) {
       await db.set(bucket, 0, { nx: true, px: duration });
       return db.incr(bucket);
     });
-    if (count > max)
-      throw new RequestError(
-        "Too many requests. Please wait a minute and try again.",
-        429,
-      );
+    if (count > max) throw new RequestError(message, 429);
     return;
   }
   const now = Date.now();
@@ -156,11 +157,7 @@ export async function rateLimit(key: string, max: number, duration = 60_000) {
     if (bucket.until <= now) windows.delete(id);
   const existing = windows.get(key);
   if (!existing) windows.set(key, { count: 1, until: now + duration });
-  else if (++existing.count > max)
-    throw new RequestError(
-      "Too many requests. Please wait a minute and try again.",
-      429,
-    );
+  else if (++existing.count > max) throw new RequestError(message, 429);
 }
 export async function readBody(request: Request) {
   const text = await request.text();
