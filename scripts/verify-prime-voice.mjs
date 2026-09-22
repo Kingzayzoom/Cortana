@@ -1,7 +1,9 @@
+// Drives a real Prime voice session in Chromium against a running server and
+// checks each answer is graded by the server. Spends ElevenLabs minutes.
 import { chromium, expect } from "@playwright/test";
 import env from "@next/env";
 import { mkdir, writeFile } from "node:fs/promises";
-import { setting } from "./settings.mjs";
+import { setting } from "./lib/settings.mjs";
 env.loadEnvConfig(process.cwd());
 const browser = await chromium.launch({
   args: [
@@ -11,7 +13,7 @@ const browser = await chromium.launch({
 });
 const context = await browser.newContext({
   permissions: ["microphone"],
-  baseURL: setting("TEST_URL") || "http://localhost:3102",
+  baseURL: setting("TEST_URL") || "http://localhost:3100",
 });
 const page = await context.newPage();
 page.setDefaultTimeout(15000);
@@ -27,7 +29,7 @@ const send = async (text) => {
   await page.getByRole("button", { name: "Send", exact: true }).click();
 };
 try {
-  await page.goto((setting("TEST_URL") || "http://localhost:3102") + "/prime");
+  await page.goto((setting("TEST_URL") || "http://localhost:3100") + "/prime");
   await page
     .getByRole("button", { name: "Start with Samantha", exact: true })
     .click();

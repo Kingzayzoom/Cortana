@@ -1,3 +1,6 @@
+// Smoke test for a production build on port 3101 (next build && next start -p 3101):
+// the home page renders, a text round starts, /dev/orb is 404. Also refreshes
+// the screenshots in docs/assets.
 import { chromium } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 const browser = await chromium.launch();

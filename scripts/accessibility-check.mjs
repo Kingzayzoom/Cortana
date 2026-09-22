@@ -1,6 +1,8 @@
+// axe WCAG 2.1 AA scan of every view against a running server.
+//   npm run test:a11y   (SAMANTHA_TEST_URL, default http://localhost:3100)
 import { chromium } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { setting } from "./settings.mjs";
+import { setting } from "./lib/settings.mjs";
 const browser = await chromium.launch();
 const context = await browser.newContext({
   viewport: { width: 1440, height: 900 },

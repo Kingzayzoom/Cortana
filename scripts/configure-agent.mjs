@@ -2,43 +2,28 @@
 // Reuses the selected agent and its model/voice. Existing unrelated settings survive.
 import nextEnv from "@next/env";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { elevenlabs, isNotFound } from "./lib/elevenlabs.mjs";
 nextEnv.loadEnvConfig(process.cwd());
-const apiKey = process.env.ELEVENLABS_API_KEY;
 const agentId = process.env.ELEVENLABS_AGENT_ID;
-if (!apiKey || !agentId)
-  throw new Error("Missing server ElevenLabs configuration.");
+if (!agentId) throw new Error("ELEVENLABS_AGENT_ID is not set.");
+const api = elevenlabs(process.env.ELEVENLABS_API_KEY, { timeoutMs: 20_000 });
+// True when a document or tool still exists. Ones deleted in the dashboard stay
+// referenced by the agent, and ElevenLabs then rejects the whole update.
+const exists = (path) =>
+  api(path).then(
+    () => true,
+    (error) => {
+      if (isNotFound(error)) return false;
+      throw error;
+    },
+  );
 const apply = process.argv.includes("--apply");
 const definitions = JSON.parse(
-  await readFile("docs/elevenlabs-tools.json", "utf8"),
+  await readFile("voice-agents/browser/tools.json", "utf8"),
 );
-const promptFile = await readFile("docs/agent-prompt.md", "utf8");
+const promptFile = await readFile("voice-agents/browser/prompt.md", "utf8");
 const prompt = promptFile.match(/```text\r?\n([\s\S]*?)```/)?.[1]?.trim();
 if (!prompt) throw new Error("Agent prompt text block is missing.");
-async function api(path, method = "GET", body) {
-  const response = await fetch(`https://api.elevenlabs.io/v1/convai/${path}`, {
-    method,
-    headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(20000),
-  });
-  if (!response.ok) {
-    const failure = await response.json().catch(() => null);
-    // Validation locations/messages only; never headers, raw bodies or input values.
-    const validation =
-      response.status === 422 && Array.isArray(failure?.detail)
-        ? failure.detail.map(({ loc, msg, type }) => ({
-            loc,
-            msg: String(msg).replaceAll(apiKey, "[REDACTED]"),
-            type,
-          }))
-        : undefined;
-    if (validation) console.log(JSON.stringify({ validation }));
-    throw new Error(
-      `ElevenLabs ${method} request failed (${response.status}). No raw response body or credentials were logged.`,
-    );
-  }
-  return response.json();
-}
 // The provider echoes tool schemas back with its own defaults added and the
 // keys reordered, so compare what the contract actually says.
 function normalize(value) {
@@ -102,7 +87,7 @@ if (apply) {
     if (found)
       // A tool deleted in the ElevenLabs dashboard is recreated below.
       await api(`tools/${found}`, "PATCH", definition).catch((error) => {
-        if (!String(error.message).includes("(404)")) throw error;
+        if (!isNotFound(error)) throw error;
         ids.delete(found);
         found = undefined;
       });
@@ -132,31 +117,19 @@ if (apply) {
   }
   if (
     saved.knowledge &&
-    !(await api(
-      `knowledge-base/${encodeURIComponent(saved.knowledge.id)}`,
-    ).then(
-      () => true,
-      (error) => !String(error.message).includes("(404)"),
-    ))
+    !(await exists(`knowledge-base/${encodeURIComponent(saved.knowledge.id)}`))
   )
     saved.knowledge = null;
   if (!saved.knowledge) {
     saved.knowledge = await api("knowledge-base/text", "POST", {
       name: plan.knowledge,
-      text: await readFile("docs/round-knowledge.md", "utf8"),
+      text: await readFile("voice-agents/browser/knowledge.md", "utf8"),
     });
     await save();
   }
-  // Documents deleted in the dashboard stay listed on the agent, and ElevenLabs
-  // then rejects the whole update, so only documents that still exist are kept.
   const knowledge = [];
   for (const item of existingPrompt.knowledge_base ?? [])
-    if (
-      await api(`knowledge-base/${encodeURIComponent(item.id)}`).then(
-        () => true,
-        (error) => !String(error.message).includes("(404)"),
-      )
-    )
+    if (await exists(`knowledge-base/${encodeURIComponent(item.id)}`))
       knowledge.push(item);
   const patch = {
     conversation_config: {

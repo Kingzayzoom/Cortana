@@ -1,6 +1,6 @@
 # Samantha agent instructions
 
-Applied to the browser agent by `node scripts/configure-agent.mjs --apply`. Editing the prompt in the ElevenLabs dashboard instead will be overwritten by the next apply, so change it here. The phone agent has its own, deliberately different prompt in [phone-agent-prompt.md](phone-agent-prompt.md).
+Applied to the browser agent by `node scripts/configure-agent.mjs --apply`. Editing the prompt in the ElevenLabs dashboard instead will be overwritten by the next apply, so change it here. The phone agent has its own, deliberately different prompt in [../phone/prompt.md](../phone/prompt.md).
 
 ```text
 PRIME MODE (takes precedence when context_mode is prime, or the learner explicitly asks for a quick primer):

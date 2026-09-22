@@ -1,3 +1,6 @@
+// Generates the ElevenLabs tool definitions and the knowledge document from the
+// app's own Zod schemas and content, so the agents can't drift from the server.
+//   npm run agent:export
 import { readFile, writeFile } from "node:fs/promises";
 import { contextToolNames, contextToolSchemas } from "../src/lib/context/tools";
 import { primeToolNames, primeToolSchemas } from "../src/lib/prime/tools";
@@ -144,7 +147,7 @@ function exportedParameters(name: string, schema: z.ZodType) {
   return result;
 }
 await writeFile(
-  "docs/elevenlabs-tools.json",
+  "voice-agents/browser/tools.json",
   JSON.stringify(
     definitions.map(([name, schema, description]) => ({
       tool_config: {
@@ -161,10 +164,10 @@ await writeFile(
   ) + "\n",
 );
 const existingPhoneTools = JSON.parse(
-  await readFile("docs/phone-tools.json", "utf8"),
+  await readFile("voice-agents/phone/tools.json", "utf8"),
 );
 await writeFile(
-  "docs/phone-tools.json",
+  "voice-agents/phone/tools.json",
   JSON.stringify(
     [
       ...existingPhoneTools.filter(
@@ -226,7 +229,10 @@ const knowledge = [
       `## Source ${source.id}\n\n${source.title}\n\n${source.authors}\n\n${source.publisher} · ${source.date}\n\nOriginal: ${source.url}\n\nRelevant section: ${source.section}\n\nSupporting excerpt: “${source.excerpt}”\n\nSummary: ${source.summary}\n\nScope: ${source.scope}`,
   ),
 ];
-await writeFile("docs/round-knowledge.md", knowledge.join("\n\n") + "\n");
+await writeFile(
+  "voice-agents/browser/knowledge.md",
+  knowledge.join("\n\n") + "\n",
+);
 console.log(
   "Exported web and phone agent tools, including context tools, and versioned knowledge.",
 );

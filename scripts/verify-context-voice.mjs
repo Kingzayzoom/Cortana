@@ -1,7 +1,10 @@
+// Drives a real Context Feed voice briefing in Chromium against a running
+// server, and checks the agent's answers come from the active scenario.
+// Spends ElevenLabs minutes.
 import { chromium, expect } from "@playwright/test";
 import nextEnv from "@next/env";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { setting } from "./settings.mjs";
+import { setting } from "./lib/settings.mjs";
 nextEnv.loadEnvConfig(process.cwd());
 const browser = await chromium.launch({
   args: [
@@ -29,7 +32,7 @@ page.on("response", async (response) => {
 });
 try {
   await page.goto(
-    (setting("TEST_URL") || "http://localhost:3102") + "/context",
+    (setting("TEST_URL") || "http://localhost:3100") + "/context",
   );
   await page
     .getByRole("button", { name: "Start briefing", exact: true })

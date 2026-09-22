@@ -3,17 +3,13 @@
 // The browser agent is never modified; its model and voice are copied.
 import nextEnv from "@next/env";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { setting } from "./settings.mjs";
+import { setting } from "./lib/settings.mjs";
+import { elevenlabs, publicUrl as deployedUrl } from "./lib/elevenlabs.mjs";
 nextEnv.loadEnvConfig(process.cwd());
-const apiKey = process.env.ELEVENLABS_API_KEY;
+const api = elevenlabs(process.env.ELEVENLABS_API_KEY);
 const toolSecret = setting("PHONE_TOOL_SECRET");
-const publicUrl = (
-  process.argv.find((a) => a.startsWith("--url="))?.slice(6) ||
-  setting("PUBLIC_URL") ||
-  ""
-).replace(/\/$/, "");
+const publicUrl = deployedUrl();
 const apply = process.argv.includes("--apply");
-if (!apiKey) throw new Error("ELEVENLABS_API_KEY is not set.");
 if (!toolSecret || toolSecret.length < 32)
   throw new Error(
     "SAMANTHA_PHONE_TOOL_SECRET is missing or too short. Run: node scripts/prepare-local.mjs",
@@ -23,38 +19,11 @@ if (!/^https:\/\/[^/]+$/.test(publicUrl))
     "Pass the deployed site's public origin, e.g. --url=https://your-app.vercel.app (ElevenLabs must reach it without a login).",
   );
 
-async function api(path, method = "GET", body) {
-  const response = await fetch(`https://api.elevenlabs.io/v1/convai/${path}`, {
-    method,
-    headers: { "xi-api-key": apiKey, "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(30000),
-  });
-  if (!response.ok) {
-    const failure = await response.json().catch(() => null);
-    // Validation locations only; never headers, raw bodies or secret values.
-    if (response.status === 422 && Array.isArray(failure?.detail))
-      console.log(
-        JSON.stringify({
-          validation: failure.detail.map(({ loc, msg, type }) => ({
-            loc,
-            msg: String(msg).replaceAll(apiKey, "[REDACTED]"),
-            type,
-          })),
-        }),
-      );
-    throw new Error(
-      `ElevenLabs ${method} ${path} failed (${response.status}). No credentials were logged.`,
-    );
-  }
-  return response.json();
-}
-
-const promptFile = await readFile("docs/phone-agent-prompt.md", "utf8");
+const promptFile = await readFile("voice-agents/phone/prompt.md", "utf8");
 const prompt = promptFile.match(/```text\r?\n([\s\S]*?)```/)?.[1]?.trim();
 if (!prompt) throw new Error("Phone agent prompt text block is missing.");
 const definitions = JSON.parse(
-  (await readFile("docs/phone-tools.json", "utf8"))
+  (await readFile("voice-agents/phone/tools.json", "utf8"))
     .replaceAll("__PUBLIC_URL__", publicUrl)
     .replaceAll("__TOOL_SECRET__", toolSecret),
 );
@@ -233,7 +202,7 @@ console.log(
       attachedTools: verified.conversation_config.agent.prompt.tool_ids?.length,
       next: [
         `Set ELEVENLABS_PHONE_AGENT_ID=${saved.agentId} on the server and in Vercel.`,
-        "Set ELEVENLABS_PHONE_NUMBER_ID to an imported Twilio number id listed above.",
+        "Set ELEVENLABS_PHONE_NUMBER_ID to an imported phone number id listed above.",
         "Set SAMANTHA_PHONE_TOOL_SECRET in Vercel to the same value used here.",
       ],
     },

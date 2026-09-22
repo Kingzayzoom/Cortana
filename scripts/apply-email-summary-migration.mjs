@@ -1,3 +1,6 @@
+// Applies supabase/migrations to the email briefing's Supabase project through
+// the Management API. --check reports what exists; --apply runs the SQL.
+// Refuses to run if SUPABASE_PROJECT_REF doesn't match SUPABASE_URL.
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 

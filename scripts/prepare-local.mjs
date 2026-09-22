@@ -1,7 +1,10 @@
+// Fills .env.local with the secrets local development needs, keeping any value
+// already set (under either the SAMANTHA_ or the older CORTANA_ name).
+//   npm run setup:local
 import { readFile, appendFile, mkdir, writeFile } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import nextEnv from "@next/env";
-import { setting } from "./settings.mjs";
+import { setting } from "./lib/settings.mjs";
 await mkdir(".cortana", { recursive: true });
 nextEnv.loadEnvConfig(process.cwd());
 let additions = "";

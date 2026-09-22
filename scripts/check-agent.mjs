@@ -1,3 +1,5 @@
+// Read-only: prints the browser agent's live configuration and keeps a
+// one-time backup in .cortana/. The API key is never printed.
 import nextEnv from "@next/env";
 import { mkdir, writeFile } from "node:fs/promises";
 nextEnv.loadEnvConfig(process.cwd());

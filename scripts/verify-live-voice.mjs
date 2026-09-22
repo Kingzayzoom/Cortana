@@ -1,7 +1,10 @@
+// End-to-end check of a real browser voice round: connect, interrupt, answer,
+// complete, mute, end and reconnect. Needs a microphone, or --fixture-audio for
+// Chromium's fake device. Spends ElevenLabs minutes.
 import { chromium, expect } from "@playwright/test";
 import nextEnv from "@next/env";
 import { mkdir, writeFile } from "node:fs/promises";
-import { setting } from "./settings.mjs";
+import { setting } from "./lib/settings.mjs";
 nextEnv.loadEnvConfig(process.cwd());
 const fixtureAudio = process.argv.includes("--fixture-audio");
 const headed = process.argv.includes("--headed");

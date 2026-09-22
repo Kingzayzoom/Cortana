@@ -2,7 +2,7 @@
 //   node scripts/check-phone-setup.mjs --url=https://your-app.vercel.app
 // Nothing is created or changed; secrets are never printed.
 import nextEnv from "@next/env";
-import { setting } from "./settings.mjs";
+import { setting } from "./lib/settings.mjs";
 nextEnv.loadEnvConfig(process.cwd());
 const url = (
   process.argv.find((a) => a.startsWith("--url="))?.slice(6) ||
