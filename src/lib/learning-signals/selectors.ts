@@ -1,3 +1,4 @@
+// Session summary for the UI and the export: counts, concepts, duration.
 import type { LearningSignal } from "./types";
 import { reduceLearningSignals, REINFORCEMENT_RULES } from "./reducer";
 export function selectLearningSummary(

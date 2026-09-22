@@ -1,3 +1,5 @@
+// Chooses what to practise next from learning signals, and says why:
+// reinforcement first, then unresolved misses, overdue practice, unseen content.
 import {
   reduceLearningSignals,
   type ConceptActivity,
@@ -15,7 +17,7 @@ export const supportedRounds = [
     ] as ConceptId[],
   },
 ];
-export type SupportedRound = (typeof supportedRounds)[number];
+type SupportedRound = (typeof supportedRounds)[number];
 export function selectNextRound(
   signals: readonly LearningSignal[],
   rounds: readonly SupportedRound[] = supportedRounds,

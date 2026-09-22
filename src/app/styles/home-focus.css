@@ -1,0 +1,55 @@
+/* The idle home canvas: a compact pair of next actions around the orb. */
+
+/* A focused home canvas with a compact pair of next actions. */
+.dashboard-grid:not(.live-mode) {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  max-width: 1040px;
+  margin-inline: auto;
+}
+.dashboard-grid:not(.live-mode) .hero-column {
+  padding-top: 4px;
+}
+.dashboard-grid:not(.live-mode) .hero-intro {
+  text-align: center;
+}
+.dashboard-grid:not(.live-mode) .orb-stage {
+  width: min(370px, 80vw);
+  height: 340px;
+  margin: 8px auto 0;
+}
+.dashboard-lower-shell {
+  max-width: 1040px;
+  margin-inline: auto;
+}
+.dashboard-lower-inner {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.dashboard-lower-inner > .panel {
+  margin: 24px 0 0;
+  min-width: 0;
+}
+@media (max-width: 760px) {
+  .dashboard-lower-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .dashboard-lower-inner > .panel {
+    margin: 0;
+  }
+  .dashboard-lower-inner {
+    padding-top: 24px;
+  }
+  .dashboard-grid:not(.live-mode) .orb-stage {
+    width: min(320px, 80vw);
+    height: 290px;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-grid:not(.live-mode) .orb-halo {
+    inset: 9% -5% 0;
+  }
+}

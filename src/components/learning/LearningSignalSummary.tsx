@@ -1,4 +1,6 @@
 "use client";
+// Per-concept activity for a session (explored, practised, reinforced, review
+// next) with the reasons behind each status, and the JSON export.
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Download, Activity } from "lucide-react";

@@ -1,4 +1,6 @@
 "use client";
+// The evidence drawer: a source's publication, date, quoted passage and scope.
+// Opened by the page or by the agent's show_evidence tool.
 import { ExternalLink, BookOpen, CalendarDays, FileText } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";
 import { sourceById, sources } from "@/lib/content/round";

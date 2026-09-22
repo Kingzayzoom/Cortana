@@ -1,3 +1,5 @@
+// The agents' Context Feed tools: narrow, validated queries over the active
+// scenario. Missing facts return a fixed sentence, never an empty guess.
 import { z } from "zod";
 import {
   buildPhoneBriefingContext,
@@ -11,7 +13,7 @@ const empty = z.object({}).strict();
 const caseRequest = z
   .object({ caseId: z.string().min(1).max(80).optional() })
   .strict();
-export const caseSectionSchema = z.enum([
+const caseSectionSchema = z.enum([
   "history",
   "status",
   "vitals",
@@ -32,7 +34,7 @@ export const contextToolSchemas = {
   get_hospital_timeline: empty,
   get_education_triggers: empty,
 };
-export type ContextToolName = keyof typeof contextToolSchemas;
+type ContextToolName = keyof typeof contextToolSchemas;
 export const contextToolNames = Object.keys(
   contextToolSchemas,
 ) as ContextToolName[];

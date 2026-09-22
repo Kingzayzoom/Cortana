@@ -1,7 +1,9 @@
+// Request schemas for /api/learning and the browser agent's round tools. The
+// model supplies meaning; ids and request ids come from the app.
 import { z } from "zod";
 import { ROUND_ID } from "../content/round";
 import { observationSchema } from "../learning-signals/types";
-export const sourceId = z.enum(["dapa-hf", "dapa-diabetes"]);
+const sourceId = z.enum(["dapa-hf", "dapa-diabetes"]);
 export const stageTool = z
   .object({
     stageId: z.enum(["briefing", "challenge", "questions"]),
@@ -20,14 +22,14 @@ export const answerTool = z
     requestId: z.string().uuid(),
   })
   .strict();
-export const completionTool = z
+const completionTool = z
   .object({ roundId: z.literal(ROUND_ID), requestId: z.string().uuid() })
   .strict();
 // The model supplies semantic parameters; the app owns idempotency IDs.
 export const clientAnswerTool = answerTool.omit({ requestId: true });
 export const clientCompletionTool = completionTool.omit({ requestId: true });
 export const contextTool = z.object({ roundId: z.literal(ROUND_ID) }).strict();
-export const preferencesSchema = z
+const preferencesSchema = z
   .object({
     name: z.string().trim().min(1).max(40),
     timezone: z

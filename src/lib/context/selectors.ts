@@ -1,3 +1,5 @@
+// Read-only views of a scenario, shared by the page, the browser agent's tools
+// and the phone briefing, so every surface reports the same facts.
 import type { ContextScenario } from "./types";
 export const SYNTHETIC_NOTICE =
   "Synthetic demo data · No real patient information";

@@ -1,0 +1,228 @@
+/* The evidence round panel: briefing sections, the case question, feedback and follow-up questions. */
+
+.lesson-panel {
+  scroll-margin-top: 24px;
+  margin: 30px 0 10px;
+  border: 1px solid var(--line);
+  background: white;
+  padding: 29px 34px;
+  border-radius: 18px;
+  max-width: 870px;
+}
+.lesson-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.tag {
+  font-size: 9px;
+  letter-spacing: 0.055em;
+  font-weight: 500;
+  padding: 5px 8px;
+  color: var(--blue);
+  background: var(--surface-blue);
+  border-radius: 4px;
+  display: inline-block;
+}
+.section-progress {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 25px;
+}
+.section-progress span {
+  height: 3px;
+  background: var(--line);
+  width: 35px;
+  border-radius: 3px;
+}
+.section-progress span.done {
+  background: var(--blue);
+}
+.lesson-panel h2 {
+  font-size: 25px;
+  line-height: 1.4;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+  margin: 8px 0 13px;
+}
+.lesson-panel h3 {
+  font-size: 14px;
+  margin: 22px 0 16px;
+  font-weight: 500;
+}
+.lesson-prose {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--muted);
+  max-width: 72ch;
+}
+.lesson-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 24px;
+}
+.align-end {
+  justify-content: flex-end;
+}
+.case-label {
+  color: var(--muted);
+  font-size: 10px;
+  display: block;
+  margin-bottom: 12px;
+}
+.answer-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
+.answer-options button {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-align: left;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: white;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.answer-options button > span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-blue);
+  color: var(--blue);
+  border-radius: 5px;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.answer-options button > svg {
+  margin-left: auto;
+  color: var(--muted);
+}
+.answer-options button:hover:not(:disabled) {
+  border-color: var(--blue);
+  background: var(--surface);
+}
+.inline-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+.inline-form input {
+  flex: 1;
+  min-width: 0;
+}
+.send-button {
+  color: var(--blue);
+  width: 42px;
+  height: 42px;
+  background: var(--surface-blue);
+}
+.clarification {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  background: var(--surface-blue);
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 14px;
+}
+.feedback-icon {
+  width: 47px;
+  height: 47px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+}
+.feedback-icon.correct {
+  color: var(--success);
+  background: oklch(0.955 0.03 164);
+}
+.feedback-icon.incorrect {
+  color: var(--blue);
+  background: var(--surface-blue);
+}
+.takeaway {
+  background: var(--surface-blue);
+  padding: 17px 20px;
+  border-radius: 9px;
+  margin-top: 20px;
+}
+.takeaway strong {
+  font-size: 11px;
+  font-weight: 600;
+}
+.takeaway p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 7px;
+}
+.question-area {
+  margin-top: 18px;
+}
+.suggested-questions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.suggested-questions button {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 6px;
+  font-size: 10px;
+  padding: 8px 11px;
+}
+.suggested-questions button:hover {
+  color: var(--blue);
+  background: var(--surface-blue);
+}
+.question-reply {
+  margin-top: 20px;
+  background: var(--surface);
+  border-radius: 9px;
+  padding: 18px 20px;
+}
+.question-reply p {
+  font-size: 12px;
+  line-height: 1.9;
+}
+.question-reply button {
+  margin-top: 12px;
+  font-size: 11px;
+}
+.brief-question {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  margin-top: 24px;
+}
+.brief-question summary {
+  color: var(--muted);
+  font-size: 11px;
+}
+.completion-facts {
+  display: flex;
+  gap: 35px;
+  margin: 24px 0;
+}
+.completion-facts span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.completion-facts strong {
+  display: block;
+  color: var(--ink);
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 22px;
+}

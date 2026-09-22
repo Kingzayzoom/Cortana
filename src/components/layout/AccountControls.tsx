@@ -1,4 +1,6 @@
 "use client";
+// Google sign-in button, the signed-in badge, sign out, and the notice that
+// explains an ?auth_error= code after a failed sign-in.
 import { useEffect, useState } from "react";
 import { useLearning } from "@/lib/learning/provider";
 

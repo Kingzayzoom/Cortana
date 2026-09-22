@@ -1,3 +1,4 @@
+// Shapes shared by the email briefing's server code and its page.
 export type SourceMessage = {
   sender: string;
   subject: string;

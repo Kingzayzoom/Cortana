@@ -1,3 +1,6 @@
+// Every page of the app is this one route. The path picks a view; the shell
+// and providers around it stay mounted, so a live voice session survives
+// navigation between pages.
 import { notFound } from "next/navigation";
 import { Shell } from "@/components/layout/Shell";
 import { Dashboard } from "@/components/dashboard/Dashboard";

@@ -1,3 +1,5 @@
+// Reads and writes the profile's active scenario. `undefined` means never set
+// (serve the default); `null` means the learner cleared it.
 import { withProgress } from "../server/store";
 import { normalizeScenario } from "./normalize";
 import { defaultScenario } from "./demo";

@@ -1,3 +1,5 @@
+// The Context Feed scenario contract, version 1.0. Strict: unknown fields are
+// rejected, nothing is coerced, and every case must be labelled synthetic.
 import { z } from "zod";
 export const MAX_CONTEXT_BYTES = 64 * 1024;
 const text = z.string().trim().min(1).max(600);
@@ -13,13 +15,8 @@ const time = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use HH:mm, for example 08:30");
 const timestamp = z.iso.datetime({ offset: true });
-export const urgencySchema = z.enum([
-  "routine",
-  "review_soon",
-  "urgent",
-  "immediate",
-]);
-export const physicianUrgencySchema = z
+const urgencySchema = z.enum(["routine", "review_soon", "urgent", "immediate"]);
+const physicianUrgencySchema = z
   .object({
     level: urgencySchema,
     requestedBy: text,

@@ -1,0 +1,223 @@
+/* Dialogs and forms: the evidence drawer, voice consent, fields and the text transcript. */
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: oklch(0.24 0.06 265 / 0.2);
+  backdrop-filter: blur(3px);
+  z-index: var(--z-backdrop);
+  animation: fade-in 0.18s ease-out;
+}
+.dialog-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 20px;
+  width: min(500px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+  padding: 34px;
+  z-index: var(--z-modal);
+  box-shadow: 0 20px 100px #17234719;
+  animation: fade-in 0.2s ease-out;
+}
+.dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--muted);
+}
+.dialog-title {
+  font-size: 23px;
+  line-height: 1.3;
+  letter-spacing: -0.035em;
+  padding-right: 20px;
+  font-weight: 600;
+}
+.dialog-description {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 10px;
+}
+.dialog-drawer {
+  inset: 0 0 0 auto;
+  transform: none;
+  height: 100dvh;
+  max-height: none;
+  width: min(500px, 100vw);
+  border-radius: 20px 0 0 20px;
+  padding: 42px 34px;
+}
+.evidence-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding: 20px 0 15px;
+  margin-bottom: 28px;
+}
+.evidence-tabs button {
+  border: 0;
+  background: transparent;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  color: var(--muted);
+}
+.evidence-tabs button[aria-pressed="true"] {
+  background: var(--surface-blue);
+  color: var(--blue);
+}
+.source-publisher {
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--blue);
+}
+.source-title {
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+.source-date {
+  font-size: 11px;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--muted);
+  margin-top: 17px;
+}
+.evidence-section {
+  margin: 25px 0;
+}
+.evidence-section h4,
+.scope-note h4 {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 9px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.evidence-section p,
+.evidence-section blockquote,
+.scope-note p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin: 0;
+}
+.evidence-section blockquote {
+  font-size: 14px;
+  color: var(--ink);
+}
+.scope-note {
+  background: var(--surface-blue);
+  padding: 19px;
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+.evidence-footer {
+  margin-top: 22px;
+  font-size: 10px;
+}
+.consent-symbol {
+  background: var(--surface-blue);
+  color: var(--blue);
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 24px 0 18px;
+}
+.consent-copy {
+  line-height: 1.85;
+  font-size: 13px;
+  margin: 12px 0;
+}
+.config-notice {
+  background: var(--surface-blue);
+  padding: 16px;
+  border-radius: 10px;
+  margin-top: 20px;
+  font-size: 12px;
+}
+.config-notice p {
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.dialog-content .centered {
+  margin-top: 12px;
+  font-size: 10px;
+}
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 22px;
+}
+.input {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  min-height: 44px;
+  padding: 12px 13px;
+  width: 100%;
+  color: var(--ink);
+  outline-offset: 2px;
+  font-size: 12px;
+  font-weight: 400;
+}
+.input::placeholder {
+  color: var(--muted);
+}
+.input:focus {
+  border-color: var(--blue);
+}
+.field-label small {
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--muted);
+  font-weight: 400;
+}
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
+.transcript-panel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-align: left;
+  padding: 20px;
+  margin-top: 25px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: white;
+}
+.transcript-message + .transcript-message {
+  margin-top: 17px;
+}
+.transcript-message span {
+  font-size: 10px;
+  color: var(--blue);
+  font-weight: 600;
+}
+.transcript-message p {
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 5px;
+}
+.message-user span {
+  color: var(--muted);
+}

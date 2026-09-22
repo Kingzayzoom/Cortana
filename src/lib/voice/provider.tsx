@@ -1,4 +1,16 @@
 "use client";
+// The browser voice session. Owns the ElevenLabs SDK connection, the live
+// transcript, and the client tools the agent calls, which relay to the API
+// with the page's cookie. It decides nothing itself: every tool result comes
+// from the server.
+//
+// Most of the complexity is lifecycle. The SDK's start and end return nothing
+// and report through callbacks that can arrive late, after an End or a
+// reconnect. Four refs keep a stale callback from acting on a newer session:
+//   generation — bumped on every start and finish; callbacks compare their own
+//   accepting  — true only while a connected session may run tools
+//   lock       — one start at a time, including while the SDK is releasing audio
+//   stopReason — whether the coming disconnect was asked for or a failure
 /* eslint-disable react-hooks/refs -- The tool factory returns callbacks; their ref reads occur only when ElevenLabs invokes a tool, never during render. */
 import {
   ConversationProvider,
@@ -99,6 +111,7 @@ function VoiceController({ children }: { children: React.ReactNode }) {
     generation = useRef(0),
     accepting = useRef(false),
     timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Set once the saved run has been checked on load (see the effect below).
   const restored = useRef(false);
   const current = useRef(learning);
   const mutedRef = useRef(false);
@@ -119,6 +132,8 @@ function VoiceController({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     current.current = learning;
   }, [learning]);
+  // A reload mid-round comes back paused in text preview at the saved
+  // checkpoint, rather than silently reconnecting the microphone.
   useEffect(() => {
     if (!learning.data || restored.current) return;
     restored.current = true;
@@ -132,6 +147,9 @@ function VoiceController({ children }: { children: React.ReactNode }) {
     timer.current = null;
   }, []);
   const clientTools: ClientTools = useMemo(() => {
+    // The model can't be trusted to make valid UUIDs, so the app makes the
+    // request id. The same operation and arguments reuse the same id, which is
+    // what makes a retried tool call idempotent on the server.
     const requestIds = new Map<string, string>();
     const requestId = (operation: string, runId: string, params: unknown) => {
       const key = JSON.stringify([operation, runId, params]);
@@ -142,6 +160,8 @@ function VoiceController({ children }: { children: React.ReactNode }) {
       }
       return requestIds.get(key)!;
     };
+    // Wraps a tool: validate the model's arguments, refuse once the session is
+    // over, and always return a string (the SDK's contract), errors included.
     const tool =
       <T,>(
         schema: z.ZodType<T>,
@@ -253,6 +273,8 @@ function VoiceController({ children }: { children: React.ReactNode }) {
     controlsRef.current = conversation;
     mutedRef.current = conversation.isMuted;
   }, [conversation]);
+  // Final teardown, run once the SDK has actually disconnected (or never
+  // started). Everything here is safe to call twice.
   const finish = () => {
     clearTimer();
     abort.current?.abort();
@@ -447,6 +469,8 @@ function VoiceController({ children }: { children: React.ReactNode }) {
         if (sdkDisconnected.current) finish();
       };
       timer.current = setTimeout(() => fail("Connection timed out"), 25_000);
+      // Tools are bound to this session: a call that arrives after End or a
+      // reconnect gets an error instead of acting on the new run.
       const sessionTools = Object.fromEntries(
         Object.entries(clientTools).map(([name, handler]) => [
           name,

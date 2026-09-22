@@ -1,5 +1,7 @@
+// The profile's append-only signal list, with the de-duplication rules that
+// stop retries and reconnects from inflating counts.
 import { learningSignalSchema, type LearningSignal } from "./types";
-export interface LearningSignalRepository {
+interface LearningSignalRepository {
   append(signal: LearningSignal): boolean;
   listForRound(roundId: string): LearningSignal[];
   listForTopic(topicId: string): LearningSignal[];

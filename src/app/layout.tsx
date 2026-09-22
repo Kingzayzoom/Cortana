@@ -1,11 +1,11 @@
+// Root layout. Fonts are bundled locally (no request to a font CDN), and the
+// providers mount once here.
 import type { Metadata } from "next";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 import "@fontsource/inter/700.css";
 import "./globals.css";
-import "./context.css";
-import "./prime.css";
 import { Providers } from "./providers";
 export const metadata: Metadata = {
   title: "Samantha — Your daily clinical conversation",

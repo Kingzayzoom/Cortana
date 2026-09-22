@@ -1,4 +1,6 @@
 "use client";
+// /phone, /context/phone and /prime/phone: ask Samantha to call, then follow
+// the call's live transcript. The number is sent once and never stored.
 import { useEffect, useRef, useState } from "react";
 import { Phone, PhoneCall, ShieldCheck, Check } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";

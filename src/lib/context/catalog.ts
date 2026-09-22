@@ -1,3 +1,5 @@
+// Search and filter metadata for the bundled scenarios, projected from the
+// validated files so clinical facts are never duplicated.
 import { demoScenarios } from "./demo";
 import type { ContextScenario } from "./types";
 
@@ -16,7 +18,7 @@ export const urgencyLabels = {
   urgent: "Urgent",
   immediate: "Immediate",
 } as const;
-export type ScenarioCatalogItem = {
+type ScenarioCatalogItem = {
   id: string;
   title: string;
   category: ScenarioCategory;

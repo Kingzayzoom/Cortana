@@ -1,3 +1,5 @@
+// Builds a validated signal with a server timestamp, and maps round sections
+// and the case to the concepts they cover.
 import {
   learningSignalSchema,
   type ConceptId,

@@ -1,3 +1,4 @@
+// Button with the app's variants; asChild renders the styles on a Link.
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 export function Button({

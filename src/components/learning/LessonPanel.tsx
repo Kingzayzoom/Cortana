@@ -1,4 +1,6 @@
 "use client";
+// The evidence round panel: briefing sections, the synthetic case, feedback and
+// follow-up questions. Every step is a request the server can refuse.
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,

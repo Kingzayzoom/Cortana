@@ -1,3 +1,5 @@
+// Writes signals from inside a withProgress transaction, next to the grade
+// they describe, so the two can never disagree.
 import type { Progress } from "../learning/types";
 import { round } from "../content/round";
 import {

@@ -1,4 +1,6 @@
 "use client";
+// Connects the WebGL orb to the voice session's real input and output levels,
+// with a static fallback when WebGL fails.
 import dynamic from "next/dynamic";
 import { Component, useEffect, useRef, useState, type ReactNode } from "react";
 import { useVoice } from "@/lib/voice/provider";

@@ -1,4 +1,6 @@
 "use client";
+// /impiricus: the current session's learning signals next to the payload an
+// export would contain. Illustrative; nothing is sent anywhere.
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";

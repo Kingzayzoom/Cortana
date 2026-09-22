@@ -1,4 +1,6 @@
 "use client";
+// /prime: the daily card, the focused three-question session, and feedback with
+// its sources. Correct answers arrive only after the server grades.
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";

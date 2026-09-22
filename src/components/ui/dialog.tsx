@@ -1,4 +1,5 @@
 "use client";
+// Radix dialog with the app's overlay and panel styles.
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";

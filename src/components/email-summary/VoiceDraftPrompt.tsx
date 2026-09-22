@@ -1,4 +1,6 @@
 "use client";
+// Asks for the message aloud and transcribes it with the browser's own speech
+// recognition, falling back to RecordedVoicePrompt where there is none.
 
 import { useEffect, useRef, useState } from "react";
 import { RecordedVoicePrompt } from "./RecordedVoicePrompt";

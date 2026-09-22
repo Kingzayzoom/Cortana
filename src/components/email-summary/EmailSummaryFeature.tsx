@@ -1,4 +1,6 @@
 "use client";
+// /email-summary: connect Gmail, read the morning briefing, refresh it, or
+// disconnect. OAuth errors arrive as ?email_error= codes and are explained here.
 
 import { useEffect, useState } from "react";
 import type { EmailSummaryStatus } from "@/lib/email-summary/types";

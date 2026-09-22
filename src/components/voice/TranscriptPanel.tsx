@@ -1,4 +1,5 @@
 "use client";
+// The optional text transcript of the conversation.
 import { useEffect, useRef } from "react";
 import { useVoice } from "@/lib/voice/provider";
 export function TranscriptPanel() {

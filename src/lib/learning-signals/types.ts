@@ -1,3 +1,5 @@
+// The learning signal event union, and the much smaller set of observations a
+// page is allowed to report.
 import { z } from "zod";
 export const conceptId = z.enum([
   "trial-population",
@@ -23,14 +25,14 @@ export const questionCategory = z.enum([
 ]);
 export type QuestionCategory = z.infer<typeof questionCategory>;
 export const evidenceSourceId = z.enum(["dapa-hf", "dapa-diabetes"]);
-export const signalStage = z.enum([
+const signalStage = z.enum([
   "briefing",
   "challenge",
   "feedback",
   "questions",
   "completed",
 ]);
-export const sectionId = z.enum(["population", "finding", "limitation"]);
+const sectionId = z.enum(["population", "finding", "limitation"]);
 const base = {
   id: z.string().uuid(),
   timestamp: z.string().datetime(),

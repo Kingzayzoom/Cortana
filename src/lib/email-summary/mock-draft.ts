@@ -1,3 +1,5 @@
+// Turns a spoken request into a plausible email draft with local templates.
+// No model and no network: the drafting demo works offline.
 import type { EmailDraft } from "./types";
 
 function greeting(recipient: string) {

@@ -1,4 +1,6 @@
 "use client";
+// The live round: the current section or case beside a single transcript of
+// what was said, typed and done.
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowRight, Send } from "lucide-react";

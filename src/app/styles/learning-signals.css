@@ -1,3 +1,5 @@
+/* Learning signals: the concept activity summary, the next-round reason and the /impiricus signal bridge. */
+
 .orb-learning-caption {
   text-align: center;
   color: var(--ink);
@@ -57,10 +59,6 @@
 .concept-status.reinforced {
   color: var(--success);
   background: oklch(0.966 0.027 165);
-}
-.concept-status.review-next {
-  color: oklch(0.4 0.13 295);
-  background: oklch(0.95 0.025 295);
 }
 .reinforcement-reasons {
   font-size: 12px;

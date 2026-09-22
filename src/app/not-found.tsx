@@ -1,3 +1,4 @@
+// 404 for any path the catch-all page doesn't know.
 import Link from "next/link";
 export default function NotFound() {
   return (

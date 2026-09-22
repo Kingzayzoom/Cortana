@@ -1,4 +1,6 @@
 "use client";
+// /settings: name, time zone, motion and transcript preferences, account, and
+// the deliberate profile reset.
 import { useEffect, useState } from "react";
 import { Check, RotateCcw, Volume2 } from "lucide-react";
 import { useLearning } from "@/lib/learning/provider";

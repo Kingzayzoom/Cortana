@@ -1,4 +1,5 @@
 "use client";
+// The smaller pages: My Rounds, Evidence Library, Learning Profile and Topics.
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

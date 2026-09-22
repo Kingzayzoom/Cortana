@@ -1,4 +1,6 @@
 "use client";
+// Fallback for browsers without speech recognition (Firefox): records up to
+// 20 seconds and sends the clip to /api/email-summary/transcribe.
 
 import { useEffect, useRef, useState } from "react";
 

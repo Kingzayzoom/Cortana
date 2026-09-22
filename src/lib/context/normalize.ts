@@ -1,3 +1,5 @@
+// Validates a scenario and puts it in canonical order (timelines by time), for
+// bundled files and uploads alike.
 import { contextScenarioSchema, MAX_CONTEXT_BYTES } from "./schema";
 import type { ContextScenario } from "./types";
 export function normalizeScenario(input: unknown): ContextScenario {

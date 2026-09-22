@@ -1,3 +1,5 @@
+// Folds a signal history into per-concept status and a transparent
+// reinforcement priority. The weights are REINFORCEMENT_RULES below.
 import { conceptId, type ConceptId, type LearningSignal } from "./types";
 export const REINFORCEMENT_RULES = {
   incorrect: 3,

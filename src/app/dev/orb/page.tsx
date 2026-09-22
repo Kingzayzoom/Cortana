@@ -1,3 +1,4 @@
+// Development-only harness for tuning the orb shader. 404 in production.
 import { notFound } from "next/navigation";
 import { OrbHarness } from "@/components/voice/OrbHarness";
 export default function Page() {

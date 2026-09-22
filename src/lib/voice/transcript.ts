@@ -1,3 +1,5 @@
+// Merges SDK message events into one transcript: final messages only, agent
+// corrections replace their row, and a typed message shares a row with its echo.
 import type { HookCallbacks } from "@elevenlabs/react";
 import type { Message } from "../learning/types";
 

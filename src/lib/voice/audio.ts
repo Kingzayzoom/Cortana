@@ -1,4 +1,6 @@
-export function clampEnergy(value: number) {
+// Smooths raw SDK audio levels for the orb: fast attack, slow release, and a
+// noise floor so silence stays still.
+function clampEnergy(value: number) {
   return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
 }
 export function smoothEnergy(current: number, raw: number, delta: number) {

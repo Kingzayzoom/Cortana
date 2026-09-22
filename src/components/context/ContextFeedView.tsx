@@ -1,4 +1,7 @@
 "use client";
+// /context: the active shift scenario, its briefing preview, and the controls
+// to brief by voice or phone. Scenario strings are untrusted and only ever
+// rendered as text.
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

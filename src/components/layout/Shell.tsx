@@ -1,4 +1,6 @@
 "use client";
+// The app frame: sidebar navigation (a focus-trapped drawer on phones), the
+// greeting bar, and a banner when a voice round is live on another page.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";

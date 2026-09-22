@@ -1,4 +1,6 @@
 "use client";
+// The voice email drafting panel. A spoken request becomes an editable draft
+// from a local template; nothing is read from or sent through Gmail.
 
 import { useState } from "react";
 import type { EmailDraft } from "@/lib/email-summary/types";

@@ -1,4 +1,5 @@
 "use client";
+// Client copy of the profile's active Context Feed scenario.
 import {
   createContext,
   useCallback,

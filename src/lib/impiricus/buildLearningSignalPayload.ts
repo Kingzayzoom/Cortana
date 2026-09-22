@@ -1,3 +1,5 @@
+// The exportable learning-signal payload, schema 1.0: counts and closed enums
+// only, validated before download. A proposal, not an agreed contract.
 import { z } from "zod";
 import {
   conceptId,

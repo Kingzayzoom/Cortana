@@ -1,4 +1,6 @@
 "use client";
+// Route error boundary: a calm retry instead of a broken page. Progress is
+// saved server-side, so nothing is lost by retrying.
 export default function ErrorPage({ reset }: { reset: () => void }) {
   return (
     <main className="not-found">

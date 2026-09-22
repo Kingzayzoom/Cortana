@@ -1,3 +1,5 @@
+// The 15 bundled scenarios, validated at import. A malformed file fails the
+// build rather than a demo.
 import scenario0 from "../../../demo-data/context/cardiology/01-hf-urgent-hypotension.json";
 import scenario1 from "../../../demo-data/context/cardiology/02-hf-renal-trend.json";
 import scenario2 from "../../../demo-data/context/cardiology/03-post-pci-stable.json";

@@ -1,3 +1,5 @@
+// Keyword classification of a learner's question into a fixed category. The
+// text exists only for this call; only the category is stored.
 import type { ConceptId, QuestionCategory } from "./types";
 // Text exists only for the duration of this call. Only the returned enum crosses the analytics boundary.
 export function classifyQuestion(text: string): QuestionCategory {

@@ -1,4 +1,6 @@
 "use client";
+// /dev/orb: drive the orb with synthetic levels to tune it without a live
+// session. Never rendered in production.
 import { useCallback, useState } from "react";
 import { OrbVisual } from "./SamanthaOrb";
 import Link from "next/link";

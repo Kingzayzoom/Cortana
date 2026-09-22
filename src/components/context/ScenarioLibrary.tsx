@@ -1,4 +1,6 @@
 "use client";
+// The bundled scenario catalogue with category, urgency and text filters.
+// Previewing a card never changes the active scenario.
 import { useState } from "react";
 import {
   categoryLabels,

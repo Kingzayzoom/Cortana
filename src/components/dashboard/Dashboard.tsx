@@ -1,4 +1,6 @@
 "use client";
+// Today (/): the orb, the start controls, and whichever state the round is in
+// (idle, live conversation, or the completion summary).
 
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";

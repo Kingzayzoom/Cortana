@@ -1,4 +1,6 @@
 "use client";
+// Start, mute and end controls, connection status, the language picker, and
+// the consent dialog that collects the demo access code.
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -18,7 +20,7 @@ import { useLearning } from "@/lib/learning/provider";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { SPOKEN_LANGUAGES, spokenLanguage } from "@/lib/voice/languages";
-export function VoiceStatus() {
+function VoiceStatus() {
   const voice = useVoice();
   let text = "Ready when you are.";
   let state = "idle";
